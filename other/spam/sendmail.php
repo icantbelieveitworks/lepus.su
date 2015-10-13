@@ -2,6 +2,7 @@
 <?php
 // about sendmail flags => http://linux.die.net/man/8/sendmail.sendmail
 // clamav scan php mail script => if get *virus* => don`t send mail
+setlocale(LC_CTYPE, "en_US.UTF-8");
 
 function log_in_file($data){
 	file_put_contents('/home/mail-clamav.log', $data, FILE_APPEND | LOCK_EX);

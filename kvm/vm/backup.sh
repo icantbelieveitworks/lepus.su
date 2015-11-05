@@ -1,34 +1,21 @@
-#!/bin/bash
-#zfs snapshot kvm@backup
-#mount -t zfs kvm@backup /var/backups/vm
-#umount /var/backups/vm
-#zfs list -t snapshot
-#zfs destroy kvm@backup
+#/bin/bash
 
-DAY=$(date +%d)
-DIR="/var/backups/vm"
-BACKUP_DIR=/backup/ovh2
+BACKUP_DIR=/backup/test/vm
 DATE=$(date +%F)
 IP=x.x.x.x
-USER=test
+USER=zzz
 
 ssh $USER@$IP "mkdir $BACKUP_DIR/$DATE"
 
-zfs destroy kvm@backup
-zfs snapshot kvm@backup
-mount -t zfs kvm@backup /var/backups/vm
-
-for variable in `find $DIR -mindepth 1 -type d`
+zfs list | while read line
 do
-#if [ "$variable" != "/var/backups/vm/p2pool" ] && [ "$variable" != "/var/backups/vm/ns2" ];
-if [ "$variable" != "/var/backups/vm/p2pool" ];
+IFS=" " set -- $line
+if [ "$1" != "NAME" ] && [ "$1" != "sata" ] && [ "$1" != "ssd" ];
 then
-	echo "$variable"
-	NAME=$(basename $variable)
-	echo $NAME
-	nice -n 19 ionice -c3 tar --use-compress-program=pigz -cpf - $variable | ssh $USER@$IP  dd of=$BACKUP_DIR/$DATE/$NAME.tar.gz
+	echo "$1 ${1##*/}"
+	zfs destroy $1@backup
+	zfs snapshot $1@backup
+	zfs send $1@backup | nice -n 19 pigz | ssh $USER@$IP dd of=$BACKUP_DIR/$DATE/${1##*/}.gz
+	zfs destroy $1@backup
 fi
 done
-
-umount /var/backups/vm
-zfs destroy kvm@backup

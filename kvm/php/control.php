@@ -1,6 +1,5 @@
-<pre>
 <?php
-/* such dangerous code [need root access]*/
+// https://www.linux.org.ru/forum/admin/12097297
 $uri = "qemu+unix:///system"; $credentials = [VIR_CRED_AUTHNAME => "", VIR_CRED_PASSPHRASE => ""]; $res = libvirt_connect($uri,false,$credentials);
 
 function get_status($name){
@@ -31,4 +30,3 @@ if($_GET['command'] == 'reboot'){
 }
 
 echo $status['state'];
-?>

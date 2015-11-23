@@ -1,0 +1,21 @@
+.jqueryslidemenu ul { list-style-type:none; }
+.jqueryslidemenu ul li { position:relative; }
+
+.jqueryslidemenu ul li ul { position:absolute; left:0; display:block; visibility:hidden; margin-top:-2px; z-index:1; }
+/* Sub level menu list items (undo style from Top level List Items) */
+.jqueryslidemenu ul li ul li { display:list-item; float:none; width:152px; background:url('../images/sub-menu-bg.png') left top repeat-y; }
+.jqueryslidemenu ul li ul li:hover { background:url('../images/sub-menu-bg-h.png') left top repeat-y; }
+.jqueryslidemenu ul li ul li.sub-menu-last { min-height:35px; background:url('../images/sub-menu-last-bg.png') left bottom no-repeat; }
+.jqueryslidemenu ul li ul li.sub-menu-last:hover { background:url('../images/sub-menu-last-bg-h.png') left bottom no-repeat; }
+
+/* Sub level menu links style */
+.jqueryslidemenu ul li ul li a { height:30px; color:white; text-decoration:underline; background:transparent; line-height:28px; padding-left:23px; 
+	background:url('../images/sub-menu-dot.png') 10px center no-repeat; }
+.jqueryslidemenu ul li ul li a:hover { background:url('../images/sub-menu-dot.png') 10px center no-repeat; }
+
+/* All subsequent sub menu levels vertical offset after 1st level sub menu */
+.jqueryslidemenu ul li ul li ul { top:0; }
+
+/* *:first-child+html .jqueryslidemenu { height:1%; } */
+/* i have bug in IE7 O.o disabled */
+/* Holly Hack for IE7 and below. (NO!!! FUCK IE6!) */

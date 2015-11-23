@@ -27,7 +27,7 @@ a:hover { text-decoration:none; }
 .news .title a { font-size:8pt; margin-left:10px; }
 .news .body { padding-bottom:10px; }
 
-.container { width:1068px; padding-bottom:47px; padding-left: 0px; }
+.container { width:1068px; padding-bottom:60px; padding-left: 0px; }
 .container:after { content:""; clear:both; display:block; }
 .content-box { float:left; width:764px; margin-left:37px; }
 .content-info { min-height:245px; margin:0px auto; background: #FFF; border-radius: 8px; }

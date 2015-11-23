@@ -12,29 +12,12 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/init/memcache.php');
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 		<meta name="yandex-verification" content="6940b644b3235f76" />
 		<link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
-
+		<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+		<link rel="stylesheet" type="text/css" href="css/font-awesome.min.css">
 		<link rel="stylesheet" type="text/css" href="css/reset.css"/>
 		<link rel="stylesheet" type="text/css" href="css/style.css"/>
-		<link rel="stylesheet" type="text/css" href="css/chosen.css"/>
-		<link rel="stylesheet" type="text/css" href="css/jquery.slidemenu.css"/>
-		<link rel="stylesheet" type="text/css" href="css/alertify.core.css"/>
-		<link rel="stylesheet" type="text/css" href="css/alertify.bootstrap.css"/>
-		<link rel="stylesheet" type="text/css" href="css/jquery.treeview.css"/>
-
-		<script type="text/javascript" src="js/jquery.js"></script>
-		<script type="text/javascript" src="js/jquery.tinycarousel.min.js"></script>
-		<script type="text/javascript" src="js/jquery.jeditable.mini.js"></script>
-		<script type="text/javascript" src="js/jquery.slidemenu.js"></script>
-		<script type="text/javascript" src="js/jquery.cookie.js"></script>
-		<script type="text/javascript" src="js/jquery.treeview.js"></script>
-		<script type="text/javascript" src="js/jquery.simplemodal.js"></script>
-		<script type="text/javascript" src="js/common.js"></script>
-		<script type="text/javascript" src="js/chosen.jquery.js"></script>
-		<script type="text/javascript" src="js/bootstrap.js"></script>
-		<script type="text/javascript" src="js/alertify.min.js"></script>
-		<script type="text/javascript">
-			(function($){ $(window).load(function(){ $('#tab-hosting').tinycarousel({ axis: 'x',display: 1 }); }); })(jQuery);
-		</script>
+		<script src="js/jquery.min.js"></script>
+		<script src="js/bootstrap.min.js"></script>
 	</head>
 	<body>
 		<div class="wrapper">
@@ -108,28 +91,24 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/init/memcache.php');
 				<div class="blocks">
 <div class="block-login">
 <div class="block-body">
-								<div class="form-login">
-									<form action="https://lepus.su/public/login.php?do=1" method="post" name="do_login">
-										<dl>
-											<dt><label for="mail">E-mail:</label></dt>
-											<dd><input type="text" name="mail" id="mail" value=""  class="casadasf" /></dd>
-											<dt><label for="pass">Пароль:</label></dt>
-											<dd><input type="password" name="pass" id="pass" value="" class="casadasf" /></dd>
-										</dl>
-										<input type="submit" value="" class="menu-login" />
-									</form>
-								</div>
-								<div class="links">
-									<span>
-										<a href="/nojs.html" target="_blank" onclick="showmodal(0);return false" rel="nofollow">Регистрация</a>
-									</span>
-									<span>
-										<a href="/nojs.html" target="_blank" onclick="showmodal(1);return false" rel="nofollow">Забыли пароль?</a>
-									</span>
-								</div>
-							</div>
+<input class="form-control" placeholder="E-mail" name="email" type="email" value="" autofocus="">
+<input class="form-control" placeholder="Password" name="password" type="password" value="" autofocus=""><br/>
+<input type="submit" name="login" class="btn btn-sm btn-success btn-block" value="Войти">
 </div>
+</div>
+
+<br/>
+
+<div class="block-info1">
+<div class="block-body">
+<input type="submit" name="login" class="btn btn-sm btn-success btn-block" value="Регистрация">
+<input type="submit" name="login" class="btn btn-sm btn-success btn-block" value="Забыл пароль">
+</div>
+</div>
+
 				</div>
+
+				
 			</div>
 		</div>
 		<div class="footer-box">

@@ -79,7 +79,6 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/init/memcache.php');
 								</div>					
 								<b>Техническая поддержка, icq: 450420625</b><br/>
 								Наши DNS серверы: ns1.lepus.su и ns2.poiuty.com<br/>
-								Обсуждение и отзывы на: <a href="http://forum.searchengines.ru/showthread.php?t=824192" target="_blank" rel="nofollow">searchengines.ru</a>, <a href="http://talkwebber.ru/topic/36130-lepus-khosting/" target="_blank" rel="nofollow">talkwebber.ru</a><br/>
 							</div>
 						</div>
 					</div>
@@ -87,12 +86,9 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/init/memcache.php');
 			</div>
 			<div class="container">
 				<div class="content-box">
-					<div class="content-t"></div>
-						<div class="content-bg">
-							<div class="content">		
-								<div class="page-title">Lepus хостинг</div>
-									<div class="news">
-										<div class="text">
+					<div class="content-info">
+						<div class="content-text">
+							<div class="page-title">Lepus хостинг</div>
 											<p>
 												— <a href="/domains.html" target="_blank" rel="nofollow">Регистрация доменов</a>.<br/>
 												— Moneyback по первому требованию.<br/>
@@ -106,17 +102,12 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/init/memcache.php');
 												Оказываем профессиональные услуги по технической поддержке, администрированию и сопровождению проектов.<br/>
 												Самое ценное - это вы, наши клиенты. Мы болеем за вас, радуемся вашим победам и успехам! Добро пожаловать!<br/>
 											</p>
-										</div>
-									</div>
-								</div>
 							</div>
-						<div class="content-b"></div>
-					</div>
+					 </div>
+				</div>
 				<div class="blocks">
-					<div class="block cp" id="cp">
-						<div class="header"></div>
-						<div class="block-bg">
-							<div class="block-body">
+<div class="block-login">
+<div class="block-body">
 								<div class="form-login">
 									<form action="https://lepus.su/public/login.php?do=1" method="post" name="do_login">
 										<dl>
@@ -137,20 +128,7 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/init/memcache.php');
 									</span>
 								</div>
 							</div>
-						</div>
-						<div class="block-b"></div>
-					</div>
-					<div class="block paytype">
-						<div class="header"></div>
-						<div class="block-bg">
-							<div class="block-body">
-								<center>
-									<a href="/pay.html"><img src="images/other/pay.png"/></a>
-								</center>
-							</div>
-						</div>
-						<div class="block-b"></div>
-					</div>
+</div>
 				</div>
 			</div>
 		</div>

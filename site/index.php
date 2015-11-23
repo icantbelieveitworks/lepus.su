@@ -21,7 +21,7 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/init/memcache.php');
 	</head>
 	<body>
 		<div class="wrapper">
-			<div class="top-menu jqueryslidemenu" id="myslidemenu">
+			<div class="top-menu">
 				<ul>
 					<li><a href="/" class="menu-home" rel="nofollow"></a></li>
 					<li><a href="/outsourcing.html" class="menu-about" rel="nofollow"></a></li>
@@ -31,39 +31,35 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/init/memcache.php');
 					<li><a href="/contacts.html" class="menu-contacts" rel="nofollow"></a></li>
 				</ul>
 			</div>
-			<div class="head">
-				<div class="logo"></div>
-				<div class="information">
-					<div class="news-block">
-						<div class="news-box">
-							<div class="news">
-								<div class="body">
-									<div class="title">
-										<span class='date'>2014-08-01</span>
-										<a role="button" tabindex="0">PayPal</a>
-									</div>
-									Теперь вы можете пополнить счет в личном кабинете через PayPal.
-								</div>					
-								<div class="body">
-									<div class="title">
-										<span class='date'>2014-04-12</span>
-										<a role="button" tabindex="0">Антивирусная проверка</a>
-									</div>
-									Сделали автоматическое еженедельное сканирование VPS, виртуального хостинга с отправкой отчета на почту клиента.
-								</div>					
-								<div class="body">
-									<div class="title">
-										<span class='date'>2014-04-09</span>
-										<a role="button" tabindex="0">Обновление тарифов</a>
-									</div>
-									Еще больше места на виртуальном хостинге!<br/>
-									Добавлена возможность использовать SSL для сайтов.<br/>
-									Бесплатно помогаем получить SSL сертификаты StartCom Class 1
-								</div>					
-								<b>Техническая поддержка, icq: 450420625</b><br/>
-								Наши DNS серверы: ns1.lepus.su и ns2.poiuty.com<br/>
+			<div class="logo"></div>
+			<div class="information">
+				<div class="news-box">
+					<div class="news">
+						<div class="body">
+							<div class="title">
+								<span class='date'>2014-08-01</span>
+								<a role="button" tabindex="0">PayPal</a>
 							</div>
-						</div>
+							Теперь вы можете пополнить счет в личном кабинете через PayPal.
+						</div>					
+						<div class="body">
+							<div class="title">
+								<span class='date'>2014-04-12</span>
+								<a role="button" tabindex="0">Антивирусная проверка</a>
+							</div>
+							Сделали автоматическое еженедельное сканирование VPS, виртуального хостинга с отправкой отчета на почту клиента.
+						</div>					
+						<div class="body">
+							<div class="title">
+								<span class='date'>2014-04-09</span>
+								<a role="button" tabindex="0">Обновление тарифов</a>
+							</div>
+							Еще больше места на виртуальном хостинге!<br/>
+							Добавлена возможность использовать SSL для сайтов.<br/>
+							Бесплатно помогаем получить SSL сертификаты StartCom Class 1
+						</div>					
+						<b>Техническая поддержка, icq: 450420625</b><br/>
+						Наши DNS серверы: ns1.lepus.su и ns2.poiuty.com<br/>
 					</div>
 				</div>
 			</div>
@@ -72,49 +68,43 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/init/memcache.php');
 					<div class="content-info">
 						<div class="content-text">
 							<div class="page-title">Lepus хостинг</div>
-											<p>
-												— <a href="/domains.html" target="_blank" rel="nofollow">Регистрация доменов</a>.<br/>
-												— Moneyback по первому требованию.<br/>
-												— <a href="/ispmanager.html" rel="nofollow">Лицензии ISPmanager</a> по доступным ценам.<br/>
-												— Мощные <a href="/vps.html">администрируемые VPS</a> на SSD дисках.<br/>
-												— Бесплатный перенос ваших сайтов на наш хостинг.<br/>
-												— <a href="/shared.html">Виртуальный хостинг</a> и <a href="/vip.html" rel="nofollow">VIP хостинг</a> для ваших сайтов.<br/>
-												— Быстрые администрируемые <a href="/dedicated.html">выделенные серверы</a> по выгодной цене.<br/><br/>
-												Наша миссия - предоставление качественных услуг хостинга. 
-												Находим индивидуальный подход к каждому клиенту.  <br/>
-												Оказываем профессиональные услуги по технической поддержке, администрированию и сопровождению проектов.<br/>
-												Самое ценное - это вы, наши клиенты. Мы болеем за вас, радуемся вашим победам и успехам! Добро пожаловать!<br/>
-											</p>
-							</div>
-					 </div>
+							<p>
+								— <a href="/domains.html" target="_blank" rel="nofollow">Регистрация доменов</a>.<br/>
+								— Moneyback по первому требованию.<br/>
+								— <a href="/ispmanager.html" rel="nofollow">Лицензии ISPmanager</a> по доступным ценам.<br/>
+								— Мощные <a href="/vps.html">администрируемые VPS</a> на SSD дисках.<br/>
+								— Бесплатный перенос ваших сайтов на наш хостинг.<br/>
+								— <a href="/shared.html">Виртуальный хостинг</a> и <a href="/vip.html" rel="nofollow">VIP хостинг</a> для ваших сайтов.<br/>
+								— Быстрые администрируемые <a href="/dedicated.html">выделенные серверы</a> по выгодной цене.<br/><br/>
+								Наша миссия - предоставление качественных услуг хостинга. 
+								Находим индивидуальный подход к каждому клиенту.  <br/>
+								Оказываем профессиональные услуги по технической поддержке, администрированию и сопровождению проектов.<br/>
+								Самое ценное - это вы, наши клиенты. Мы болеем за вас, радуемся вашим победам и успехам! Добро пожаловать!<br/>
+							</p>
+						</div>
+					</div>
 				</div>
 				<div class="blocks">
-<div class="block-login">
-<div class="block-body">
-<input class="form-control" placeholder="E-mail" name="email" type="email" value="" autofocus="">
-<input class="form-control" placeholder="Password" name="password" type="password" value="" autofocus=""><br/>
-<input type="submit" name="login" class="btn btn-sm btn-success btn-block" value="Войти">
-</div>
-</div>
-
-<br/>
-
-<div class="block-info1">
-<div class="block-body">
-<input type="submit" name="login" class="btn btn-sm btn-success btn-block" value="Регистрация">
-<input type="submit" name="login" class="btn btn-sm btn-success btn-block" value="Забыл пароль">
-</div>
-</div>
-
+					<div class="block-login">
+						<div class="block-body">
+							<input class="form-control" placeholder="E-mail" name="email" type="email" value="" autofocus="">
+							<input class="form-control" style="margin-top: 3px;" placeholder="Password" name="password" type="password" value="" autofocus="">
+							<input type="submit" name="login" class="btn btn-sm btn-success btn-block" style="margin-top: 15px;" value="Войти">
+						</div>
+					</div>
+					<div class="block-info1" style="margin-top: 15px;">
+						<div class="block-body">
+							<input type="submit" name="login" class="btn btn-sm btn-success btn-block" value="Регистрация">
+							<input type="submit" name="login" class="btn btn-sm btn-success btn-block" value="Забыл пароль">
+						</div>
+					</div>
 				</div>
-
-				
 			</div>
 		</div>
 		<div class="footer-box">
 			<div class="footer">
 				<p class="author">
-					Дизайн — <a href="http://www.o-kvadrat.ru" target="_blank" rel="nofollow">Веб-студия «КРУГЛЫЙ КВАДРАТ»</a>
+					<del>Дизайн — <a href="http://www.o-kvadrat.ru" target="_blank" rel="nofollow">Веб-студия «КРУГЛЫЙ КВАДРАТ»</a></del>
 				</p>
 				<p class="copyright">
 					&copy; Lepus Hosting (<a href="https://lepus.su/oferta.html">публичный договор оферты</a>)

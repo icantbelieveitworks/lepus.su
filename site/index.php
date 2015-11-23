@@ -118,5 +118,25 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/init/memcache.php');
 				</div>
 			</div>
 		</div>
+		
+<!--<div id="myModal" class="modal fade" data-backdrop="static">  -->
+<!-- https://github.com/poiuty/gamecp/blob/master/web/private/template/include/modal.php -->
+<div id="myModal" class="modal fade">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+				<h4 class="modal-title">Тестовое окно</h4>
+			</div>
+			<div id="modal_info" class="modal-body">
+				<center> <h4 class="modal-title">Пожалуйста, подождите.</h4> </center>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script>
+$('#myModal').modal('show');
+</script>
 	</body>
 </html>

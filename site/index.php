@@ -18,6 +18,8 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/init/memcache.php');
 		<link rel="stylesheet" type="text/css" href="css/style.css"/>
 		<script src="js/jquery.min.js"></script>
 		<script src="js/bootstrap.min.js"></script>
+		<script src="js/lepus.js"></script>
+		<script src="https://www.google.com/recaptcha/api.js"></script>
 	</head>
 	<body>
 		<div class="wrapper">
@@ -94,7 +96,7 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/init/memcache.php');
 					</div>
 					<div class="block-info1" style="margin-top: 15px;">
 						<div class="block-body">
-							<input type="submit" name="login" class="btn btn-sm btn-success btn-block" value="Регистрация">
+							<input type="submit" name="login" class="btn btn-sm btn-success btn-block" data-register-open="1" value="Регистрация">
 							<input type="submit" name="login" class="btn btn-sm btn-success btn-block" value="Забыл пароль">
 						</div>
 					</div>
@@ -117,26 +119,28 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/init/memcache.php');
 					</div>
 				</div>
 			</div>
-		</div>
-		
-<!--<div id="myModal" class="modal fade" data-backdrop="static">  -->
-<!-- https://github.com/poiuty/gamecp/blob/master/web/private/template/include/modal.php -->
-<div id="myModal" class="modal fade">
-	<div class="modal-dialog">
-		<div class="modal-content">
-			<div class="modal-header">
-				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-				<h4 class="modal-title">Тестовое окно</h4>
-			</div>
-			<div id="modal_info" class="modal-body">
-				<center> <h4 class="modal-title">Пожалуйста, подождите.</h4> </center>
+		</div>	
+	<!--<div id="myModal" class="modal fade" data-backdrop="static">  -->
+	<!-- https://github.com/poiuty/gamecp/blob/master/web/private/template/include/modal.php -->
+	<div id="myModal" class="modal fade">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+					<h4 class="modal-title">Регистрация</h4>
+				</div>
+				<div id="modal_info" class="modal-body">
+					<center><p><input class="form-control input-sm" id="email" style="display:inline; position:relative;width:300px;" type="text" placeholder="E-mail"> </p>
+					<p><input class="form-control input-sm" id="password" style="display:inline; position:relative;width:300px;margin-top: 3px;" type="password" placeholder="Password"> </p>
+					<p><input class="form-control input-sm" id="re_password" style="display:inline; position:relative;width:300px;margin-top: 3px;" type="password" placeholder="Re-Password"> </p>
+					<div class="g-recaptcha" style="margin-top: 5px;" data-sitekey="6LdqjBETAAAAAGZfJ8Gq6eTM7w7V8LVTLaQvpoHC"></div></center>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-success" data-save-settings>Регистрация</button>
+					<button type="button" class="btn btn-default" data-dismiss="modal">Закрыть</button>
+				</div>
 			</div>
 		</div>
 	</div>
-</div>
-
-<script>
-$('#myModal').modal('show');
-</script>
 	</body>
 </html>

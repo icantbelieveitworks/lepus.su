@@ -16,3 +16,12 @@ $(document).on("click", "[data-lost-passwd]", function(e) {
 	grecaptcha.reset();
 	$('#regLost').modal('show');
 });
+
+
+$(document).on("click", "[data-do-login]", function(e) {
+	$(this).blur();
+	e.preventDefault();
+	alertify.success("Success notification");
+	//alertify.error("Success notification");
+});
+

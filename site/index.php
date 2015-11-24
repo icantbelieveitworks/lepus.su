@@ -16,8 +16,11 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/init/memcache.php');
 		<link rel="stylesheet" type="text/css" href="css/font-awesome.min.css">
 		<link rel="stylesheet" type="text/css" href="css/reset.css"/>
 		<link rel="stylesheet" type="text/css" href="css/style.css"/>
+		<link rel="stylesheet" type="text/css" href="css/alertify.core.css" />
+		<link rel="stylesheet" type="text/css" href="css/alertify.bootstrap.css" />
 		<script src="js/jquery.min.js"></script>
 		<script src="js/bootstrap.min.js"></script>
+		<script src="js/alertify.js"></script>
 		<script src="js/lepus.js"></script>
 	</head>
 	<body>
@@ -90,7 +93,7 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/init/memcache.php');
 						<div class="block-body">
 							<input class="form-control" placeholder="E-mail" name="email" type="email" value="" autofocus="">
 							<input class="form-control" style="margin-top: 3px;" placeholder="Password" name="password" type="password" value="" autofocus="">
-							<input type="submit" name="login" class="btn btn-sm btn-success btn-block" style="margin-top: 15px;" value="Войти">
+							<input type="submit" name="login" class="btn btn-sm btn-success btn-block" style="margin-top: 15px;" data-do-login value="Войти">
 						</div>
 					</div>
 					<div class="block-info1" style="margin-top: 15px;">

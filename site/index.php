@@ -27,47 +27,10 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/auth.php');
 	</head>
 	<body>
 		<div class="wrapper">
-			<div class="top-menu">
-				<ul>
-					<li><a href="/" class="menu-home" rel="nofollow"></a></li>
-					<li><a href="/outsourcing.html" class="menu-about" rel="nofollow"></a></li>
-					<li><a href="/domains.html" class="menu-prices" rel="nofollow"></a></li>
-					<li><a href="/stock.html" class="menu-partner" rel="nofollow"></a></li>
-					<li><a href="/ispmanager.html" class="menu-online" rel="nofollow"></a></li>
-					<li><a href="/contacts.html" class="menu-contacts" rel="nofollow"></a></li>
-				</ul>
-			</div>
+			<?php require_once($_SERVER['DOCUMENT_ROOT'].'/private/pages/menu.php'); ?>
 			<div class="logo"></div>
 			<div class="information">
-				<div class="news-box">
-					<div class="news">
-						<div class="body">
-							<div class="title">
-								<span class='date'>2014-08-01</span>
-								<a role="button" tabindex="0">PayPal</a>
-							</div>
-							Теперь вы можете пополнить счет в личном кабинете через PayPal.
-						</div>					
-						<div class="body">
-							<div class="title">
-								<span class='date'>2014-04-12</span>
-								<a role="button" tabindex="0">Антивирусная проверка</a>
-							</div>
-							Сделали автоматическое еженедельное сканирование VPS, виртуального хостинга с отправкой отчета на почту клиента.
-						</div>					
-						<div class="body">
-							<div class="title">
-								<span class='date'>2014-04-09</span>
-								<a role="button" tabindex="0">Обновление тарифов</a>
-							</div>
-							Еще больше места на виртуальном хостинге!<br/>
-							Добавлена возможность использовать SSL для сайтов.<br/>
-							Бесплатно помогаем получить SSL сертификаты StartCom Class 1
-						</div>					
-						<b>Техническая поддержка, icq: 450420625</b><br/>
-						Наши DNS серверы: ns1.lepus.su и ns2.poiuty.com<br/>
-					</div>
-				</div>
+			<?php require_once($_SERVER['DOCUMENT_ROOT'].'/private/pages/news.php'); ?>
 			</div>
 			<div class="container">
 				<div class="content-box">
@@ -90,40 +53,10 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/auth.php');
 						</div>
 					</div>
 				</div>
-				<div class="blocks">
-					<div class="block-login">
-						<div class="block-body">
-							<input class="form-control" id="login_email" placeholder="E-mail" name="email" type="email" value="" autofocus="">
-							<input class="form-control" id="login_passwd" style="margin-top: 3px;" placeholder="Password" name="password" type="password" value="" autofocus="">
-							<input type="submit" name="login" class="btn btn-sm btn-success btn-block" style="margin-top: 15px;" data-do-login value="Войти">
-						</div>
-					</div>
-					<div class="block-info1" style="margin-top: 15px;">
-						<div class="block-body">
-							<input type="submit" name="login" class="btn btn-sm btn-success btn-block" data-register-open value="Регистрация">
-							<input type="submit" name="login" class="btn btn-sm btn-success btn-block" data-lost-passwd value="Забыл пароль">
-						</div>
-					</div>
-				</div>
+				<?php require_once($_SERVER['DOCUMENT_ROOT'].'/private/pages/navi.php'); ?>
 			</div>
 		</div>
-		<div class="footer-box">
-			<div class="footer">
-				<p class="author">
-					<del>Дизайн — <a href="http://www.o-kvadrat.ru" target="_blank" rel="nofollow">Веб-студия «КРУГЛЫЙ КВАДРАТ»</a></del>
-				</p>
-				<p class="copyright">
-					&copy; Lepus Hosting (<a href="https://lepus.su/oferta.html">публичный договор оферты</a>)
-				</p>
-				<div class="banners">
-					<div>
-						<a href="https://money.yandex.ru" target="_blank"> <img src="/images/other/yamoney_logo88x31.gif" alt="Я принимаю Яндекс.Деньги" title="Я принимаю Яндекс.Деньги" border="0" width="88" height="31"/></a>
-						<a href="http://www.webmoney.ru/" target="_blank"><img src="/images/other/88x31_wm_blue_on_transparent_ru.png" border="0" width="88" height="31"/></a>
-						<a href="https://qiwi.ru/" target="_blank" rel="nofollow"><img width="88" height="31" border="0" src="/images/ico/qiwi_b.png" /></a>
-					</div>
-				</div>
-			</div>
-		</div>
+		<?php require_once($_SERVER['DOCUMENT_ROOT'].'/private/pages/footer.php'); ?>
 		<?php require_once($_SERVER['DOCUMENT_ROOT'].'/private/pages/modal.php'); ?>
 		<script src="//www.google.com/recaptcha/api.js?onload=onloadCallback&render=explicit" async defer></script>
 	</body>

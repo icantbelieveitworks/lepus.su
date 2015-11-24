@@ -22,7 +22,7 @@
 		<div class="block-body">
 			<ul>
 				<center>
-					<a href="./logout.html" title="Выход"><b>poiuty@lepus.su</b></a>
+					<a href="./public/logout.php" title="Выход"><b>poiuty@lepus.su</b></a>
 				</center>
 				<hr/>
 				<li><a href="./cp.html">Настройки</a></li>

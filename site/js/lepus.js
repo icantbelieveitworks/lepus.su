@@ -29,10 +29,11 @@ $(document).on("click", "[data-do-login]", function(e) {
 		$('#myModal').modal('hide');
 		if(data == '1'){
 			alertify.success("Success");
-			return;
+			location.reload();
 		}else{
 			alertify.error(data);
 		}
+		return;
 	});
 });
 

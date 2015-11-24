@@ -6,6 +6,12 @@ function rehash($passwd, $hash){
 		return 'no_hash';
 }
 
+function _exit(){
+	session_unset();
+	session_destroy();
+	header("Location: http://lepus.dev");
+}
+
 function login($login, $passwd){
 	global $db;
 	$query = $db->prepare("SELECT * FROM `users` WHERE `login` =:login");

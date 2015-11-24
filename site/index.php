@@ -3,6 +3,8 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/config.php');
 require_once($_SERVER['DOCUMENT_ROOT'].'/private/init/mysql.php');
 require_once($_SERVER['DOCUMENT_ROOT'].'/private/init/memcache.php');
 require_once($_SERVER['DOCUMENT_ROOT'].'/private/init/session.php');
+require_once($_SERVER['DOCUMENT_ROOT'].'/private/func.main.php');
+require_once($_SERVER['DOCUMENT_ROOT'].'/private/auth.php');
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">

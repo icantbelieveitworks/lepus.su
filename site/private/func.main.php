@@ -17,7 +17,6 @@ function login($login, $passwd){
 		if($row['block'] == 1) return 'block_user';
 		$new_passwd = rehash($passwd, $row['passwd']);
 		$_SESSION['id'] = $row['id'];
-		$_SESSION['login'] = $login;
 		$_SESSION['sess'] = hash('sha512' ,$login.$passwd.$_SERVER['REMOTE_ADDR'].$_SERVER['HTTP_USER_AGENT']);
 	
 		if($new_passwd != 'no_hash'){
@@ -37,3 +36,44 @@ function login($login, $passwd){
 	} else return 'bad_passwd';
 }
 
+function auth($id, $session){
+	global $db;
+	$query = $db->prepare("SELECT * FROM `users` WHERE `id` = :id AND `session` = :session");
+	$query->bindParam(':id', $id, PDO::PARAM_STR);
+	$query->bindParam(':session', $session, PDO::PARAM_STR);
+	$query->execute();
+	
+	if($query->rowCount() != 1){
+		$query = $db->prepare("UPDATE `users` SET `session` = NULL WHERE `login` = :login AND `session` = :session");
+		$query->bindParam(':login', $login, PDO::PARAM_STR);
+		$query->bindParam(':session', $session, PDO::PARAM_STR);
+		$query->execute();
+		
+		session_unset();
+		session_destroy();
+		return 'no_auth';
+	}
+	
+	$row = $query->fetch();
+	return ["id" => $row['id'], "login" => $row['login'], "passwd" => $row['passwd']];
+}
+
+function error($message, $j = 0){
+	if(!is_array($message)){
+		$err = [
+			"no_auth" => "Неудачная попытка входа.",
+			"no_user" => "Неправильный логин.",
+			"bad_passwd" => "Неправильный пароль.",
+			"block_user" => "Пользователь заблокирован"
+		];
+		if (array_key_exists($message, $err)) $j = 1;
+	}
+	
+	if($j == 1){
+		$message = ['mess' => $message, 'err' => $err[$message]];
+	}else{
+		$message = ['mess' => $message, 'err' => 'OK'];
+	}
+	
+	return $message;
+}

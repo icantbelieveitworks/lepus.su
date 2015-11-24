@@ -2,7 +2,7 @@
 require_once($_SERVER['DOCUMENT_ROOT'].'/private/config.php');
 require_once($_SERVER['DOCUMENT_ROOT'].'/private/init/mysql.php');
 require_once($_SERVER['DOCUMENT_ROOT'].'/private/init/memcache.php');
-//require_once($_SERVER['DOCUMENT_ROOT'].'/private/init/session.php');
+require_once($_SERVER['DOCUMENT_ROOT'].'/private/init/session.php');
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
@@ -91,8 +91,8 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/init/memcache.php');
 				<div class="blocks">
 					<div class="block-login">
 						<div class="block-body">
-							<input class="form-control" placeholder="E-mail" name="email" type="email" value="" autofocus="">
-							<input class="form-control" style="margin-top: 3px;" placeholder="Password" name="password" type="password" value="" autofocus="">
+							<input class="form-control" id="login_email" placeholder="E-mail" name="email" type="email" value="" autofocus="">
+							<input class="form-control" id="login_passwd" style="margin-top: 3px;" placeholder="Password" name="password" type="password" value="" autofocus="">
 							<input type="submit" name="login" class="btn btn-sm btn-success btn-block" style="margin-top: 15px;" data-do-login value="Войти">
 						</div>
 					</div>

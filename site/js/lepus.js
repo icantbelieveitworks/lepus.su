@@ -21,7 +21,18 @@ $(document).on("click", "[data-lost-passwd]", function(e) {
 $(document).on("click", "[data-do-login]", function(e) {
 	$(this).blur();
 	e.preventDefault();
-	alertify.success("Success notification");
-	//alertify.error("Success notification");
+
+	login_email = $('input[id=login_email]').val();
+	login_passwd = $('input[id=login_passwd]').val();
+
+	$.post("http://"+document.domain+"/public/login.php", {command: 'login', email: login_email, passwd: login_passwd}, function( data ){
+		$('#myModal').modal('hide');
+		if(data == '1'){
+			alertify.success("Success");
+			return;
+		}else{
+			alertify.error(data);
+		}
+	});
 });
 

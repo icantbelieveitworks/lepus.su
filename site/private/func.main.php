@@ -61,7 +61,7 @@ function auth($id, $session){
 	}
 	
 	$row = $query->fetch();
-	return ["id" => $row['id'], "login" => $row['login'], "passwd" => $row['passwd']];
+	return ["id" => $row['id'], "login" => $row['login'], "passwd" => $row['passwd'], "data" => $row['data']];
 }
 
 function error($message, $j = 0){

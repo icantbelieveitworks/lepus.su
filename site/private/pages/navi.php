@@ -22,26 +22,26 @@ if(empty($user)){ ?>
 		<div class="block-body">
 			<ul>
 				<center>
-					<a href="./public/logout.php" title="Выход"><b><?php echo $user['login']; ?></b></a>
+					<a href="/public/logout.php" title="Выход"><b><?php echo $user['login']; ?></b></a>
 				</center>
 				<hr/>
-				<li><a href="./pages/cp.php">Настройки</a></li>
-				<li><a href="./cp.html">Пополнить счет</a></li>
-				<li><a href="./cp-cron.html">Планировщик задач</a></li>
+				<li><a href="/pages/cp.php">Настройки</a></li>
+				<li><a href="/pages/cp.php">Пополнить счет</a></li>
+				<li><a href="/cp-cron.html">Планировщик задач</a></li>
 				<hr>
 				<li><a href="http://dom.lepus.su" target="_blank">Домены</a></li>
-				<li><a href="./cp-vps.html">VPS хостинг</a></li>
-				<li><a href="./cp-domains.html">DNS хостинг</a></li>
-				<li><a href="./cp-adm.html">Администрирование</a></li>
-				<li><a href="./cp-hosting-isp.html">Виртуальный xостинг</a></li>
-				<li><a href="./cp-serv.html">Выделенные серверы</a></li>
+				<li><a href="/cp-vps.html">VPS хостинг</a></li>
+				<li><a href="/cp-domains.html">DNS хостинг</a></li>
+				<li><a href="/cp-adm.html">Администрирование</a></li>
+				<li><a href="/cp-hosting-isp.html">Виртуальный xостинг</a></li>
+				<li><a href="/cp-serv.html">Выделенные серверы</a></li>
 				<hr/>
-				<li><a href="./cp-support.html">Тех. поддержка</a></li>
-				<li><a href="./cp-iplogs.html">Логи авторизаций</a></li>
-				<li><a href="./cp-buylogs.html">Логи оплаты услуг</a></li>
-				<li><a href="./cp-finlogs.html">Логи пополнения счета</a></li>
+				<li><a href="/cp-support.html">Тех. поддержка</a></li>
+				<li><a href="/cp-iplogs.html">Логи авторизаций</a></li>
+				<li><a href="/cp-buylogs.html">Логи оплаты услуг</a></li>
+				<li><a href="/cp-finlogs.html">Логи пополнения счета</a></li>
 				<hr/>
-				<li><b>Баланс</b>: 251 рублей</li>
+				<li><b>Баланс</b>: <?php echo $user['data']['balance']; ?> рублей</li>
 				<hr/>
 			</ul>
 		</div>

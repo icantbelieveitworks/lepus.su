@@ -48,7 +48,7 @@ if(empty($user)){
 										<input class="btn btn-sm btn-danger btn-block" style="margin-top: 2px;" type="submit" value="Получить новый пароль">
 									</div>
 									<div class="col-lg-4">
-										<input class="form-control" type="password" value="" name="oldpass" required="" placeholder="+7916XXXXX53">
+										<input class="form-control" type="password" value="" name="oldpass" required="" placeholder="<?php echo $user['data']['phone']; ?>">
 										<input class="btn btn-sm btn-danger btn-block" style="margin-top: 2px;" type="submit" value="Изменить номер">
 									</div>
 									<div class="col-lg-4">

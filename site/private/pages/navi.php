@@ -1,5 +1,5 @@
 <?php
- if(empty($user)){ ?>
+if(empty($user)){ ?>
 <div class="blocks">
 	<div class="block-login">
 		<div class="block-body">
@@ -22,10 +22,10 @@
 		<div class="block-body">
 			<ul>
 				<center>
-					<a href="./public/logout.php" title="Выход"><b>poiuty@lepus.su</b></a>
+					<a href="./public/logout.php" title="Выход"><b><?php echo $user['login']; ?></b></a>
 				</center>
 				<hr/>
-				<li><a href="./cp.html">Настройки</a></li>
+				<li><a href="./pages/cp.php">Настройки</a></li>
 				<li><a href="./cp.html">Пополнить счет</a></li>
 				<li><a href="./cp-cron.html">Планировщик задач</a></li>
 				<hr>

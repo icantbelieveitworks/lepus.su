@@ -5,6 +5,10 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/init/memcache.php');
 require_once($_SERVER['DOCUMENT_ROOT'].'/private/init/session.php');
 require_once($_SERVER['DOCUMENT_ROOT'].'/private/func.main.php');
 require_once($_SERVER['DOCUMENT_ROOT'].'/private/auth.php');
+if(empty($user)){
+	header('refresh: 3; url=http://lepus.dev');
+	die;
+}
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
@@ -36,20 +40,32 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/auth.php');
 				<div class="content-box">
 					<div class="content-info">
 						<div class="content-text">
-							<div class="page-title">Lepus хостинг</div>
-							<p>
-								— <a href="/domains.html" target="_blank" rel="nofollow">Регистрация доменов</a>.<br/>
-								— Moneyback по первому требованию.<br/>
-								— <a href="/ispmanager.html" rel="nofollow">Лицензии ISPmanager</a> по доступным ценам.<br/>
-								— Мощные <a href="/vps.html">администрируемые VPS</a> на SSD дисках.<br/>
-								— Бесплатный перенос ваших сайтов на наш хостинг.<br/>
-								— <a href="/shared.html">Виртуальный хостинг</a> и <a href="/vip.html" rel="nofollow">VIP хостинг</a> для ваших сайтов.<br/>
-								— Быстрые администрируемые <a href="/dedicated.html">выделенные серверы</a> по выгодной цене.<br/><br/>
-								Наша миссия - предоставление качественных услуг хостинга. 
-								Находим индивидуальный подход к каждому клиенту.  <br/>
-								Оказываем профессиональные услуги по технической поддержке, администрированию и сопровождению проектов.<br/>
-								Самое ценное - это вы, наши клиенты. Мы болеем за вас, радуемся вашим победам и успехам! Добро пожаловать!<br/>
-							</p>
+							<div class="page-title">Настройки</div>
+							<div class="row">					
+								<div class="col-lg-14">
+									<div class="col-lg-4">
+										<input class="form-control" type="password" value="" name="oldpass" required="" placeholder="Старый пароль">
+										<input class="btn btn-sm btn-danger btn-block" style="margin-top: 2px;" type="submit" value="Получить новый пароль">
+									</div>
+									<div class="col-lg-4">
+										<input class="form-control" type="password" value="" name="oldpass" required="" placeholder="+7916XXXXX53">
+										<input class="btn btn-sm btn-danger btn-block" style="margin-top: 2px;" type="submit" value="Изменить номер">
+									</div>
+									<div class="col-lg-4">
+										<div class="form-inline">
+											<input class="form-control" style="width: 98px;" type="text" name="count" value="" maxlength="5" required="" placeholder="Сумма">
+												<select class="form-control" name="type">
+													<option value="master" selected="">Paymaster</option>
+													<option value="paypal">PayPal</option>
+												</select>
+											<input class="btn btn-sm btn-danger btn-block" style="margin-top: 2px;" type="submit" value="Пополнить счет">
+										</div>
+									</div>
+									<div class="col-lg-12">
+										<hr/>
+									</div>
+								</div>
+							</div>
 						</div>
 					</div>
 				</div>

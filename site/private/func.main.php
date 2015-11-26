@@ -83,3 +83,13 @@ function error($message, $j = 0){
 	
 	return $message;
 }
+
+function save_user_data($id, $data){
+	global $db;
+	$data = json_encode($data);
+	$query = $db->prepare("UPDATE `users` SET `data` = :data WHERE `id` = :id");
+	$query->bindParam(':data', $data, PDO::PARAM_STR);
+	$query->bindParam(':id', $id, PDO::PARAM_STR);
+	$query->execute();
+	return '1';
+}

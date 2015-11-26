@@ -48,8 +48,8 @@ if(empty($user)){
 										<input data-cp-change-passwd class="btn btn-sm btn-danger btn-block" style="margin-top: 2px;" type="submit" value="Получить новый пароль">
 									</div>
 									<div class="col-lg-4">
-										<input class="form-control" type="password" value="" name="oldpass" required="" placeholder="<?php echo $user['data']['phone']; ?>">
-										<input class="btn btn-sm btn-danger btn-block" style="margin-top: 2px;" type="submit" value="Изменить номер">
+										<input class="form-control" type="text" value="" id="new_phone"  required="" placeholder="+<?php echo $user['data']['phone']; ?>">
+										<input data-cp-change-phone class="btn btn-sm btn-danger btn-block" style="margin-top: 2px;" type="submit" value="Изменить номер">
 									</div>
 									<div class="col-lg-4">
 										<div class="form-inline">

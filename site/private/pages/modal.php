@@ -50,3 +50,14 @@
 		</div>
 	</div>
 </div>
+
+<div id="changePhonewdModal" class="modal fade" data-backdrop="static">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div id="modal_info" class="modal-body">
+				<center>По-вашему запросу, мы поменяли номер телефона.</center>
+			</div>
+		</div>
+	</div>
+</div>
+

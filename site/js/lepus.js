@@ -54,3 +54,19 @@ $(document).on("click", "[data-cp-change-passwd]", function(e) {
 	});
 });
 
+$(document).on("click", "[data-cp-change-phone]", function(e) {
+	$(this).blur();
+	e.preventDefault();
+	phone = $('input[id=new_phone]').val();
+	$.post("//"+document.domain+"/public/change_phone.php", {phone: phone}, function( data ){
+		if(data == '1'){
+			alertify.success("Success");
+			$('#changePhonewdModal').modal('show');
+			setTimeout(function(){location.reload()},2500);
+		}else{
+			alertify.error(data);
+		}
+		return;
+	});
+});
+

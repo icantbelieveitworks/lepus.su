@@ -20,23 +20,21 @@ function login($login, $passwd){
 	if($query->rowCount() != 1) return 'no_user';
 	$row = $query->fetch();
 	if (password_verify($passwd, $row['passwd'])){
-		if($row['block'] == 1) return 'block_user';
 		$new_passwd = rehash($passwd, $row['passwd']);
 		$_SESSION['id'] = $row['id'];
 		$_SESSION['sess'] = hash('sha512' ,$login.$passwd.$_SERVER['REMOTE_ADDR'].$_SERVER['HTTP_USER_AGENT']);
-	
+		
 		if($new_passwd != 'no_hash'){
 			$query = $db->prepare("UPDATE `users` SET `passwd` = :passwd WHERE `id` = :id");
 			$query->bindParam(':passwd', $new_passwd, PDO::PARAM_STR);
 			$query->bindParam(':id', $row['id'], PDO::PARAM_STR);
 			$query->execute();
 		}
-		
+			
 		$query = $db->prepare("UPDATE `users` SET `session` = :sess WHERE `id` = :id");
 		$query->bindParam(':id', $row['id'], PDO::PARAM_STR);
 		$query->bindParam(':sess', $_SESSION['sess'], PDO::PARAM_STR);
 		$query->execute();
-		
 		return 'enter';
 		
 	} else return 'bad_passwd';
@@ -93,3 +91,28 @@ function save_user_data($id, $data){
 	$query->execute();
 	return '1';
 }
+
+function _mail($email, $subject, $message){
+	$headers  = "MIME-Version: 1.0\r\n";
+	$headers .= "Content-type: text/html; charset=utf-8\r\n";
+	$subject  = "=?utf-8?B?".base64_encode($subject)."?=";
+	$headers .= "From: Lepus Artifical Intelligence <support@lepus.su>\r\n";
+	mail($email, $subject, $message, $headers);
+}
+
+function genRandStr($length){
+	$characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+	$randomString = '';	
+	for ($i = 0; $i < $length; $i++)
+		$randomString .= $characters[mt_rand(0, strlen($characters) - 1)];
+	return $randomString;
+}
+
+function change_passwd($passwd, $id){
+	global $db;
+	$query = $db->prepare("UPDATE `users` SET `passwd` = :passwd WHERE `id` = :id");
+	$query->bindParam(':passwd', $passwd, PDO::PARAM_STR);
+	$query->bindParam(':id', $id, PDO::PARAM_STR);
+	$query->execute();
+}
+

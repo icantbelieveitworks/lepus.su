@@ -39,3 +39,14 @@
 		</div>
 	</div>
 </div>
+
+
+<div id="changePasswdModal" class="modal fade" data-backdrop="static">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div id="modal_info" class="modal-body">
+				<center>По-вашему запросу, мы поменяли пароль и отправили новый - на вашу почту.</center>
+			</div>
+		</div>
+	</div>
+</div>

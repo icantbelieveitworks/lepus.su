@@ -44,8 +44,8 @@ if(empty($user)){
 							<div class="row">					
 								<div class="col-lg-14">
 									<div class="col-lg-4">
-										<input class="form-control" type="password" value="" name="oldpass" required="" placeholder="Старый пароль">
-										<input class="btn btn-sm btn-danger btn-block" style="margin-top: 2px;" type="submit" value="Получить новый пароль">
+										<input class="form-control" type="password" value="" id="real_passwd" required="" placeholder="Старый пароль">
+										<input data-cp-change-passwd class="btn btn-sm btn-danger btn-block" style="margin-top: 2px;" type="submit" value="Получить новый пароль">
 									</div>
 									<div class="col-lg-4">
 										<input class="form-control" type="password" value="" name="oldpass" required="" placeholder="<?php echo $user['data']['phone']; ?>">

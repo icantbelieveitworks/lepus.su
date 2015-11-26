@@ -25,11 +25,28 @@ $(document).on("click", "[data-do-login]", function(e) {
 	login_email = $('input[id=login_email]').val();
 	login_passwd = $('input[id=login_passwd]').val();
 
-	$.post("http://"+document.domain+"/public/login.php", {command: 'login', email: login_email, passwd: login_passwd}, function( data ){
+	$.post("//"+document.domain+"/public/login.php", {command: 'login', email: login_email, passwd: login_passwd}, function( data ){
 		$('#myModal').modal('hide');
 		if(data == '1'){
 			alertify.success("Success");
 			location.reload();
+		}else{
+			alertify.error(data);
+		}
+		return;
+	});
+});
+
+
+$(document).on("click", "[data-cp-change-passwd]", function(e) {
+	$(this).blur();
+	e.preventDefault();
+	passwd = $('input[id=real_passwd]').val();
+	$.post("//"+document.domain+"/public/change_passwd.php", {passwd: passwd}, function( data ){
+		if(data == '1'){
+			alertify.success("Success");
+			$('#changePasswdModal').modal('show');
+			setTimeout(function(){location.reload()},2500);
 		}else{
 			alertify.error(data);
 		}

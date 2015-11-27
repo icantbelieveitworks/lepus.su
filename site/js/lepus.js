@@ -1,6 +1,6 @@
 var onloadCallback = function() {
-	grecaptcha.render('captcha_reg', {'sitekey' : '6LdqjBETAAAAAGZfJ8Gq6eTM7w7V8LVTLaQvpoHC'});
-	grecaptcha.render('captcha_lost', {'sitekey' : '6LdqjBETAAAAAGZfJ8Gq6eTM7w7V8LVTLaQvpoHC'});
+	grecaptcha.render('captcha_reg', {'sitekey' : '6LcI6RETAAAAAOGz1Pbig57ErQ70tIRlvbhECQIw'});
+	grecaptcha.render('captcha_lost', {'sitekey' : '6LcI6RETAAAAAOGz1Pbig57ErQ70tIRlvbhECQIw'});
 };
 
 $(document).on("click", "[data-register-open]", function(e) {
@@ -8,6 +8,12 @@ $(document).on("click", "[data-register-open]", function(e) {
 	e.preventDefault();
 	grecaptcha.reset();
 	$('#regModal').modal('show');
+});
+
+$(document).on("click", "[data-register-send]", function(e) {
+	$.post("//"+document.domain+"/public/register.php", {'g-recaptcha-response': grecaptcha.getResponse()}, function( data ){
+		alertify.error(data);
+	});
 });
 
 $(document).on("click", "[data-lost-passwd]", function(e) {

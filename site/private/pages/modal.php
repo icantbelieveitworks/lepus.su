@@ -14,7 +14,7 @@
 				<div id="captcha_reg" style="width:300px;margin-top: 3px;"></div></center>
 			</div>
 			<div class="modal-footer">
-				<button type="button" class="btn btn-success" data-save-settings>Регистрация</button>
+				<button type="button" class="btn btn-success" data-register-send>Регистрация</button>
 				<button type="button" class="btn btn-default" data-dismiss="modal">Закрыть</button>
 			</div>
 		</div>

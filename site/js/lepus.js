@@ -1,34 +1,29 @@
+var widgetId1;
+var widgetId2;
 var onloadCallback = function() {
-	grecaptcha.render('captcha_reg', {'sitekey' : '6LcI6RETAAAAAOGz1Pbig57ErQ70tIRlvbhECQIw'});
-	grecaptcha.render('captcha_lost', {'sitekey' : '6LcI6RETAAAAAOGz1Pbig57ErQ70tIRlvbhECQIw'});
+	widgetId1 = grecaptcha.render(document.getElementById('captcha_reg'), { 'sitekey' : '6LcI6RETAAAAAOGz1Pbig57ErQ70tIRlvbhECQIw' });
+	widgetId2 = grecaptcha.render(document.getElementById('captcha_lost'), { 'sitekey' : '6LcI6RETAAAAAOGz1Pbig57ErQ70tIRlvbhECQIw' });
 };
 
 $(document).on("click", "[data-register-open]", function(e) {
 	$(this).blur();
 	e.preventDefault();
-	grecaptcha.reset();
+	grecaptcha.reset(widgetId1);;
 	$('#regModal').modal('show');
 });
 
 $(document).on("click", "[data-send-lost-passwd]", function(e) {
-
-	console.log(grecaptcha.getResponse());
-	return;
 	email = $('input[id=lost_passwd_email]').val();
-	$.post("//"+document.domain+"/public/lost_passwd.php", { 'g-recaptcha-response': grecaptcha.getResponse()}, function( data ){
+	$.post("//"+document.domain+"/public/lost_passwd.php", { 'g-recaptcha-response': grecaptcha.getResponse(widgetId2)}, function( data ){
 			alertify.error(data);
 	});
 });
 
 $(document).on("click", "[data-register-send]", function(e) {
-
-	console.log(grecaptcha.getResponse());
-	return;
-	
 	regEmail = $('input[id=regEmail]').val();
 	regEmail = $('input[id=regEmail]').val();
 	regEmail = $('input[id=regEmail]').val();
-	$.post("//"+document.domain+"/public/register.php", { 'g-recaptcha-response': grecaptcha.getResponse()}, function( data ){
+	$.post("//"+document.domain+"/public/register.php", { 'g-recaptcha-response': grecaptcha.getResponse(widgetId1)}, function( data ){
 		alertify.error(data);
 	});
 });
@@ -36,7 +31,7 @@ $(document).on("click", "[data-register-send]", function(e) {
 $(document).on("click", "[data-lost-passwd]", function(e) {
 	$(this).blur();
 	e.preventDefault();
-	grecaptcha.reset();
+	grecaptcha.reset(widgetId2);
 	$('#regLost').modal('show');
 });
 

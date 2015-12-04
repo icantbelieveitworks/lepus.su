@@ -20,6 +20,16 @@ function is_lepus_user($login){
 	return ['0' => $query->rowCount(), '1' => $query->fetch()];
 }
 
+function lost_passwd_change($arr){
+	$data = json_decode(lepus_crypt($arr, 'decode'), true);
+	$is_user = is_lepus_user($data[0]);
+	if($is_user['0'] != 1) return 'no_user';
+	$row = $is_user['1'];
+	$real_hash = hash('sha512' ,$_SERVER['HTTP_USER_AGENT'].$_SERVER['REMOTE_ADDR'].$row['passwd'].$row['login']);
+	if($data[1] != $real_hash) return 'wrong_hash';
+		else return ['id' => $row['id'], 'email' => $data[0]];
+}
+
 function lost_passwd($login){
 	$is_user = is_lepus_user($login);
 	if($is_user['0'] != 1) return 'no_user';
@@ -129,3 +139,24 @@ function change_passwd($passwd, $id){
 	$query->execute();
 }
 
+function lepus_crypt($input, $do = 'encode', $key = 'Jml*Zwde4a#%ix$m'){
+	$algo = MCRYPT_RIJNDAEL_256;
+	$mode = MCRYPT_MODE_CBC;
+	$iv_size = mcrypt_get_iv_size($algo, $mode);
+	$iv = mcrypt_create_iv($iv_size, MCRYPT_DEV_URANDOM);
+	switch($do){
+		case 'encode':	
+		$ciphertext = mcrypt_encrypt($algo, $key, $input, $mode, $iv);
+		$ciphertext = $iv . $ciphertext;
+		$result = base64_encode($ciphertext);
+		break;
+		
+		case 'decode':
+		$ciphertext_dec = base64_decode($input);
+		$iv_dec = substr($ciphertext_dec, 0, $iv_size);
+		$ciphertext_dec = substr($ciphertext_dec, $iv_size);
+		$result = mcrypt_decrypt($algo, $key, $ciphertext_dec, $mode, $iv_dec);
+		break;
+	}
+	return $result;
+}

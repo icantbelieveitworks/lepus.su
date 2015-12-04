@@ -12,13 +12,24 @@ function _exit(){
 	header("Location: http://lepus.dev");
 }
 
-function login($login, $passwd){
+function is_lepus_user($login){
 	global $db;
 	$query = $db->prepare("SELECT * FROM `users` WHERE `login` =:login");
 	$query->bindParam(':login', $login, PDO::PARAM_STR);
 	$query->execute();
-	if($query->rowCount() != 1) return 'no_user';
-	$row = $query->fetch();
+	return ['0' => $query->rowCount(), '1' => $query->fetch()];
+}
+
+function lost_passwd($login){
+	
+
+}
+
+function login($login, $passwd){
+	global $db;
+	$is_user = is_lepus_user($login);
+	if($is_user['0'] != 1) return 'no_user';
+	$row = $is_user['1'];
 	if (password_verify($passwd, $row['passwd'])){
 		$new_passwd = rehash($passwd, $row['passwd']);
 		$_SESSION['id'] = $row['id'];

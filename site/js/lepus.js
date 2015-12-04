@@ -14,7 +14,7 @@ $(document).on("click", "[data-register-open]", function(e) {
 
 $(document).on("click", "[data-send-lost-passwd]", function(e) {
 	email = $('input[id=lost_passwd_email]').val();
-	$.post("//"+document.domain+"/public/lost_passwd.php", { 'g-recaptcha-response': grecaptcha.getResponse(widgetId2)}, function( data ){
+	$.post("//"+document.domain+"/public/lost_passwd.php", { email: email, 'g-recaptcha-response': grecaptcha.getResponse(widgetId2)}, function( data ){
 			alertify.error(data);
 	});
 });

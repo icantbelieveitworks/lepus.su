@@ -8,9 +8,9 @@
 				<h4 class="modal-title">Регистрация</h4>
 			</div>
 			<div id="modal_info" class="modal-body">
-				<center><p><input class="form-control input-sm" id="email" style="display:inline; position:relative;width:300px;" type="text" placeholder="E-mail"> </p>
-				<p><input class="form-control input-sm" id="password" style="display:inline; position:relative;width:300px;margin-top: 3px;" type="password" placeholder="Password"> </p>
-				<p><input class="form-control input-sm" id="re_password" style="display:inline; position:relative;width:300px;margin-top: 3px;" type="password" placeholder="Re-Password"> </p>
+				<center><p><input class="form-control input-sm" id="regEmail" style="display:inline; position:relative;width:300px;" type="text" placeholder="E-mail"> </p>
+				<p><input class="form-control input-sm" id="regPasswd" style="display:inline; position:relative;width:300px;margin-top: 3px;" type="password" placeholder="Password"> </p>
+				<p><input class="form-control input-sm" id="regRePasswd" style="display:inline; position:relative;width:300px;margin-top: 3px;" type="password" placeholder="Re-Password"> </p>
 				<div id="captcha_reg" style="width:300px;margin-top: 3px;"></div></center>
 			</div>
 			<div class="modal-footer">
@@ -29,11 +29,11 @@
 				<h4 class="modal-title">Восстановление пароля</h4>
 			</div>
 			<div id="modal_info" class="modal-body">
-				<center><p><input class="form-control input-sm" id="email" style="display:inline; position:relative;width:300px;" type="text" placeholder="E-mail"> </p>
+				<center><p><input class="form-control input-sm" id="lost_passwd_email" style="display:inline; position:relative;width:300px;" type="text" placeholder="E-mail"> </p>
 				<div id="captcha_lost" style="width:300px;margin-top: 3px;"></div></center>
 			</div>
 			<div class="modal-footer">
-				<button type="button" class="btn btn-success" data-save-settings>Восстановить пароль</button>
+				<button type="button" class="btn btn-success" data-send-lost-passwd>Восстановить пароль</button>
 				<button type="button" class="btn btn-default" data-dismiss="modal">Закрыть</button>
 			</div>
 		</div>

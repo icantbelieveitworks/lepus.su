@@ -4,7 +4,7 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/init/mysql.php');
 require_once($_SERVER['DOCUMENT_ROOT'].'/private/init/memcache.php');
 require_once($_SERVER['DOCUMENT_ROOT'].'/private/init/session.php');
 require_once($_SERVER['DOCUMENT_ROOT'].'/private/func.main.php');
-//require_once($_SERVER['DOCUMENT_ROOT'].'/private/recaptcha/check.php');
+require_once($_SERVER['DOCUMENT_ROOT'].'/private/recaptcha/check.php');
 
 if(!isset($_GET['hash'])){
 	if(empty($_POST['email'])) die("Empty data");

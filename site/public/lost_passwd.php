@@ -12,14 +12,15 @@ if(!isset($_GET['hash'])){
 	$j = lost_passwd($_POST['email']);
 	if($j == "no_user") die("Sorry, but unknown user");
 	$arr = [$_POST['email'], $j];
-	_mail($_POST['email'], "Забыли пароль?", "Дорогой клиент,\r\n для того, чтобы получить новый пароль,\r\n перейдите ,пожалуйста, по ссылке http://lepus.dev/public/lost_passwd.php?hash=".urlencode(lepus_crypt(json_encode($arr))));
+	_mail($_POST['email'], "Забыли пароль?", "Дорогой клиент,<br/>после того как вы перейдете <a href=\"http://lepus.dev/public/lost_passwd.php?hash=".urlencode(lepus_crypt(json_encode($arr)))."\">по этой ссылке</a> - вы получите второе письмо с паролем от вашего аккаунта.<br/>");
+	echo 1;
 }else{
 	$i = lost_passwd_change($_GET['hash']);
 	if(is_array($i)){
 		$new_passwd = genRandStr(8);
 		change_passwd(password_hash($new_passwd, PASSWORD_DEFAULT), $i['id']);
-		_mail($i['email'], "Новый пароль", "Дорогой клиент,\r\nпо-вашему запросу, мы поменяли пароль.\r\nВаш новый пароль: $new_passwd");
-		echo "1";
+		_mail($i['email'], "Новый пароль", "Дорогой клиент,<br/>по-вашему запросу, мы поменяли пароль.<br/>Ваш новый пароль: $new_passwd");
+		header('Location: http://lepus.dev');
 	}else{
 		echo "Unknown user or wrong hash";
 	}

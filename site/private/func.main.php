@@ -21,8 +21,10 @@ function is_lepus_user($login){
 }
 
 function lost_passwd($login){
-	
-
+	$is_user = is_lepus_user($login);
+	if($is_user['0'] != 1) return 'no_user';
+	$row = $is_user['1'];
+	return hash('sha512' ,$_SERVER['HTTP_USER_AGENT'].$_SERVER['REMOTE_ADDR'].$row['passwd'].$row['login']);
 }
 
 function login($login, $passwd){

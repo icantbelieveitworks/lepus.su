@@ -11,7 +11,7 @@ if(empty($_POST['passwd'])) die("Empty data");
 if(login($user['login'], $_POST['passwd']) == 'enter'){
 	$new_passwd = genRandStr(8);
 	change_passwd(password_hash($new_passwd, PASSWORD_DEFAULT), $user['id']);
-	_mail($user['login'], "Новый пароль", "Дорогой клиент,\r\nпо-вашему запросу, мы поменяли пароль.\r\nВаш новый пароль: $new_passwd");
+	_mail($user['login'], "Новый пароль", "Дорогой клиент,<br/>по-вашему запросу, мы поменяли пароль.<br/>Ваш новый пароль: $new_passwd");
 	echo "1";
 }else{
 	echo "Wrong password!";

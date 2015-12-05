@@ -24,10 +24,15 @@ if(empty($user)){
 		<link rel="stylesheet" type="text/css" href="/css/style.css"/>
 		<link rel="stylesheet" type="text/css" href="/css/alertify.core.css" />
 		<link rel="stylesheet" type="text/css" href="/css/alertify.bootstrap.css" />
+		<link rel="stylesheet" href="//cdn.datatables.net/plug-ins/1.10.6/integration/bootstrap/3/dataTables.bootstrap.css">
 		<script src="/js/jquery.min.js"></script>
+				<script src="//cdn.datatables.net/1.10.10/js/jquery.dataTables.min.js"></script>
+		<script src="//cdn.datatables.net/plug-ins/1.10.10/integration/bootstrap/3/dataTables.bootstrap.js"></script>
 		<script src="/js/bootstrap.min.js"></script>
+
 		<script src="/js/alertify.js"></script>
 		<script src="/js/lepus.js"></script>
+	<script type="text/javascript" charset="utf-8"> $(document).ready(function() { $('#log_ip').dataTable({ "order": [[ 2, "desc" ]] }); }); </script>
 	</head>
 	<body>
 		<div class="wrapper">
@@ -63,6 +68,27 @@ if(empty($user)){
 									</div>
 									<div class="col-lg-12">
 										<hr/>
+										
+			<table id="log_ip" class="table table-striped table-bordered" cellspacing="0" width="100%">
+				<thead>
+					<tr>
+						<th><center>IP</center></th>
+						<th><center>Страна</center></th>
+						<th><center>Браузер</center></th>
+						<th><center>OS</center></th>
+						<th><center>Время</center></th>
+					</tr>
+				</thead>
+				<tbody>
+					 <tr>
+					 <td><center>92.222.108.232</center></td>
+					 <td><center>Россия<center></td>
+					 <td><center>Firefox<center></td>
+					 <td><center>Ubuntu<center></td>
+					 <td><center>03-11-15<center></td>
+					 </tr>
+					</tbody>
+			</table>
 									</div>
 								</div>
 							</div>

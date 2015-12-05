@@ -58,6 +58,8 @@ function login($login, $passwd){
 		$query->bindParam(':id', $row['id'], PDO::PARAM_STR);
 		$query->bindParam(':sess', $_SESSION['sess'], PDO::PARAM_STR);
 		$query->execute();
+		
+		lepus_log_ip($row['id'], ip2long($_SERVER["REMOTE_ADDR"]));
 		return 'enter';
 		
 	} else return 'bad_passwd';
@@ -175,4 +177,13 @@ function lepus_new_account($login){
 	$query->bindParam(':data', $json, PDO::PARAM_STR);
 	$query->execute();
 	return $passwd;
+}
+
+function lepus_log_ip($id, $ip){
+	global $db;
+	$query = $db->prepare("INSERT INTO `log_ip` (`uid`, `ip`, `time`) VALUES (:id, :ip, :time)");
+	$query->bindParam(':id', $id, PDO::PARAM_STR);
+	$query->bindParam(':ip', $ip, PDO::PARAM_STR);
+	$query->bindParam(':time', time(), PDO::PARAM_STR);
+	$query->execute();
 }

@@ -5,6 +5,10 @@ if(!empty($_SESSION['sess'])){
 		$user = $x['mess'];
 		$user['data'] = json_decode($user['data'], true);
 		unset($x);
+		if($user['data']['lastIP'] == ip2long($_SERVER["REMOTE_ADDR"])){
+			$user['data']['lastIP'] = ip2long($_SERVER["REMOTE_ADDR"]);
+			save_user_data($user['id'], $user['data']);
+		}
 	}else{
 		session_unset();
 		session_destroy();

@@ -7,5 +7,5 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/func.main.php');
 
 if(empty($_POST['email']) || empty($_POST['passwd'])) die("Empty data");
 if(!filter_var($_POST['email'], FILTER_VALIDATE_EMAIL)) die("Wrong email format");
-if(login($_POST['email'], $_POST['passwd']) == 'enter') echo '1';
-	else echo 'Error';
+if(login($_POST['email'], $_POST['passwd']) != 'enter') die("Error");
+echo 1;

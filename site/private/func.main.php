@@ -180,10 +180,16 @@ function lepus_new_account($login){
 }
 
 function lepus_log_ip($id, $ip){
-	global $db;
-	$query = $db->prepare("INSERT INTO `log_ip` (`uid`, `ip`, `time`) VALUES (:id, :ip, :time)");
+	global $db; $info = get_browser(null, true);
+
+	if(preg_match('/[^0-9A-Za-z.]/', $info['platform'])) $info['platform'] = "unknown";
+	if(preg_match('/[^0-9A-Za-z.]/', $info['browser'])) $info['browser'] = "unknown";
+	
+	$query = $db->prepare("INSERT INTO `log_ip` (`uid`, `ip`, `platform`, `browser`, `time`) VALUES (:id, :ip, :platform, :browser, :time)");
 	$query->bindParam(':id', $id, PDO::PARAM_STR);
 	$query->bindParam(':ip', $ip, PDO::PARAM_STR);
+	$query->bindParam(':platform', $info['platform'], PDO::PARAM_STR);
+	$query->bindParam(':browser', $info['browser'], PDO::PARAM_STR);
 	$query->bindParam(':time', time(), PDO::PARAM_STR);
 	$query->execute();
 }

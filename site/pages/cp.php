@@ -25,6 +25,12 @@ if(empty($user)){
 		<link rel="stylesheet" type="text/css" href="/css/alertify.core.css" />
 		<link rel="stylesheet" type="text/css" href="/css/alertify.bootstrap.css" />
 		<link rel="stylesheet" href="//cdn.datatables.net/plug-ins/1.10.10/integration/bootstrap/3/dataTables.bootstrap.css">
+		<style>
+td,th {
+  text-align: center;
+  vertical-align: middle;
+}
+		</style>
 		<script src="/js/jquery.min.js"></script>
 		<script src="//cdn.datatables.net/1.10.10/js/jquery.dataTables.min.js"></script>
 		<script src="//cdn.datatables.net/plug-ins/1.10.10/integration/bootstrap/3/dataTables.bootstrap.js"></script>
@@ -72,31 +78,16 @@ if(empty($user)){
 			<table id="log_ip" class="table table-striped table-bordered" cellspacing="0" width="100%">
 				<thead>
 					<tr>
-						<th><center>ID</center></th>
-						<th><center>IP</center></th>
-						<th><center>Страна</center></th>
-						<th><center>Браузер</center></th>
-						<th><center>OS</center></th>
-						<th><center>Время</center></th>
+						<th>ID</th>
+						<th>IP</th>
+						<th>Страна</th>
+						<th>Система</th>
+						<th>Браузер</th>
+						<th>Время</th>
 					</tr>
 				</thead>
 				<tbody>
-					 <tr>
-				     <td><center>1</center></td>
-					 <td><center>92.222.108.232</center></td>
-					 <td><center>Россия<center></td>
-					 <td><center>Firefox<center></td>
-					 <td><center>Ubuntu<center></td>
-					 <td><center>01-01-15<center></td>
-					 </tr>
-					 <tr>
-				     <td><center>2</center></td>
-					 <td><center>92.222.108.111</center></td>
-					 <td><center>Россия<center></td>
-					 <td><center>Opera<center></td>
-					 <td><center>Windows<center></td>
-					 <td><center>03-11-12<center></td>
-					 </tr>
+				<?php echo lepus_get_logip($user['id']); ?>
 				</tbody>
 			</table>
 									</div>

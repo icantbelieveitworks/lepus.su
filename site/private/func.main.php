@@ -193,3 +193,15 @@ function lepus_log_ip($id, $ip){
 	$query->bindParam(':time', time(), PDO::PARAM_STR);
 	$query->execute();
 }
+
+function lepus_get_logip($id, $i = 0){
+	global $db;
+	$query = $db->prepare("SELECT * FROM `log_ip` WHERE `uid` = :id");
+	$query->bindParam(':id', $id, PDO::PARAM_STR);
+	$query->execute();
+	if($query->rowCount() == 0) return "no_data";
+	while($row = $query->fetch()){
+		$i++; $data .= "<tr><td>$i</td><td>".long2ip($row['ip'])."</td><td><img src=\"/images/flags16/".mb_strtolower(geoip_country_code_by_name('136.243.79.123')).".png\" style=\"margin-bottom:-3px;\"> ".geoip_country_name_by_name('136.243.79.123')."</td><td>".$row['platform']."</td><td>".$row['browser']."</td><td>".date('Y-m-d H:i', $row['time'])."</td></tr>";
+	}
+	return $data;
+}

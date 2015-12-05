@@ -1,6 +1,6 @@
 <?php
 function rehash($passwd, $hash){
-	if (password_needs_rehash($hash, PASSWORD_DEFAULT))
+	if(password_needs_rehash($hash, PASSWORD_DEFAULT) || empty($hash))
 		return password_hash($passwd, PASSWORD_DEFAULT);
 	else
 		return 'no_hash';
@@ -159,4 +159,20 @@ function lepus_crypt($input, $do = 'encode', $key = 'Jml*Zwde4a#%ix$m'){
 		break;
 	}
 	return $result;
+}
+
+function lepus_new_account($login){
+	global $db;
+	$is_user = is_lepus_user($login);
+	if($is_user['0'] != 0) return 'user_exist';
+	$passwd = genRandStr(8);
+	// {"balance":500,"phone":"7495xxxx80","regDate":"1448450707","access":"1","lastIP":"127.0.0.1","apiKey":"ec374361f6e0d83147924890027c28e8"}
+	$data = ['balance' => 0, 'phone' => NULL, 'regDate' => time(), 'accsess' => 1, 'lastIP' => NULL, 'apiKey' => genRandStr(32)];
+	$json = json_encode($data);
+	$query = $db->prepare("INSERT INTO `users` (`login`, `passwd`, `data`) VALUES (:login, :passwd, :data)");
+	$query->bindParam(':login', $login, PDO::PARAM_STR);
+	$query->bindParam(':passwd', rehash($passwd), PDO::PARAM_STR);
+	$query->bindParam(':data', $json, PDO::PARAM_STR);
+	$query->execute();
+	return $passwd;
 }

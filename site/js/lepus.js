@@ -26,11 +26,15 @@ $(document).on("click", "[data-send-lost-passwd]", function(e) {
 });
 
 $(document).on("click", "[data-register-send]", function(e) {
+	$(this).blur();
 	regEmail = $('input[id=regEmail]').val();
-	regEmail = $('input[id=regEmail]').val();
-	regEmail = $('input[id=regEmail]').val();
-	$.post("//"+document.domain+"/public/register.php", { 'g-recaptcha-response': grecaptcha.getResponse(widgetId1)}, function( data ){
-		alertify.error(data);
+	$('#regModal').modal('hide');
+	$.post("//"+document.domain+"/public/register.php", { email: regEmail, 'g-recaptcha-response': grecaptcha.getResponse(widgetId1)}, function( data ){
+		if(data == '1'){
+			alertify.success("Check your email");
+		}else{
+			alertify.error(data);
+		}
 	});
 });
 

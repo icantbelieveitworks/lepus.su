@@ -9,8 +9,6 @@
 			</div>
 			<div id="modal_info" class="modal-body">
 				<center><p><input class="form-control input-sm" id="regEmail" style="display:inline; position:relative;width:300px;" type="text" placeholder="E-mail"> </p>
-				<p><input class="form-control input-sm" id="regPasswd" style="display:inline; position:relative;width:300px;margin-top: 3px;" type="password" placeholder="Password"> </p>
-				<p><input class="form-control input-sm" id="regRePasswd" style="display:inline; position:relative;width:300px;margin-top: 3px;" type="password" placeholder="Re-Password"> </p>
 				<div id="captcha_reg" style="width:300px;margin-top: 3px;"></div></center>
 			</div>
 			<div class="modal-footer">

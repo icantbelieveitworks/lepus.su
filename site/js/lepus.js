@@ -5,6 +5,20 @@ var onloadCallback = function() {
 	widgetId2 = grecaptcha.render(document.getElementById('captcha_lost'), { 'sitekey' : '6LcI6RETAAAAAOGz1Pbig57ErQ70tIRlvbhECQIw' });
 };
 
+$(document).on("click", "[data-dns-domain-add]", function(e) {
+	$(this).blur();
+	dnsDomain = $('input[id=dnsDomain]').val();
+	dnsDomainType = $('select[id=dnsDomainType]').val();
+	dnsDomainMaster = $('input[id=dnsDomainMaster]').val();
+	$.post("//"+document.domain+"/public/add_dnsDomain.php", { domain: dnsDomain, type: dnsDomainType, master: dnsDomainMaster}, function( data ){
+		if(data == '1'){
+			alertify.success("Ok, we add this domain");
+		}else{
+			alertify.error(data);
+		}
+	});
+});
+
 $(document).on("click", "[data-register-open]", function(e) {
 	$(this).blur();
 	e.preventDefault();

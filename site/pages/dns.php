@@ -75,7 +75,7 @@ blockquote {
 										Для SLAVE => на MASTER DNS (для наших IP) нужно разрешить allow-transfer и also-notify.<br/>
 										Пример для bind9 => /etc/bind/named.conf.options
 										<blockquote>
-											<pre>
+<pre>
 options {
 	directory "/var/cache/bind";
 	
@@ -88,20 +88,20 @@ options {
 	listen-on-v6 { any; };
 	allow-transfer { 5.9.164.59; };
 	also-notify { 5.9.164.59; };
-};</pre>
+};
+</pre>
 										</blockquote>
-										
 										<hr/>
 									</div>
 									<div class="col-lg-9 col-centered">
 										<div class="form-inline">
-											<input class="form-control" style="width: 204px;" type="text" name="count" value="" required="" placeholder="example.com">
-												<select class="form-control" name="type">
+											<input class="form-control" id="dnsDomain" style="width: 204px;" type="text" name="count" value="" required="" placeholder="example.com">
+												<select class="form-control" id="dnsDomainType" name="type">
 													<option value="master" selected="">MASTER</option>
-													<option value="paypal">SLAVE</option>
+													<option value="slave">SLAVE</option>
 												</select>
-												<input class="form-control" style="width: 208px;"  type="text" name="count" value="" required="" placeholder="8.8.8.8 (только для SLAVE)">
-											<input class="btn btn-sm btn-danger btn-block" style="margin-top: 2px;" type="submit" value="Пополнить счет">
+												<input class="form-control" id="dnsDomainMaster"  style="width: 208px;"  type="text" name="count" value="" required="" placeholder="8.8.8.8 (только для SLAVE)">
+											<input class="btn btn-sm btn-danger btn-block" data-dns-domain-add style="margin-top: 2px;" type="submit" value="Пополнить счет">
 										</div>
 									</div>
 

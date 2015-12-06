@@ -210,3 +210,28 @@ function lepus_get_logip($id, $i = 0){
 	}
 	return $data;
 }
+
+function lepus_addDNSDomain($domain, $type, $master){
+	global $pdns, $user;
+	$query = $pdns->prepare("SELECT * FROM `domains` WHERE `name` = :domain");
+	$query->bindParam(':domain', $domain, PDO::PARAM_STR);
+	$query->execute();
+	if($query->rowCount() != 0) return 'already_add';
+	switch($type){
+		default: die("Something wrong"); break;
+		case 'master':
+			$query = $pdns->prepare("INSERT INTO `domains` (`name`, `type`, `account`) VALUES ( :domain, 'MASTER', :uid)");
+			$query->bindParam(':domain', $domain, PDO::PARAM_STR);
+			$query->bindParam(':uid', $user['id'], PDO::PARAM_STR);
+			$query->execute();
+		break;
+		case 'slave':
+			$query = $pdns->prepare("INSERT INTO `domains` (`name`, `master`, `type`, `account`) VALUES ( :domain, :master, 'SLAVE', :uid)");
+			$query->bindParam(':domain', $domain, PDO::PARAM_STR);
+			$query->bindParam(':master', $master, PDO::PARAM_STR);
+			$query->bindParam(':uid', $user['id'], PDO::PARAM_STR);
+			$query->execute();
+		break;
+	}
+	return 1;
+}

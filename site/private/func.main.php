@@ -7,9 +7,14 @@ function rehash($passwd, $hash){
 }
 
 function _exit(){
+    $params = session_get_cookie_params();
+    setcookie(session_name(), '', time() - 42000,
+        $params["path"], $params["domain"],
+        $params["secure"], $params["httponly"]
+    );
 	session_unset();
 	session_destroy();
-	header("Location: http://lepus.dev");
+	header("Location: https://lepus.dev");
 }
 
 function is_lepus_user($login){

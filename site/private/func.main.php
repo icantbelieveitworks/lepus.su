@@ -211,8 +211,8 @@ function lepus_get_logip($id, $i = 0){
 	return $data;
 }
 
-function lepus_addDNSDomain($domain, $type, $master){
-	global $pdns, $user;
+function lepus_addDNSDomain($domain, $type, $master, $id){
+	global $pdns;
 	$query = $pdns->prepare("SELECT * FROM `domains` WHERE `name` = :domain");
 	$query->bindParam(':domain', $domain, PDO::PARAM_STR);
 	$query->execute();
@@ -222,16 +222,28 @@ function lepus_addDNSDomain($domain, $type, $master){
 		case 'master':
 			$query = $pdns->prepare("INSERT INTO `domains` (`name`, `type`, `account`) VALUES ( :domain, 'MASTER', :uid)");
 			$query->bindParam(':domain', $domain, PDO::PARAM_STR);
-			$query->bindParam(':uid', $user['id'], PDO::PARAM_STR);
+			$query->bindParam(':uid', $id, PDO::PARAM_STR);
 			$query->execute();
 		break;
 		case 'slave':
 			$query = $pdns->prepare("INSERT INTO `domains` (`name`, `master`, `type`, `account`) VALUES ( :domain, :master, 'SLAVE', :uid)");
 			$query->bindParam(':domain', $domain, PDO::PARAM_STR);
 			$query->bindParam(':master', $master, PDO::PARAM_STR);
-			$query->bindParam(':uid', $user['id'], PDO::PARAM_STR);
+			$query->bindParam(':uid', $id, PDO::PARAM_STR);
 			$query->execute();
 		break;
 	}
 	return 1;
+}
+
+function lepus_get_dnsDomains($id, $i = 0){
+	global $pdns;
+	$query = $pdns->prepare("SELECT * FROM `domains` WHERE `account` = :uid");
+	$query->bindParam(':uid', $id, PDO::PARAM_STR);
+	$query->execute();
+	while($row = $query->fetch()){
+		if($row['type'] == 'MASTER') $row['master'] = '-';
+		$i++; $data .= "<tr> <td>$i</td> <td>".$row['name']."</td> <td>".$row['type']."</td> <td>".$row['master']."</td> <td><i class=\"glyphicon glyphicon-pencil\"></i> &nbsp; <i class=\"glyphicon glyphicon-remove\"></i></td> </tr>";
+	}
+	return $data;
 }

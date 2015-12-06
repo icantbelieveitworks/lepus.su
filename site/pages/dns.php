@@ -51,7 +51,7 @@ blockquote {
 
 		<script src="/js/alertify.js"></script>
 		<script src="/js/lepus.js"></script>
-	<script type="text/javascript" charset="utf-8"> $(document).ready(function() { $('#log_ip').dataTable({ "order": [[ 0, "desc" ]] }); }); </script>
+	<script type="text/javascript" charset="utf-8"> $(document).ready(function() { $('#dnsDomainsList').dataTable({ "order": [[ 0, "desc" ]] }); }); </script>
 	</head>
 	<body>
 		<div class="wrapper">
@@ -108,19 +108,18 @@ options {
 									<div class="col-lg-12">
 										<hr/>
 										
-			<table id="log_ip" class="table table-striped table-bordered" cellspacing="0" width="100%">
+			<table id="dnsDomainsList" class="table table-striped table-bordered" cellspacing="0" width="100%">
 				<thead>
 					<tr>
 						<th>ID</th>
-						<th>IP</th>
-						<th>Страна</th>
-						<th>Система</th>
-						<th>Браузер</th>
-						<th>Время</th>
+						<th>Домен</th>
+						<th>Тип</th>
+						<th>Мастер</th>
+						<th>Действия</th>
 					</tr>
 				</thead>
 				<tbody>
-				<?php echo lepus_get_logip($user['id']); ?>
+					<?php echo lepus_get_dnsDomains($user['id']); ?>
 				</tbody>
 			</table>
 									</div>

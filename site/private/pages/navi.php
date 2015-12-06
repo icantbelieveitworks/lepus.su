@@ -31,7 +31,7 @@ if(empty($user)){ ?>
 				<hr>
 				<li><a href="http://dom.lepus.su" target="_blank">Домены</a></li>
 				<li><a href="/cp-vps.html">VPS хостинг</a></li>
-				<li><a href="/cp-domains.html">DNS хостинг</a></li>
+				<li><a href="/pages/dns.php">DNS хостинг</a></li>
 				<li><a href="/cp-adm.html">Администрирование</a></li>
 				<li><a href="/cp-hosting-isp.html">Виртуальный xостинг</a></li>
 				<li><a href="/cp-serv.html">Выделенные серверы</a></li>

@@ -15,7 +15,7 @@ then
 	echo "$1 ${1##*/}"
 	zfs destroy $1@backup
 	zfs snapshot $1@backup
-	zfs send $1@backup | nice -n 19 pigz | ssh $USER@$IP dd of=$BACKUP_DIR/$DATE/${1##*/}.gz
+	zfs send $1@backup | nice -n 19 pigz | pv -q -L 10m | ssh $USER@$IP dd of=$BACKUP_DIR/$DATE/${1##*/}.gz
 	zfs destroy $1@backup
 fi
 done

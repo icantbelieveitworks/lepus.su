@@ -243,7 +243,7 @@ function lepus_get_dnsDomains($id, $i = 0){
 	$query->execute();
 	while($row = $query->fetch()){
 		if($row['type'] == 'MASTER') $row['master'] = '-';
-		$i++; $data .= "<tr id=\"".$row['id']."\"> <td>$i</td> <td>".idn_to_utf8($row['name'])."</td> <td>".$row['type']."</td> <td>".$row['master']."</td> <td><a href=\"/edit-domain.php?id=".$row['id']."\"><i class=\"glyphicon glyphicon-pencil\"></i></a> &nbsp; <a href=\"nourl\" data-dns-delete-id=".$row['id']."><i class=\"glyphicon glyphicon-remove\"></i></a></td> </tr>";
+		$i++; $data .= "<tr id=\"".$row['id']."\"> <td>$i</td> <td>".idn_to_utf8($row['name'])."</td> <td>".$row['type']."</td> <td>".$row['master']."</td> <td><a href=\"/pages/edit-domain.php?id=".$row['id']."\"><i class=\"glyphicon glyphicon-pencil\"></i></a> &nbsp; <a href=\"nourl\" data-dns-delete-id=".$row['id']."><i class=\"glyphicon glyphicon-remove\"></i></a></td> </tr>";
 	}
 	return $data;
 }
@@ -257,10 +257,24 @@ function lepus_get_dnsAccess($id, $uid){
 	if($query->rowCount() != 1) return 'deny';
 }
 
-function lepus_delete_dnsDomain($id, $uid){
+function lepus_delete_dnsDomain($id){
 	global $pdns;
-	$query = $pdns->prepare("DELETE FROM `domains` WHERE `id` = :id AND `account` =:uid");
+	$query = $pdns->prepare("DELETE FROM `domains` WHERE `id` = :id");
 	$query->bindParam(':id', $id, PDO::PARAM_STR);
-	$query->bindParam(':uid', $uid, PDO::PARAM_STR);
 	$query->execute();
+
+	$query = $pdns->prepare("DELETE FROM `records` WHERE `domain_id` = :id");
+	$query->bindParam(':id', $id, PDO::PARAM_STR);
+	$query->execute();
+}
+
+function lepus_get_dnsRecords($id, $i = 0){
+	global $pdns;
+	$query = $pdns->prepare("SELECT * FROM `records` WHERE `domain_id` = :id");
+	$query->bindParam(':id', $id, PDO::PARAM_STR);
+	$query->execute();
+	while($row = $query->fetch()){
+		$i++; $data .= "<tr><td>".$i."</td><td>".$row['name']."</td><td>".$row['type']."</td><td>".$row['content']."</td><td>".$row['prio']."</td><td>none</td></tr>";
+	}
+	return $data;
 }

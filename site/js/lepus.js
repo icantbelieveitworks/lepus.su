@@ -21,7 +21,7 @@ $(document).on("click", "[data-dns-domain-add]", function(e) {
 				1:     dnsDomain,
 				2:     dnsDomainType.toUpperCase(),
 				3:     dnsDomainMaster,
-				4:     '<a href="/edit-domain.php?id='+data+'"><i class="glyphicon glyphicon-pencil"></i></a> &nbsp; <a href="nourl" data-dns-delete-id="'+data+'"><i class="glyphicon glyphicon-remove"></i></a>',
+				4:     '<a href="/pages/edit-domain.php?id='+data+'"><i class="glyphicon glyphicon-pencil"></i></a> &nbsp; <a href="nourl" data-dns-delete-id="'+data+'"><i class="glyphicon glyphicon-remove"></i></a>',
 			}).draw( false );
 			alertify.success("Ok, we add this domain");
 		}else{

@@ -7,5 +7,8 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/func.main.php');
 require_once($_SERVER['DOCUMENT_ROOT'].'/private/auth.php');
 
 if(!isset($_POST['id'])) die("Empty value");
-lepus_delete_dnsDomain($_POST['id'], $user['id']);
+
+$tmpData = lepus_get_dnsAccess($_POST['id'], $user['id']);
+if($tmpData == 'deny') die("Access denied");
+lepus_delete_dnsDomain($_POST['id']);
 echo 1;

@@ -28,7 +28,6 @@ if(empty($user)){
 		<style>
 			.col-centered{ float: none; margin: 0 auto; }
 			td,th { text-align: center; vertical-align: middle; }
-			blockquote { background: #f9f9f9; border-left: 10px solid #ccc; margin: 1.5em 10px; padding: 0.5em 10px; }
 		</style>
 		<script src="/js/jquery.min.js"></script>
 		<script src="//cdn.datatables.net/1.10.10/js/jquery.dataTables.min.js"></script>
@@ -36,7 +35,6 @@ if(empty($user)){
 		<script src="/js/bootstrap.min.js"></script>
 		<script src="/js/alertify.js"></script>
 		<script src="/js/lepus.js"></script>
-		<script type="text/javascript" charset="utf-8"> $(document).ready(function() { $('#dnsDomainsList').dataTable({ "order": [[ 0, "desc" ]] }); }); </script>
 	</head>
 	<body>
 		<div class="wrapper">
@@ -49,33 +47,11 @@ if(empty($user)){
 				<div class="content-box">
 					<div class="content-info">
 						<div class="content-text">
-							<div class="page-title">DNS хостинг</div>
+							<div class="page-title">Управление доменом lolka.ru</div>
 							<div class="row">					
 								<div class="col-lg-14">
 									<div class="col-lg-12">
-										На этой странице - вы можете добавить домен и управлять записями на DNS.<br/>
-										Если вы выбираете MASTER => то все записи нужно добавить через личный кабинет.<br/>
-										Если вы выбираете SLAVE => записи будут автоматически скопированы с MASTER DNS (который вы укажите).<br/><br/>
-										Для SLAVE => отключена возможность редактировать записи. Можно только просматривать их.<br/>
-										Для SLAVE => на MASTER DNS (для наших IP) нужно разрешить allow-transfer и also-notify.<br/>
-										Пример для bind9 => /etc/bind/named.conf.options
-										<blockquote>
-<pre>
-options {
-	directory "/var/cache/bind";
-	
-	dnssec-validation auto;
-
-	recursion no;        # http://habrahabr.ru/post/235197/
-	auth-nxdomain no;    # conform to RFC1035
-	listen-on-v6 { any; };
-	notify yes;
-	listen-on-v6 { any; };
-	allow-transfer { 5.9.164.59; };
-	also-notify { 5.9.164.59; };
-};
-</pre>
-										</blockquote>
+										На этой странице - вы можете управлять записями на DNS.<br/>
 										<hr/>
 									</div>
 									<div class="col-lg-9 col-centered">
@@ -86,23 +62,27 @@ options {
 													<option value="slave">SLAVE</option>
 												</select>
 												<input class="form-control" id="dnsDomainMaster"  style="width: 208px;"  type="text" name="count" value="" required="" placeholder="8.8.8.8 (только для SLAVE)">
-											<input class="btn btn-sm btn-danger btn-block" data-dns-domain-add style="margin-top: 2px;" type="submit" value="Добавить домен">
+											<input class="btn btn-sm btn-danger btn-block" data-dns-domain-add style="margin-top: 2px;" type="submit" value="Пополнить счет">
 										</div>
 									</div>
 									<div class="col-lg-12">
 										<hr/>
-										<table id="dnsDomainsList" class="table table-striped table-bordered" cellspacing="0" width="100%">
+										<table class="table table-striped table-bordered" cellspacing="0" width="100%">
 											<thead>
 												<tr>
 													<th>ID</th>
-													<th>Домен</th>
+													<th>Запись</th>
 													<th>Тип</th>
-													<th>Мастер</th>
+													<th>Данные</th>
+													<th>Приоритет</th>
 													<th>Действия</th>
 												</tr>
 											</thead>
 											<tbody>
-												<?php echo lepus_get_dnsDomains($user['id']); ?>
+												<?php	$tmpData = lepus_get_dnsAccess($_GET['id'], $user['id']);
+														if($tmpData == 'deny') echo "<center><b><font color=\"Brown\">!!! Access denied !!!</font></b></center>";
+															else echo lepus_get_dnsRecords($_GET['id']);
+												?>
 											</tbody>
 										</table>
 									</div>

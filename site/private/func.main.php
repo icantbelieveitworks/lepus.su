@@ -32,7 +32,7 @@ function lost_passwd_change($arr){
 	$row = $is_user['1'];
 	$real_hash = hash('sha512' ,$_SERVER['HTTP_USER_AGENT'].$_SERVER['REMOTE_ADDR'].$row['passwd'].$row['login']);
 	if($data[1] != $real_hash) return 'wrong_hash';
-		else return ['id' => $row['id'], 'email' => $data[0]];
+		else return ['id' => $row['id'], 'email' => $data[0], 'time' => $data[2]];
 }
 
 function lost_passwd($login){

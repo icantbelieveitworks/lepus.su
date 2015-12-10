@@ -243,7 +243,7 @@ function lepus_get_dnsDomains($id, $i = 0){
 	$query->execute();
 	while($row = $query->fetch()){
 		if($row['type'] == 'MASTER') $row['master'] = '-';
-		$i++; $data .= "<tr> <td>$i</td> <td>".idn_to_utf8($row['name'])."</td> <td>".$row['type']."</td> <td>".$row['master']."</td> <td><i class=\"glyphicon glyphicon-pencil\"></i> &nbsp; <i class=\"glyphicon glyphicon-remove\"></i></td> </tr>";
+		$i++; $data .= "<tr id=\"".$row['id']."\"> <td>$i</td> <td>".idn_to_utf8($row['name'])."</td> <td>".$row['type']."</td> <td>".$row['master']."</td> <td><a href=\"/edit-domain.php?id=".$row['id']."\"><i class=\"glyphicon glyphicon-pencil\"></i></a> &nbsp; <a href=\"nourl\" data-dns-delete-id=".$row['id']."><i class=\"glyphicon glyphicon-remove\"></i></a></td> </tr>";
 	}
 	return $data;
 }

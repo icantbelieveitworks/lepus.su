@@ -128,3 +128,18 @@ $(document).on("click", "[data-cp-change-phone]", function(e) {
 		return;
 	});
 });
+
+$(document).on("click", "[data-dns-delete-id]", function(e) {
+	e.preventDefault();
+	confirm("Вы подтверждаете удаление?");
+	var table = $('#dnsDomainsList').dataTable();
+	idDom = $(this).data("dns-delete-id");
+	$.post("//"+document.domain+"/public/delete_dnsDomain.php", {id: idDom}, function( data ){
+		if(data == '1'){
+			alertify.success("Success");
+			table.fnDeleteRow(table.$("#"+idDom));
+		}else{
+			alertify.error(data);
+		}
+	});
+});

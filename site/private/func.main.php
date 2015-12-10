@@ -247,3 +247,20 @@ function lepus_get_dnsDomains($id, $i = 0){
 	}
 	return $data;
 }
+
+function lepus_get_dnsAccess($id, $uid){
+	global $pdns;
+	$query = $pdns->prepare("SELECT * FROM `domains` WHERE `id` = :id AND `account` =:uid");
+	$query->bindParam(':id', $id, PDO::PARAM_STR);
+	$query->bindParam(':uid', $uid, PDO::PARAM_STR);
+	$query->execute();
+	if($query->rowCount() != 1) return 'deny';
+}
+
+function lepus_delete_dnsDomain($id, $uid){
+	global $pdns;
+	$query = $pdns->prepare("DELETE FROM `domains` WHERE `id` = :id AND `account` =:uid");
+	$query->bindParam(':id', $id, PDO::PARAM_STR);
+	$query->bindParam(':uid', $uid, PDO::PARAM_STR);
+	$query->execute();
+}

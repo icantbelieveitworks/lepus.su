@@ -17,5 +17,5 @@ if($_POST['type'] == 'slave'){
 }
 
 $tmpData = lepus_addDNSDomain($_POST['domain'], $_POST['type'], $dnsMaster, $user['id']);
-if($tmpData != 1) die('We already add this domain');
-echo 1;
+if($tmpData == 'already_add') die('We already add this domain');
+echo $tmpData;

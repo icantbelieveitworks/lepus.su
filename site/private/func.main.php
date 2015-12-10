@@ -233,7 +233,7 @@ function lepus_addDNSDomain($domain, $type, $master, $id){
 			$query->execute();
 		break;
 	}
-	return 1;
+	return $pdns->lastInsertId();
 }
 
 function lepus_get_dnsDomains($id, $i = 0){

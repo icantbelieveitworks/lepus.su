@@ -7,11 +7,22 @@ var onloadCallback = function() {
 
 $(document).on("click", "[data-dns-domain-add]", function(e) {
 	$(this).blur();
+	var table = $('#dnsDomainsList').DataTable();
+	var dnsNumber = $('#dnsDomainsList tr').length;
 	dnsDomain = $('input[id=dnsDomain]').val();
 	dnsDomainType = $('select[id=dnsDomainType]').val();
 	dnsDomainMaster = $('input[id=dnsDomainMaster]').val();
+	if(!dnsDomainMaster) dnsDomainMaster = '-';
 	$.post("//"+document.domain+"/public/add_dnsDomain.php", { domain: dnsDomain, type: dnsDomainType, master: dnsDomainMaster}, function( data ){
-		if(data == '1'){
+		if($.isNumeric(data)){
+			table.row.add({
+				DT_RowId: data,
+				0:     dnsNumber,
+				1:     dnsDomain,
+				2:     dnsDomainType.toUpperCase(),
+				3:     dnsDomainMaster,
+				4:     '<a href="/edit-domain.php?id='+data+'"><i class="glyphicon glyphicon-pencil"></i></a> &nbsp; <a href="nourl" data-dns-delete-id="'+data+'"><i class="glyphicon glyphicon-remove"></i></a>',
+			}).draw( false );
 			alertify.success("Ok, we add this domain");
 		}else{
 			alertify.error(data);

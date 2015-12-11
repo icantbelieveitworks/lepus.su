@@ -97,7 +97,7 @@ if(empty($user)){
 		<script src="//www.google.com/recaptcha/api.js?onload=onloadCallback&render=explicit" async defer></script>
 		<script>
 			$(document).on('click', '.edit', function(){
-				$('.edit').editable('/public/handler/handler_user_actions.php?action=edit_domain', {
+				$('.edit').editable('/public/change_dnsRecords.php', {
 					indicator : 'Сохранение...',
 					tooltip   : 'Кликните чтобы изменить...',
 					event     : "dblclick",

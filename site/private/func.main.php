@@ -278,3 +278,25 @@ function lepus_get_dnsRecords($id, $i = 0){
 	}
 	return $data;
 }
+
+
+function lepus_edit_dnsRecord($id, $value, $uid){
+	global $pdns;
+	$check = ['name', 'type', 'content', 'prio'];
+	$data = explode("_", $id);
+	if(!in_array($data[0], $check)) return "err_check";
+	if(!ctype_digit($data[1])) return "only_num";
+	$query = $pdns->prepare("SELECT * FROM `records` WHERE `id` = :id");
+	$query->bindParam(':id', $data[1], PDO::PARAM_STR);
+	$query->execute();
+	if($query->rowCount() != 1) return "no_record";
+	$row = $query->fetch();
+	$tmpData = lepus_get_dnsAccess($row['domain_id'], $uid);
+	if($tmpData == 'deny') return 'deny';
+
+	$query = $pdns->prepare("UPDATE `records` SET `$data[0]` = :value WHERE `id` = :id");
+	$query->bindParam(':value', $value, PDO::PARAM_STR);
+	$query->bindParam(':id', $data[1], PDO::PARAM_STR);
+	$query->execute();
+	return $value;
+}

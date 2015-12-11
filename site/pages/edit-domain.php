@@ -98,6 +98,7 @@ if(empty($user)){
 		<script>
 			$(document).on('click', '.edit', function(){
 				$('.edit').editable('/public/change_dnsRecords.php', {
+					loadurl  : '//lepus.dev/public/change_dnsRecords.php?load',
 					indicator : 'Сохранение...',
 					tooltip   : 'Кликните чтобы изменить...',
 					event     : "dblclick",
@@ -106,7 +107,7 @@ if(empty($user)){
 				});
 			});
 			$(document).on('click', '.edit_type', function(){
-				$('.edit_type').editable('/public/handler/handler_user_actions.php?action=edit_domain', {
+				$('.edit_type').editable('/public/change_dnsRecords.php', {
 					indicator : 'Сохранение...',
 					tooltip   : 'Кликните чтобы изменить...',
 					data   : " {'A':'A','AAAA':'AAAA','CNAME':'CNAME','MX':'MX','NS':'NS','TXT':'TXT','SRV':'SRV','PTR':'PTR',}",

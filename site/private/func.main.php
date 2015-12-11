@@ -268,35 +268,49 @@ function lepus_delete_dnsDomain($id){
 	$query->execute();
 }
 
+function lepus_get_dnsRecordAccess($id, $uid){
+	global $pdns;
+	$query = $pdns->prepare("SELECT * FROM `records` WHERE `id` = :id");
+	$query->bindParam(':id', $id, PDO::PARAM_STR);
+	$query->execute();
+	if($query->rowCount() != 1) return "no_record";
+	$row = $query->fetch();
+	$tmpData = lepus_get_dnsAccess($row['domain_id'], $uid);
+	if($tmpData == 'deny') return 'deny';
+	return 'ok';
+}
+
+function lepus_get_dnsRecord($type, $id){
+	global $pdns;
+	$query = $pdns->prepare("SELECT * FROM `records` WHERE `id` = :id");
+	$query->bindParam(':id', $id, PDO::PARAM_STR);
+	$query->execute();
+	$row = $query->fetch();
+	return $row[$type];
+}
+
 function lepus_get_dnsRecords($id, $i = 0){
 	global $pdns;
 	$query = $pdns->prepare("SELECT * FROM `records` WHERE `domain_id` = :id");
 	$query->bindParam(':id', $id, PDO::PARAM_STR);
 	$query->execute();
 	while($row = $query->fetch()){
-		$i++; $data .= "<tr><td>".$i."</td><td class=\"edit\" id=\"name_".$row['id']."\">".$row['name']."</td><td class=\"edit_type\" id=\"type_".$row['id']."\">".$row['type']."</td><td class=\"edit\" id=\"content_".$row['id']."\">".$row['content']."</td><td class=\"edit\" id=\"prio_".$row['id']."\">".$row['prio']."</td><td>none</td></tr>";
+		$i++; $data .= "<tr><td>".$i."</td><td class=\"edit\" id=\"name_".$row['id']."\">".$row['name']."</td><td class=\"edit_type\" id=\"type_".$row['id']."\">".$row['type']."</td><td class=\"edit\" id=\"content_".$row['id']."\">".htmlspecialchars($row['content'])."</td><td class=\"edit\" id=\"prio_".$row['id']."\">".$row['prio']."</td><td>none</td></tr>";
 	}
 	return $data;
 }
 
-
-function lepus_edit_dnsRecord($id, $value, $uid){
+function lepus_edit_dnsRecord($type, $id, $value){
 	global $pdns;
-	$check = ['name', 'type', 'content', 'prio'];
-	$data = explode("_", $id);
-	if(!in_array($data[0], $check)) return "err_check";
-	if(!ctype_digit($data[1])) return "only_num";
-	$query = $pdns->prepare("SELECT * FROM `records` WHERE `id` = :id");
-	$query->bindParam(':id', $data[1], PDO::PARAM_STR);
-	$query->execute();
-	if($query->rowCount() != 1) return "no_record";
-	$row = $query->fetch();
-	$tmpData = lepus_get_dnsAccess($row['domain_id'], $uid);
-	if($tmpData == 'deny') return 'deny';
+	if($type == 'name' && strlen($type) > 255) return "max name strlen 255";
+	if($type == 'prio' && !is_int($value)) return "prio only int value";
 
-	$query = $pdns->prepare("UPDATE `records` SET `$data[0]` = :value WHERE `id` = :id");
+	$types = ['A', 'AAAA', 'CNAME', 'MX', 'NS', 'TXT', 'SRV', 'PTR'];
+	if($type == 'type' && !in_array($value, $types)) return "wrong type record";
+
+	$query = $pdns->prepare("UPDATE `records` SET `$type` = :value WHERE `id` = :id");
 	$query->bindParam(':value', $value, PDO::PARAM_STR);
-	$query->bindParam(':id', $data[1], PDO::PARAM_STR);
+	$query->bindParam(':id', $id, PDO::PARAM_STR);
 	$query->execute();
-	return $value;
+	return htmlspecialchars($value);
 }

@@ -274,7 +274,7 @@ function lepus_get_dnsRecords($id, $i = 0){
 	$query->bindParam(':id', $id, PDO::PARAM_STR);
 	$query->execute();
 	while($row = $query->fetch()){
-		$i++; $data .= "<tr><td>".$i."</td><td>".$row['name']."</td><td>".$row['type']."</td><td>".$row['content']."</td><td>".$row['prio']."</td><td>none</td></tr>";
+		$i++; $data .= "<tr><td>".$i."</td><td class=\"edit\" id=\"name_".$row['id']."\">".$row['name']."</td><td class=\"edit_type\" id=\"type_".$row['id']."\">".$row['type']."</td><td class=\"edit\" id=\"content_".$row['id']."\">".$row['content']."</td><td class=\"edit\" id=\"prio_".$row['id']."\">".$row['prio']."</td><td>none</td></tr>";
 	}
 	return $data;
 }

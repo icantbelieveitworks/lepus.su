@@ -24,14 +24,12 @@ if(empty($user)){
 		<link rel="stylesheet" type="text/css" href="/css/style.css"/>
 		<link rel="stylesheet" type="text/css" href="/css/alertify.core.css" />
 		<link rel="stylesheet" type="text/css" href="/css/alertify.bootstrap.css" />
-		<link rel="stylesheet" href="//cdn.datatables.net/plug-ins/1.10.10/integration/bootstrap/3/dataTables.bootstrap.css">
 		<style>
 			.col-centered{ float: none; margin: 0 auto; }
 			td,th { text-align: center; vertical-align: middle; }
 		</style>
 		<script src="/js/jquery.min.js"></script>
-		<script src="//cdn.datatables.net/1.10.10/js/jquery.dataTables.min.js"></script>
-		<script src="//cdn.datatables.net/plug-ins/1.10.10/integration/bootstrap/3/dataTables.bootstrap.js"></script>
+		<script src="/js/jquery.jeditable.mini.js"></script>
 		<script src="/js/bootstrap.min.js"></script>
 		<script src="/js/alertify.js"></script>
 		<script src="/js/lepus.js"></script>
@@ -97,5 +95,26 @@ if(empty($user)){
 		<?php require_once($_SERVER['DOCUMENT_ROOT'].'/private/pages/footer.php'); ?>
 		<?php require_once($_SERVER['DOCUMENT_ROOT'].'/private/pages/modal.php'); ?>
 		<script src="//www.google.com/recaptcha/api.js?onload=onloadCallback&render=explicit" async defer></script>
+		<script>
+			$(document).on('click', '.edit', function(){
+				$('.edit').editable('/public/handler/handler_user_actions.php?action=edit_domain', {
+					indicator : 'Сохранение...',
+					tooltip   : 'Кликните чтобы изменить...',
+					event     : "dblclick",
+					style: "inherit",
+					height: 'none'
+				});
+			});
+			$(document).on('click', '.edit_type', function(){
+				$('.edit_type').editable('/public/handler/handler_user_actions.php?action=edit_domain', {
+					indicator : 'Сохранение...',
+					tooltip   : 'Кликните чтобы изменить...',
+					data   : " {'A':'A','AAAA':'AAAA','CNAME':'CNAME','MX':'MX','NS':'NS','TXT':'TXT','SRV':'SRV','PTR':'PTR',}",
+					type   : 'select',
+					submit: 'OK',
+					event     : "dblclick"
+				});
+			});
+		</script>
 	</body>
 </html>

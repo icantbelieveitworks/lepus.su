@@ -261,7 +261,7 @@ function lepus_get_dnsAccess($id, $uid, $slave = 'no_check'){
 }
 
 function lepus_add_dnsRecord($zone, $type, $data, $prio, $domain_id){
-	global $pdns;
+	global $pdns;	
 	$types = ['A', 'AAAA', 'CNAME', 'MX', 'NS', 'TXT', 'SRV', 'PTR', 'SOA'];
 	if(!in_array($type, $types)) return "wrong type record";
 	$query = $pdns->prepare("INSERT INTO `records` (`domain_id`, `name`, `type`, `content`, `ttl`, `prio`) VALUES (:id, :name, :type, :content, 3600, :prio)");
@@ -304,7 +304,7 @@ function lepus_get_dnsRecord($type, $id){
 	$query->bindParam(':id', $id, PDO::PARAM_STR);
 	$query->execute();
 	$row = $query->fetch();
-	return $row[$type];
+	return htmlspecialchars(idn_to_utf8($row[$type]));
 }
 
 function lepus_get_dnsRecords($id, $i = 0){
@@ -330,7 +330,7 @@ function lepus_edit_dnsRecord($type, $id, $value){
 	$query->bindParam(':value', $value, PDO::PARAM_STR);
 	$query->bindParam(':id', $id, PDO::PARAM_STR);
 	$query->execute();
-	return htmlspecialchars($value);
+	return htmlspecialchars(idn_to_utf8($value));
 }
 
 function lepus_delete_dnsRecord($id){

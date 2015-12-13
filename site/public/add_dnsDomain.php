@@ -18,4 +18,7 @@ if($_POST['type'] == 'slave'){
 
 $tmpData = lepus_addDNSDomain($_POST['domain'], $_POST['type'], $dnsMaster, $user['id']);
 if($tmpData == 'already_add') die('We already add this domain');
+if($_POST['type'] != 'slave'){
+	lepus_add_dnsRecord($_POST['domain'], 'SOA', 'ns2.lepus.su ns1.lepus.su 2012012402 28800 7200 604800 86400', '0', $tmpData);
+}
 echo $tmpData;

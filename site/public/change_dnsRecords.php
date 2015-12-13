@@ -25,5 +25,5 @@ if(isset($_GET['load']))
 	echo lepus_get_dnsRecord($dnsPost[0], $dnsPost[1]);
 else{
 	if(!isset($_POST['value'])) die("No post value");
-	echo lepus_edit_dnsRecord($dnsPost[0], $dnsPost[1], $_POST['value']);
+	echo lepus_edit_dnsRecord($dnsPost[0], $dnsPost[1], idn_to_ascii($_POST['value']));
 }

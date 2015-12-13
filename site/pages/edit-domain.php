@@ -52,6 +52,8 @@ $tmpData = lepus_get_dnsAccess($_GET['id'], $user['id']);
 								<div class="col-lg-14">
 									<div class="col-lg-12">
 										На этой странице - вы можете управлять записями на DNS.<br/>
+										Про типы записей можно прочитать <a href="https://ru.wikipedia.org/wiki/%D0%A2%D0%B8%D0%BF%D1%8B_%D1%80%D0%B5%D1%81%D1%83%D1%80%D1%81%D0%BD%D1%8B%D1%85_%D0%B7%D0%B0%D0%BF%D0%B8%D1%81%D0%B5%D0%B9_DNS" target="_blank">по этой ссылке</a>.<br/>
+										Для slave можно только просматривать записи.
 										<hr/>
 									</div>
 									<div class="col-lg-11 col-centered">
@@ -110,7 +112,6 @@ $tmpData = lepus_get_dnsAccess($_GET['id'], $user['id']);
 				$('.edit').editable('/public/change_dnsRecords.php', {
 					loadurl  : '//lepus.dev/public/change_dnsRecords.php?load',
 					indicator : 'Сохранение...',
-					//tooltip   : 'Кликните чтобы изменить...',
 					event     : "dblclick",
 					style: "inherit",
 					height: 'none'
@@ -119,7 +120,6 @@ $tmpData = lepus_get_dnsAccess($_GET['id'], $user['id']);
 			$(document).on('click', '.edit_type', function(){
 				$('.edit_type').editable('/public/change_dnsRecords.php', {
 					indicator : 'Сохранение...',
-					//tooltip   : 'Кликните чтобы изменить...',
 					data   : " {'A':'A','AAAA':'AAAA','CNAME':'CNAME','MX':'MX','NS':'NS','TXT':'TXT','SRV':'SRV','PTR':'PTR', 'SOA':'SOA'}",
 					type   : 'select',
 					submit: 'OK',

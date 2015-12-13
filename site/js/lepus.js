@@ -181,7 +181,7 @@ $(document).on("click", "[data-dns-zone-add]", function(e) {
 	var zoneNumber = $('table#dnsZone tr').length;
 	$.post("//"+document.domain+"/public/add_dnsZone.php", {zone: dnsZone, type: dnsZoneType, data: dnsZoneData, prio: dnsZonePrio, domain_id: dnsDomainZoneID}, function( data ){
 		if($.isNumeric(data)){
-			alertify.success("Success"+data);
+			alertify.success("Success");
 			$('table#dnsZone tr:last').after('<tr><td>'+zoneNumber+'</td><td class="edit" id="name_'+data+'">'+dnsZone+'</td><td class="edit_type" id="type_'+data+'">'+dnsZoneType+'</td><td class="edit" id="content_'+data+'">'+dnsZoneData+'</td><td class="edit" id="prio_'+data+'">'+dnsZonePrio+'</td><td><a href="nourl" data-dns-zone-id='+data+'><i class="glyphicon glyphicon-remove"></i></a></td></tr>');
 		}else{
 			alertify.error(data);

@@ -248,7 +248,7 @@ function lepus_get_dnsDomains($id, $i = 0){
 	return $data;
 }
 
-function lepus_get_dnsAccess($id, $uid){
+function lepus_get_dnsAccess($id, $uid, $slave = 'no_check'){
 	global $pdns;
 	$query = $pdns->prepare("SELECT * FROM `domains` WHERE `id` = :id AND `account` =:uid");
 	$query->bindParam(':id', $id, PDO::PARAM_STR);
@@ -256,6 +256,7 @@ function lepus_get_dnsAccess($id, $uid){
 	$query->execute();
 	if($query->rowCount() != 1) return 'deny';
 	$row = $query->fetch();
+	if($slave == 'check') return $row['type'];
 	return htmlspecialchars(idn_to_utf8($row['name']));
 }
 
@@ -291,8 +292,9 @@ function lepus_get_dnsRecordAccess($id, $uid){
 	$query->execute();
 	if($query->rowCount() != 1) return "no_record";
 	$row = $query->fetch();
-	$tmpData = lepus_get_dnsAccess($row['domain_id'], $uid);
+	$tmpData = lepus_get_dnsAccess($row['domain_id'], $uid, 'check');
 	if($tmpData == 'deny') return 'deny';
+	if($tmpData == 'SLAVE') return 'SLAVE';
 	return 'ok';
 }
 

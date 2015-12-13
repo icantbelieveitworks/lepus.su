@@ -10,6 +10,6 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/auth.php');
 if(!isset($_POST['zone']) || !isset($_POST['type']) || !isset($_POST['data']) || !isset($_POST['prio']) || !isset($_POST['domain_id'])) die("Empty value");
 if(!ctype_digit($_POST['prio']) || !ctype_digit($_POST['domain_id'])) die("only_num");
 
-$tmpData = lepus_get_dnsAccess($_POST['domain_id'], $user['id']);
-if($tmpData == 'deny') die("Access denied");
+$tmpData = lepus_get_dnsAccess($_POST['domain_id'], $user['id'], 'check');
+if($tmpData != 'ok') die("deny or no_record or slave");
 echo lepus_add_dnsRecord($_POST['zone'], $_POST['type'], $_POST['data'], $_POST['prio'], $_POST['domain_id']);

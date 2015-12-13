@@ -16,7 +16,7 @@ if(empty($dnsPost[0]) || empty($dnsPost[1])) die("Empty post");
 if(!ctype_digit($dnsPost[1])) die("only_num");
 
 $tmpData = lepus_get_dnsRecordAccess($dnsPost[1], $user['id']);
-if($tmpData != 'ok') die("deny or no_record");
+if($tmpData != 'ok') die("deny or no_record or slave");
 
 $tmpCheck = ['name', 'type', 'content', 'prio'];
 if(!in_array($dnsPost[0], $tmpCheck)) die("err_check");

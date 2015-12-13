@@ -325,6 +325,7 @@ function lepus_edit_dnsRecord($type, $id, $value){
 
 	$types = ['A', 'AAAA', 'CNAME', 'MX', 'NS', 'TXT', 'SRV', 'PTR', 'SOA'];
 	if($type == 'type' && !in_array($value, $types)) return "wrong type record";
+	if($type == 'name') $value = idn_to_ascii(mb_strtolower($value));
 
 	$query = $pdns->prepare("UPDATE `records` SET `$type` = :value WHERE `id` = :id");
 	$query->bindParam(':value', $value, PDO::PARAM_STR);

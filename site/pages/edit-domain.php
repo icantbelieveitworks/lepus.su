@@ -27,6 +27,11 @@ if(empty($user)){
 		<style>
 			.col-centered{ float: none; margin: 0 auto; }
 			td,th { text-align: center; vertical-align: middle; }
+
+table td {
+    word-wrap: break-word;         /* All browsers since IE 5.5+ */
+   overflow-wrap: break-word;     /* Renamed property in CSS3 draft spec */
+}
 		</style>
 		<script src="/js/jquery.min.js"></script>
 		<script src="/js/jquery.jeditable.mini.js"></script>
@@ -54,26 +59,33 @@ if(empty($user)){
 									</div>
 									<div class="col-lg-9 col-centered">
 										<div class="form-inline">
-											<input class="form-control" id="dnsDomain" style="width: 204px;" type="text" name="count" value="" required="" placeholder="example.com">
-												<select class="form-control" id="dnsDomainType" name="type">
-													<option value="master" selected="">MASTER</option>
-													<option value="slave">SLAVE</option>
+											<input class="form-control" id="dnsZone" style="width: 200px;" type="text" name="count" value="" required="" placeholder="test.example.com">
+												<select class="form-control" id="dnsZoneType" name="type">
+													<option value="A" selected="">A</option>
+													<option value="AAAA">AAAA</option>
+													<option value="CNAME">CNAME</option>
+													<option value="MX">MX</option>
+													<option value="NS">NS</option>
+													<option value="TXT">TXT</option>
+													<option value="SRV">SRV</option>
+													<option value="PTR">PTR</option>
+													<option value="SOA">SOA</option>
 												</select>
-												<input class="form-control" id="dnsDomainMaster"  style="width: 208px;"  type="text" name="count" value="" required="" placeholder="8.8.8.8 (только для SLAVE)">
-											<input class="btn btn-sm btn-danger btn-block" data-dns-domain-add style="margin-top: 2px;" type="submit" value="Пополнить счет">
+												<input class="form-control" id="dnsZoneData"  style="width: 220px;"  type="text" name="count" value="" required="" placeholder="127.0.0.1">
+											<input class="btn btn-sm btn-danger btn-block" data-dns-domain-add style="margin-top: 2px;" type="submit" value="Добавить запись">
 										</div>
 									</div>
 									<div class="col-lg-12">
 										<hr/>
-										<table class="table table-striped table-bordered" cellspacing="0" width="100%">
+										<table id="dnsZone" class="table table-striped table-bordered" cellspacing="0" style="width: 100%; table-layout: fixed;">
 											<thead>
 												<tr>
-													<th>ID</th>
-													<th>Запись</th>
-													<th>Тип</th>
-													<th>Данные</th>
-													<th>Приоритет</th>
-													<th>Действия</th>
+													<th style="width: 5%;">ID</th>
+													<th style="width: 25%;">Запись</th>
+													<th style="width: 12%;">Тип</th>
+													<th style="width: 35%;">Данные</th>
+													<th style="width: 12%;">Приоритет</th>
+													<th style="width: 11%;">Действия</th>
 												</tr>
 											</thead>
 											<tbody>
@@ -110,7 +122,7 @@ if(empty($user)){
 				$('.edit_type').editable('/public/change_dnsRecords.php', {
 					indicator : 'Сохранение...',
 					tooltip   : 'Кликните чтобы изменить...',
-					data   : " {'A':'A','AAAA':'AAAA','CNAME':'CNAME','MX':'MX','NS':'NS','TXT':'TXT','SRV':'SRV','PTR':'PTR',}",
+					data   : " {'A':'A','AAAA':'AAAA','CNAME':'CNAME','MX':'MX','NS':'NS','TXT':'TXT','SRV':'SRV','PTR':'PTR', 'SOA':'SOA'}",
 					type   : 'select',
 					submit: 'OK',
 					event     : "dblclick"

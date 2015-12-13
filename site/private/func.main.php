@@ -295,7 +295,7 @@ function lepus_get_dnsRecords($id, $i = 0){
 	$query->bindParam(':id', $id, PDO::PARAM_STR);
 	$query->execute();
 	while($row = $query->fetch()){
-		$i++; $data .= "<tr><td>".$i."</td><td class=\"edit\" id=\"name_".$row['id']."\">".$row['name']."</td><td class=\"edit_type\" id=\"type_".$row['id']."\">".$row['type']."</td><td class=\"edit\" id=\"content_".$row['id']."\">".htmlspecialchars($row['content'])."</td><td class=\"edit\" id=\"prio_".$row['id']."\">".$row['prio']."</td><td>none</td></tr>";
+		$i++; $data .= "<tr id=\"".$row['id']."\"><td>".$i."</td><td class=\"edit\" id=\"name_".$row['id']."\">".$row['name']."</td><td class=\"edit_type\" id=\"type_".$row['id']."\">".$row['type']."</td><td class=\"edit\" id=\"content_".$row['id']."\">".htmlspecialchars($row['content'])."</td><td class=\"edit\" id=\"prio_".$row['id']."\">".$row['prio']."</td><td><a href=\"nourl\" data-dns-zone-id=\"".$row['id']."\"><i class=\"glyphicon glyphicon-remove\"></i></a></td></tr>";
 	}
 	return $data;
 }
@@ -305,7 +305,7 @@ function lepus_edit_dnsRecord($type, $id, $value){
 	if($type == 'name' && strlen($type) > 255) return "max name strlen 255";
 	if($type == 'prio' && !is_int($value)) return "prio only int value";
 
-	$types = ['A', 'AAAA', 'CNAME', 'MX', 'NS', 'TXT', 'SRV', 'PTR'];
+	$types = ['A', 'AAAA', 'CNAME', 'MX', 'NS', 'TXT', 'SRV', 'PTR', 'SOA'];
 	if($type == 'type' && !in_array($value, $types)) return "wrong type record";
 
 	$query = $pdns->prepare("UPDATE `records` SET `$type` = :value WHERE `id` = :id");
@@ -313,4 +313,11 @@ function lepus_edit_dnsRecord($type, $id, $value){
 	$query->bindParam(':id', $id, PDO::PARAM_STR);
 	$query->execute();
 	return htmlspecialchars($value);
+}
+
+function lepus_delete_dnsRecord($id){
+	global $pdns;
+	$query = $pdns->prepare("DELETE FROM `records` WHERE `id` = :id");
+	$query->bindParam(':id', $id, PDO::PARAM_STR);
+	$query->execute();
 }

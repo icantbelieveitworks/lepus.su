@@ -154,3 +154,17 @@ $(document).on("click", "[data-dns-delete-id]", function(e) {
 		}
 	});
 });
+
+$(document).on("click", "[data-dns-zone-id]", function(e) {
+	e.preventDefault();
+	confirm("Вы подтверждаете удаление?");
+	idZone = $(this).data("dns-zone-id");
+	$.post("//"+document.domain+"/public/delete_dnsZone.php", {id: idZone}, function( data ){
+		if(data == '1'){
+			alertify.success("Success");
+			$('table#dnsZone tr#'+idZone).remove();
+		}else{
+			alertify.error(data);
+		}
+	});
+});

@@ -14,4 +14,4 @@ if(strlen($_POST['zone']) < 1 || strlen($_POST['data']) < 1 || strlen($_POST['pr
 
 $tmpData = lepus_get_dnsAccess($_POST['domain_id'], $user['id'], 'check');
 if($tmpData == 'deny' || $tmpData == 'SLAVE') die("deny or no_record or slave ".$tmpData);
-echo lepus_add_dnsRecord($_POST['zone'], $_POST['type'], $_POST['data'], $_POST['prio'], $_POST['domain_id']);
+echo lepus_add_dnsRecord(idn_to_ascii(mb_strtolower($_POST['zone'])), $_POST['type'], idn_to_ascii(mb_strtolower($_POST['data'])), $_POST['prio'], $_POST['domain_id']);

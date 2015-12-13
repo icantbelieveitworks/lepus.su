@@ -158,7 +158,7 @@ $(document).on("click", "[data-dns-delete-id]", function(e) {
 $(document).on("click", "[data-dns-zone-id]", function(e) {
 	e.preventDefault();
 	if(!confirm("Вы подтверждаете удаление?")) return;
-	idZone = $(this).data("dns-zone-id");
+	var idZone = $(this).data("dns-zone-id");
 	$.post("//"+document.domain+"/public/delete_dnsZone.php", {id: idZone}, function( data ){
 		if(data == '1'){
 			alertify.success("Success");
@@ -182,7 +182,7 @@ $(document).on("click", "[data-dns-zone-add]", function(e) {
 	$.post("//"+document.domain+"/public/add_dnsZone.php", {zone: dnsZone, type: dnsZoneType, data: dnsZoneData, prio: dnsZonePrio, domain_id: dnsDomainZoneID}, function( data ){
 		if($.isNumeric(data)){
 			alertify.success("Success");
-			$('table#dnsZone tr:last').after('<tr><td>'+zoneNumber+'</td><td class="edit" id="name_'+data+'">'+dnsZone+'</td><td class="edit_type" id="type_'+data+'">'+dnsZoneType+'</td><td class="edit" id="content_'+data+'">'+dnsZoneData+'</td><td class="edit" id="prio_'+data+'">'+dnsZonePrio+'</td><td><a href="nourl" data-dns-zone-id='+data+'><i class="glyphicon glyphicon-remove"></i></a></td></tr>');
+			$('table#dnsZone tr:last').after('<tr id="'+data+'"><td>'+zoneNumber+'</td><td class="edit" id="name_'+data+'">'+dnsZone+'</td><td class="edit_type" id="type_'+data+'">'+dnsZoneType+'</td><td class="edit" id="content_'+data+'">'+dnsZoneData+'</td><td class="edit" id="prio_'+data+'">'+dnsZonePrio+'</td><td><a href="nourl" data-dns-zone-id='+data+'><i class="glyphicon glyphicon-remove"></i></a></td></tr>');
 		}else{
 			alertify.error(data);
 		}

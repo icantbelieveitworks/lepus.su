@@ -9,6 +9,7 @@ if(empty($user)){
 	header('refresh: 3; url=http://lepus.dev');
 	die;
 }
+$tmpData = lepus_get_dnsAccess($_GET['id'], $user['id']);
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
@@ -27,11 +28,7 @@ if(empty($user)){
 		<style>
 			.col-centered{ float: none; margin: 0 auto; }
 			td,th { text-align: center; vertical-align: middle; }
-
-table td {
-    word-wrap: break-word;         /* All browsers since IE 5.5+ */
-   overflow-wrap: break-word;     /* Renamed property in CSS3 draft spec */
-}
+			table td { word-wrap: break-word; overflow-wrap: break-word; }
 		</style>
 		<script src="/js/jquery.min.js"></script>
 		<script src="/js/jquery.jeditable.mini.js"></script>
@@ -50,7 +47,7 @@ table td {
 				<div class="content-box">
 					<div class="content-info">
 						<div class="content-text">
-							<div class="page-title">Управление доменом lolka.ru</div>
+							<div class="page-title">Управление доменом <?php echo $tmpData; ?></div>
 							<div class="row">					
 								<div class="col-lg-14">
 									<div class="col-lg-12">
@@ -89,8 +86,7 @@ table td {
 												</tr>
 											</thead>
 											<tbody>
-												<?php	$tmpData = lepus_get_dnsAccess($_GET['id'], $user['id']);
-														if($tmpData == 'deny') echo "<center><b><font color=\"Brown\">!!! Access denied !!!</font></b></center>";
+												<?php	if($tmpData == 'deny') echo "<center><b><font color=\"Brown\">!!! Access denied !!!</font></b></center>";
 															else echo lepus_get_dnsRecords($_GET['id']);
 												?>
 											</tbody>

@@ -243,7 +243,7 @@ function lepus_get_dnsDomains($id, $i = 0){
 	$query->execute();
 	while($row = $query->fetch()){
 		if($row['type'] == 'MASTER') $row['master'] = '-';
-		$i++; $data .= "<tr id=\"".$row['id']."\"> <td>$i</td> <td>".idn_to_utf8($row['name'])."</td> <td>".$row['type']."</td> <td>".$row['master']."</td> <td><a href=\"/pages/edit-domain.php?id=".$row['id']."\"><i class=\"glyphicon glyphicon-pencil\"></i></a> &nbsp; <a href=\"nourl\" data-dns-delete-id=".$row['id']."><i class=\"glyphicon glyphicon-remove\"></i></a></td> </tr>";
+		$i++; $data .= "<tr id=\"".$row['id']."\"> <td>$i</td> <td>".htmlspecialchars(idn_to_utf8($row['name']))."</td> <td>".$row['type']."</td> <td>".$row['master']."</td> <td><a href=\"/pages/edit-domain.php?id=".$row['id']."\"><i class=\"glyphicon glyphicon-pencil\"></i></a> &nbsp; <a href=\"nourl\" data-dns-delete-id=".$row['id']."><i class=\"glyphicon glyphicon-remove\"></i></a></td> </tr>";
 	}
 	return $data;
 }
@@ -255,6 +255,8 @@ function lepus_get_dnsAccess($id, $uid){
 	$query->bindParam(':uid', $uid, PDO::PARAM_STR);
 	$query->execute();
 	if($query->rowCount() != 1) return 'deny';
+	$row = $query->fetch();
+	return htmlspecialchars(idn_to_utf8($row['name']));
 }
 
 function lepus_delete_dnsDomain($id){
@@ -295,7 +297,7 @@ function lepus_get_dnsRecords($id, $i = 0){
 	$query->bindParam(':id', $id, PDO::PARAM_STR);
 	$query->execute();
 	while($row = $query->fetch()){
-		$i++; $data .= "<tr id=\"".$row['id']."\"><td>".$i."</td><td class=\"edit\" id=\"name_".$row['id']."\">".$row['name']."</td><td class=\"edit_type\" id=\"type_".$row['id']."\">".$row['type']."</td><td class=\"edit\" id=\"content_".$row['id']."\">".htmlspecialchars($row['content'])."</td><td class=\"edit\" id=\"prio_".$row['id']."\">".$row['prio']."</td><td><a href=\"nourl\" data-dns-zone-id=\"".$row['id']."\"><i class=\"glyphicon glyphicon-remove\"></i></a></td></tr>";
+		$i++; $data .= "<tr id=\"".$row['id']."\"><td>".$i."</td><td class=\"edit\" id=\"name_".$row['id']."\">".htmlspecialchars(idn_to_utf8($row['name']))."</td><td class=\"edit_type\" id=\"type_".$row['id']."\">".$row['type']."</td><td class=\"edit\" id=\"content_".$row['id']."\">".htmlspecialchars($row['content'])."</td><td class=\"edit\" id=\"prio_".$row['id']."\">".$row['prio']."</td><td><a href=\"nourl\" data-dns-zone-id=\"".$row['id']."\"><i class=\"glyphicon glyphicon-remove\"></i></a></td></tr>";
 	}
 	return $data;
 }

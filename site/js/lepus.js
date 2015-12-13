@@ -142,7 +142,7 @@ $(document).on("click", "[data-cp-change-phone]", function(e) {
 
 $(document).on("click", "[data-dns-delete-id]", function(e) {
 	e.preventDefault();
-	confirm("Вы подтверждаете удаление?");
+	if(!confirm("Вы подтверждаете удаление?")) return;
 	var table = $('#dnsDomainsList').dataTable();
 	idDom = $(this).data("dns-delete-id");
 	$.post("//"+document.domain+"/public/delete_dnsDomain.php", {id: idDom}, function( data ){
@@ -157,7 +157,7 @@ $(document).on("click", "[data-dns-delete-id]", function(e) {
 
 $(document).on("click", "[data-dns-zone-id]", function(e) {
 	e.preventDefault();
-	confirm("Вы подтверждаете удаление?");
+	if(!confirm("Вы подтверждаете удаление?")) return;
 	idZone = $(this).data("dns-zone-id");
 	$.post("//"+document.domain+"/public/delete_dnsZone.php", {id: idZone}, function( data ){
 		if(data == '1'){

@@ -259,6 +259,20 @@ function lepus_get_dnsAccess($id, $uid){
 	return htmlspecialchars(idn_to_utf8($row['name']));
 }
 
+function lepus_add_dnsRecord($zone, $type, $data, $prio, $domain_id){
+	global $pdns;
+	$types = ['A', 'AAAA', 'CNAME', 'MX', 'NS', 'TXT', 'SRV', 'PTR', 'SOA'];
+	if(!in_array($type, $types)) return "wrong type record";
+	$query = $pdns->prepare("INSERT INTO `records` (`domain_id`, `name`, `type`, `content`, `ttl`, `prio`) VALUES (:id, :name, :type, :content, 3600, :prio)");
+	$query->bindParam(':id', $domain_id, PDO::PARAM_STR);
+	$query->bindParam(':name', $zone, PDO::PARAM_STR);
+	$query->bindParam(':type', $type, PDO::PARAM_STR);
+	$query->bindParam(':content', $data, PDO::PARAM_STR);
+	$query->bindParam(':prio', $prio, PDO::PARAM_STR);
+	$query->execute();
+	return $pdns->lastInsertId();
+}
+
 function lepus_delete_dnsDomain($id){
 	global $pdns;
 	$query = $pdns->prepare("DELETE FROM `domains` WHERE `id` = :id");
@@ -305,7 +319,7 @@ function lepus_get_dnsRecords($id, $i = 0){
 function lepus_edit_dnsRecord($type, $id, $value){
 	global $pdns;
 	if($type == 'name' && strlen($type) > 255) return "max name strlen 255";
-	if($type == 'prio' && !is_int($value)) return "prio only int value";
+	if($type == 'prio' && !ctype_digit($value)) return "prio only number";
 
 	$types = ['A', 'AAAA', 'CNAME', 'MX', 'NS', 'TXT', 'SRV', 'PTR', 'SOA'];
 	if($type == 'type' && !in_array($value, $types)) return "wrong type record";

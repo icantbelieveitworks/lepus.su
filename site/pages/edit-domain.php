@@ -54,7 +54,7 @@ $tmpData = lepus_get_dnsAccess($_GET['id'], $user['id']);
 										На этой странице - вы можете управлять записями на DNS.<br/>
 										<hr/>
 									</div>
-									<div class="col-lg-9 col-centered">
+									<div class="col-lg-11 col-centered">
 										<div class="form-inline">
 											<input class="form-control" id="dnsZone" style="width: 200px;" type="text" name="count" value="" required="" placeholder="test.example.com">
 												<select class="form-control" id="dnsZoneType" name="type">
@@ -69,7 +69,9 @@ $tmpData = lepus_get_dnsAccess($_GET['id'], $user['id']);
 													<option value="SOA">SOA</option>
 												</select>
 												<input class="form-control" id="dnsZoneData"  style="width: 220px;"  type="text" name="count" value="" required="" placeholder="127.0.0.1">
-											<input class="btn btn-sm btn-danger btn-block" data-dns-domain-add style="margin-top: 2px;" type="submit" value="Добавить запись">
+												<input class="form-control" id="dnsZonePrio"  style="width: 120px;"  type="text" name="count" value="" required="" placeholder="10 [приоритет]">
+												<input id="dnsDomainZoneID" type="hidden" value=<?php echo intval($_GET['id']);?>>
+											<input class="btn btn-sm btn-danger btn-block" data-dns-zone-add style="margin-top: 2px;" type="submit" value="Добавить запись">
 										</div>
 									</div>
 									<div class="col-lg-12">
@@ -108,7 +110,7 @@ $tmpData = lepus_get_dnsAccess($_GET['id'], $user['id']);
 				$('.edit').editable('/public/change_dnsRecords.php', {
 					loadurl  : '//lepus.dev/public/change_dnsRecords.php?load',
 					indicator : 'Сохранение...',
-					tooltip   : 'Кликните чтобы изменить...',
+					//tooltip   : 'Кликните чтобы изменить...',
 					event     : "dblclick",
 					style: "inherit",
 					height: 'none'
@@ -117,7 +119,7 @@ $tmpData = lepus_get_dnsAccess($_GET['id'], $user['id']);
 			$(document).on('click', '.edit_type', function(){
 				$('.edit_type').editable('/public/change_dnsRecords.php', {
 					indicator : 'Сохранение...',
-					tooltip   : 'Кликните чтобы изменить...',
+					//tooltip   : 'Кликните чтобы изменить...',
 					data   : " {'A':'A','AAAA':'AAAA','CNAME':'CNAME','MX':'MX','NS':'NS','TXT':'TXT','SRV':'SRV','PTR':'PTR', 'SOA':'SOA'}",
 					type   : 'select',
 					submit: 'OK',

@@ -349,7 +349,7 @@ function lepus_dnsValid($type, $value, $j = 'ok'){
 	if(isset($i[$type])){
 		if(strlen($value) > $i[$type]) $j = "max $type strlen max $i[$type]";
 	}else{
-		$j = 'no_exist';
+		$j = 'no_exist '.$type;
 	}
 	if(strlen($value) == 0) $j = 'empty value';
 	if($type == 'prio' && !ctype_digit($value)) $j = 'prio only number';

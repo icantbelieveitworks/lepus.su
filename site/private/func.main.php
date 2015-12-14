@@ -320,10 +320,8 @@ function lepus_get_dnsRecords($id, $i = 0){
 
 function lepus_edit_dnsRecord($type, $id, $value){
 	global $pdns;
-	if($type == 'content' && strlen($value) > 4096) return "max data strlen 4096";
-	if($type == 'name' && strlen($type) > 255) return "max name strlen 255";
-	if($type == 'prio' && strlen($value) > 3) return "max prio strlen 255";
-	if($type == 'prio' && !ctype_digit($value)) return "prio only number";
+	$tmpTest = lepus_dnsValid($type, $value);
+	if($tmpTest != 'ok') return $tmpTest;
 
 	$types = ['A', 'AAAA', 'CNAME', 'MX', 'NS', 'TXT', 'SRV', 'PTR', 'SOA'];
 	if($type == 'type' && !in_array($value, $types)) return "wrong type record";
@@ -341,4 +339,16 @@ function lepus_delete_dnsRecord($id){
 	$query = $pdns->prepare("DELETE FROM `records` WHERE `id` = :id");
 	$query->bindParam(':id', $id, PDO::PARAM_STR);
 	$query->execute();
+}
+
+function lepus_dnsValid($type, $value, $j = 'ok'){
+	$i = ['prio' => 3,  'master' => 128, 'name' => 255, 'content' => 4096];
+	if(isset($i[$type])){
+		if(strlen($value) > $i[$type]) $j = "max $type strlen max $i[$type]";
+	}else{
+		$j = 'no_exist';
+	}
+	if(strlen($value) == 0) $j = 'empty value';
+	if($type == 'prio' && !ctype_digit($value)) $j = 'prio only number';
+	return $j;
 }

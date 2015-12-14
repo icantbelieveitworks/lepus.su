@@ -322,11 +322,8 @@ function lepus_edit_dnsRecord($type, $id, $value){
 	global $pdns;
 	$tmpTest = lepus_dnsValid($type, $value);
 	if($tmpTest != 'ok') return $tmpTest;
-
-	$types = ['A', 'AAAA', 'CNAME', 'MX', 'NS', 'TXT', 'SRV', 'PTR', 'SOA'];
-	if($type == 'type' && !in_array($value, $types)) return "wrong type record";
+	if($type == 'type' && lepus_dnsValidType($value) != 'ok') return "wrong type record";	
 	if($type == 'name') $value = idn_to_ascii(mb_strtolower($value));
-
 	$query = $pdns->prepare("UPDATE `records` SET `$type` = :value WHERE `id` = :id");
 	$query->bindParam(':value', $value, PDO::PARAM_STR);
 	$query->bindParam(':id', $id, PDO::PARAM_STR);
@@ -341,8 +338,14 @@ function lepus_delete_dnsRecord($id){
 	$query->execute();
 }
 
+function lepus_dnsValidType($value, $j = 'ok'){
+	$types = ['A', 'AAAA', 'CNAME', 'MX', 'NS', 'TXT', 'SRV', 'PTR', 'SOA'];
+	if(!in_array($value, $types)) $j = "wrong type record";
+	return $j;
+}
+
 function lepus_dnsValid($type, $value, $j = 'ok'){
-	$i = ['prio' => 3,  'master' => 128, 'name' => 255, 'content' => 4096];
+	$i = ['prio' => 3, 'type' => 6, 'master' => 128, 'name' => 255, 'content' => 4096];
 	if(isset($i[$type])){
 		if(strlen($value) > $i[$type]) $j = "max $type strlen max $i[$type]";
 	}else{

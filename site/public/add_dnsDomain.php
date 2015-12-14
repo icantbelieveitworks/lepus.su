@@ -9,10 +9,13 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/auth.php');
 $dnsMaster = NULL;
 $_POST['domain'] = idn_to_ascii(mb_strtolower($_POST['domain']));
 
+if(strlen($_POST['domain']) > 255) die("max_strlen_255");
+
 if(empty($_POST['domain']) || empty($_POST['type'])) die("Empty post");
 if(!preg_match('/^[a-zA-Z0-9_.-]+$/', $_POST['domain'])) die("Wrong domain");
 if($_POST['type'] == 'slave'){
 	if(!filter_var($_POST['master'], FILTER_VALIDATE_IP)) die("Wrong master ip");
+	if(strlen($_POST['master']) > 128) die("max_strlen_255");
 	$dnsMaster = $_POST['master'];
 }
 

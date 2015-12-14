@@ -320,7 +320,9 @@ function lepus_get_dnsRecords($id, $i = 0){
 
 function lepus_edit_dnsRecord($type, $id, $value){
 	global $pdns;
+	if($type == 'content' && strlen($value) > 4096) return "max data strlen 4096";
 	if($type == 'name' && strlen($type) > 255) return "max name strlen 255";
+	if($type == 'prio' && strlen($value) > 3) return "max prio strlen 255";
 	if($type == 'prio' && !ctype_digit($value)) return "prio only number";
 
 	$types = ['A', 'AAAA', 'CNAME', 'MX', 'NS', 'TXT', 'SRV', 'PTR', 'SOA'];

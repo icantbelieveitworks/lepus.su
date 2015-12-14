@@ -10,7 +10,7 @@ $tmpPOST = ['name', 'type', 'content', 'prio', 'domain_id'];
 foreach($tmpPOST as $val){
 	if(!isset($_POST[$val])) die("Empty POST value");
 	if($val == 'name'){
-		$_POST[$val] = idn_to_ascii(mb_strtolower($_POST['name']));
+		$_POST[$val] = idn_to_ascii(mb_strtolower($_POST[$val]));
 	}
 	if($val == 'type' || $val == 'domain_id'){
 		if(empty($_POST[$val])) die("Empty value $val");

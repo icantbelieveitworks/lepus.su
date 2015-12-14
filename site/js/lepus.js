@@ -13,7 +13,7 @@ $(document).on("click", "[data-dns-domain-add]", function(e) {
 	dnsDomainType = $('select[id=dnsDomainType]').val();
 	dnsDomainMaster = $('input[id=dnsDomainMaster]').val();
 	if(!dnsDomainMaster) dnsDomainMaster = '-';
-	$.post("//"+document.domain+"/public/add_dnsDomain.php", { domain: dnsDomain, type: dnsDomainType, master: dnsDomainMaster}, function( data ){
+	$.post("//"+document.domain+"/public/add_dnsDomain.php", { name: dnsDomain, type: dnsDomainType, master: dnsDomainMaster}, function( data ){
 		if($.isNumeric(data)){
 			table.row.add({
 				DT_RowId: data,

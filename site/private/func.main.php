@@ -304,7 +304,8 @@ function lepus_get_dnsRecord($type, $id){
 	$query->bindParam(':id', $id, PDO::PARAM_STR);
 	$query->execute();
 	$row = $query->fetch();
-	return htmlspecialchars(idn_to_utf8($row[$type]));
+	//return htmlspecialchars(idn_to_utf8($row[$type]));
+	return idn_to_utf8($row[$type]);
 }
 
 function lepus_get_dnsRecords($id, $i = 0){
@@ -349,9 +350,10 @@ function lepus_dnsValid($type, $value, $j = 'ok'){
 	if(isset($i[$type])){
 		if(strlen($value) > $i[$type]) $j = "max $type strlen max $i[$type]";
 	}else{
-		$j = 'no_exist '.$type;
+		$j = 'no_exist';
 	}
 	if(strlen($value) == 0) $j = 'empty value';
+	if($type == 'master' && !filter_var($value, FILTER_VALIDATE_IP)) $j = 'Wrong master IP';
 	if($type == 'prio' && !ctype_digit($value)) $j = 'prio only number';
 	return $j;
 }

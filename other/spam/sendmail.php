@@ -5,7 +5,7 @@
 setlocale(LC_CTYPE, "en_US.UTF-8");
 
 function log_in_file($data){
-	file_put_contents('/home/mail-clamav.log', $data, FILE_APPEND | LOCK_EX);
+	file_put_contents('/home/mail-clamav.log', $data.PHP_EOL, FILE_APPEND | LOCK_EX);
 }
 
 function send_debug($data){

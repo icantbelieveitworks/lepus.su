@@ -47,3 +47,35 @@ a:hover { text-decoration:none; }
 .footer p.copyright { float:left; padding-top:17px; text-indent:50px; }
 .footer div.banners { float:right; text-align:right; }
 .footer div.banners div { padding-right:25px; padding-top:10px; }
+
+.label-green, .badge-green {
+	background: #dcebd8;
+	border: 1px solid #cae0c3;
+	color: #555555;
+	text-shadow:none;
+	font-weight: normal;
+}
+
+.label-yellow, .badge-yellow {
+	background: #f7f0c5;
+	border: 1px solid #f4eaab;
+	color: #555555;
+	text-shadow:none;
+	font-weight: normal;
+}
+
+.label-red, .badge-red {
+	background: #f7d1d0;
+	border: 1px solid #f3b3b2;
+	color: #555555;
+	text-shadow:none;
+	font-weight: normal;
+}
+
+.label-blue, .badge-blue {
+	background: #d2e4eb;
+	border: 1px solid #bed9e2;
+	color: #555555;
+	text-shadow:none;
+	font-weight: normal;
+}

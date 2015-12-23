@@ -36,7 +36,7 @@ if(empty($user)){ ?>
 				<li><a href="/cp-hosting-isp.html">Виртуальный xостинг</a></li>
 				<li><a href="/cp-serv.html">Выделенные серверы</a></li>
 				<hr/>
-				<li><a href="/cp-support.html">Тех. поддержка</a></li>
+				<li><a href="/pages/support.php">Тех. поддержка</a></li>
 				<li><a href="/cp-iplogs.html">Логи авторизаций</a></li>
 				<li><a href="/cp-buylogs.html">Логи оплаты услуг</a></li>
 				<li><a href="/cp-finlogs.html">Логи пополнения счета</a></li>

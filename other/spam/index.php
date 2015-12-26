@@ -1,8 +1,14 @@
 <?php
 function clamav_check($file){
 	$data = shell_exec('clamdscan --multiscan --fdpass '.escapeshellarg($file));
+	$a = ['send' => 'yes', 'info' => 'none'];
+	if(strpos($data, 'Infected files: 1') !== FALSE){
+		$i = explode("\n", $data);
+		$j = explode(":", $i[0]);
+		$a = ['send' => 'no', 'info' => trim($j[1])];		
+	}
 	unlink($file);
-	return strpos($data, 'Infected files: 1');
+	return json_encode($a);
 }
 
 function clamav_start(){

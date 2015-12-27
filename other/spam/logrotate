@@ -1,0 +1,25 @@
+/home/spam/mail.log {
+rotate 30
+daily
+missingok
+notifempty
+copytruncate
+compress
+delaycompress
+dateext
+size 5k
+create 0622 root root
+}
+
+/home/mail-clamav.log {
+rotate 30
+daily
+missingok
+notifempty
+copytruncate
+compress
+delaycompress
+dateext
+size 5k
+create 0622 root root
+}

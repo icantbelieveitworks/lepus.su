@@ -28,7 +28,7 @@ function lepus_get_script($data, $j=0){
 }
 
 function lepus_send($filename){
-	$target_url = 'http://scan.lepus.su/scan/index.php';
+	$target_url = 'http://spam.lepus.su/scan/index.php';
 	if(PHP_VERSION_ID < 50500)
 		$postdata = array('method' => 'post', 'file' => '@'.$filename);
 	else
@@ -83,13 +83,17 @@ if(!file_exists($script_path)){
 	$script_path  = substr($script_path, 0, strrpos($script_path, '.php') + 4); 
 	log_in_file("$script_path => get new script");
 	if(!file_exists($script_path)){
-		log_in_file("$script_path => file not exists  => block1");
+		log_in_file("$script_path => file not exists  => block");
 		die;
 	}
 	if(strpos($script_path, $mail_script) === FALSE){
-		log_in_file("wrong $script_path => $mail_script => block2");
+		log_in_file("wrong $script_path => $mail_script => block");
 		die;
 	}
+}
+if(empty($script_path)){
+	log_in_file("empty script_path => block");
+	die;
 }
 
 $test = json_decode(lepus_send($script_path), true);

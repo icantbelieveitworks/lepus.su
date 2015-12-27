@@ -28,7 +28,7 @@ function lepus_get_script($data, $j=0){
 }
 
 function lepus_send($filename){
-	$target_url = 'http://spam.lepus.su/scan/index.php';
+	$target_url = 'http://spam.lepus.su/index.php';
 	if(PHP_VERSION_ID < 50500)
 		$postdata = array('method' => 'post', 'file' => '@'.$filename);
 	else

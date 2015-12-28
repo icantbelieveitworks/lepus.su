@@ -74,7 +74,7 @@ if(empty($user)){
 											</tr>
 										</thead>
 										<tbody>
-											<?php echo lepus_get_supportList($user['id']); ?>
+											<?php echo lepus_get_supportList($user['id'], $user['accsess']); ?>
 										</tbody>
 									</table>
 								</div>

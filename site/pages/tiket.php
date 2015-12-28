@@ -9,6 +9,8 @@ if(empty($user)){
 	header('refresh: 3; url=http://lepus.dev');
 	die;
 }
+$tmpData = lepus_get_supportMsg($user['id'], $user['accsess']);
+if(!is_array($tmpData)) die('no accsess');
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
@@ -48,11 +50,9 @@ if(empty($user)){
 				<div class="content-box">
 					<div class="content-info">
 						<div class="content-text">
-							<div class="page-title">Техническая поддержка</div>
+							<div class="page-title"><?php echo $tmpData['title']; ?></div>
 							<div class="row">					
-								<div class="col-lg-12">
-									Дорогие пользователи, мы работаем без выходных и праздников с 10.00 до 20.00
-									<hr>									
+								<div class="col-lg-12">							
 									<textarea id="tiketMsg" class="form-control" rows="5" id="comment" style="resize:vertical;" placeholder=""></textarea>
 									<div class="form-inline" style="padding-top: 7px;">
 										<center>
@@ -61,10 +61,11 @@ if(empty($user)){
 										</center>
 									</div>
 									<hr>
-									<div class="panel panel-danger panelbg">
+									<?php echo $tmpData['msg']; ?>
+									<!--<div class="panel panel-danger panelbg">
 										<div class="panel-heading">
 											<span class="label label-pill label-default myLabel">27.12.15 в 21:41</span>
-											Panel heading without title
+											<font color="black">Ответ службы поддержи</font>
 										</div>
 										<div class="panel-body">
 											Panel content
@@ -73,12 +74,12 @@ if(empty($user)){
 									<div class="panel panel-info panelbg">
 										<div class="panel-heading">
 											<span class="label label-pill label-default myLabel">27.12.15 в 14:32</span>
-											Panel heading without title
+											<font color="black">Пользователь написал (xxx@xxx.com)</font>
 										</div>
 										<div class="panel-body">
 											Panel content
 										</div>
-									</div>
+									</div> -->			
 								</div>
 							</div>
 						</div>

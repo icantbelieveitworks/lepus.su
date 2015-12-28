@@ -358,7 +358,7 @@ function lepus_dnsValid($type, $value, $j = 'ok'){
 	return $j;
 }
 
-function lepus_get_supportList($uid){
+function lepus_get_supportList($uid, $access){
 	global $db;
 	function tiket_status($id){
 		$arr = [1 => 'Открыт', 2 => 'Закрыт'];
@@ -368,13 +368,17 @@ function lepus_get_supportList($uid){
 		$arr = [1 => 'success', 2 => 'warning', 3 => 'danger'];
 		return $arr[$id];
 	}
-	$query = $db->prepare("SELECT * FROM `support` WHERE `uid` = :uid");
-	$query->bindParam(':uid', $uid, PDO::PARAM_STR);
+	if($access >= 2){
+		$query = $db->prepare("SELECT * FROM `support`");
+	}else{
+		$query = $db->prepare("SELECT * FROM `support` WHERE `uid` = :uid");
+		$query->bindParam(':uid', $uid, PDO::PARAM_STR);
+	}
 	$query->execute();
 	while($row = $query->fetch()){
 		if(!empty($row['open'])) $row['open'] = date("Y-m-d H:i", $row['open']); else $row['open'] = '-';
 		if(!empty($row['last'])) $row['last'] = date("Y-m-d H:i", $row['last']); else $row['last'] = '-';
-		$data .= "<tr><td><a href=\"./test.php\" title=\"Открыть\">#".$row['id']."</a></td><td>".$row['title']."</td><td>".$row['open']."</td><td>".$row['last']."</td><td style=\"padding-top: 11px;\"><span class=\"label label-pill label-".tiket_label($row['status'])." myLabel\">".tiket_status($row['status'])."</span></td></tr>";
+		$data .= "<tr><td><a href=\"/pages/tiket.php?id={$row['id']}\" title=\"Открыть\">#".$row['id']."</a></td><td>".$row['title']."</td><td>".$row['open']."</td><td>".$row['last']."</td><td style=\"padding-top: 11px;\"><span class=\"label label-pill label-".tiket_label($row['status'])." myLabel\">".tiket_status($row['status'])."</span></td></tr>";
 	}
 	return $data;
 }
@@ -398,3 +402,31 @@ function support_create($uid){
 	$query->execute();
 }
 
+function lepus_get_supportMsg($uid, $access, $data = ''){
+	global $db;
+	$query = $db->prepare("SELECT * FROM `support` WHERE `id` = :id");
+	$query->bindParam(':id', $_GET['id'], PDO::PARAM_STR);
+	$query->execute();
+	$row = $query->fetch();
+	if($row['uid'] != $uid && $access < 2) return 'no_access';
+
+	$query = $db->prepare("SELECT * FROM `support_msg` WHERE `tid` = :id");
+	$query->bindParam(':id', $row['id'], PDO::PARAM_STR);
+	$query->execute();
+	while($msg = $query->fetch()){
+		$tmpQuery = $db->prepare("SELECT * FROM `users` WHERE `id` =:id");
+		$tmpQuery->bindParam(':id', $msg['uid'], PDO::PARAM_STR);
+		$tmpQuery->execute();
+		$tmpRow = $tmpQuery->fetch();
+		if($msg['uid'] == $uid){
+			$panel = 'panel-info';
+			$who = "Пользователь написал ({$tmpRow['login']})";
+		}else{
+			$panel = 'panel-danger';
+			$who = "Ответ службы поддержи";
+		}
+		$msg['time'] = date("Y-m-d H:i", $msg['time']);
+		$data .= "<div class=\"panel $panel panelbg\"><div class=\"panel-heading\"><span class=\"label label-pill label-default myLabel\">{$msg['time']}</span><font color=\"black\"> $who</font></div><div class=\"panel-body\">{$msg['msg']}</div></div>";
+	}
+	return ['title' => $row['title'], 'msg' => $data];
+}

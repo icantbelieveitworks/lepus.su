@@ -357,3 +357,44 @@ function lepus_dnsValid($type, $value, $j = 'ok'){
 	if($type == 'prio' && !ctype_digit($value)) $j = 'prio only number';
 	return $j;
 }
+
+function lepus_get_supportList($uid){
+	global $db;
+	function tiket_status($id){
+		$arr = [1 => 'Открыт', 2 => 'Закрыт'];
+		return $arr[$id];
+	}
+	function tiket_label($id){
+		$arr = [1 => 'success', 2 => 'warning', 3 => 'danger'];
+		return $arr[$id];
+	}
+	$query = $db->prepare("SELECT * FROM `support` WHERE `uid` = :uid");
+	$query->bindParam(':uid', $uid, PDO::PARAM_STR);
+	$query->execute();
+	while($row = $query->fetch()){
+		if(!empty($row['open'])) $row['open'] = date("Y-m-d H:i", $row['open']); else $row['open'] = '-';
+		if(!empty($row['last'])) $row['last'] = date("Y-m-d H:i", $row['last']); else $row['last'] = '-';
+		$data .= "<tr><td><a href=\"./test.php\" title=\"Открыть\">#".$row['id']."</a></td><td>".$row['title']."</td><td>".$row['open']."</td><td>".$row['last']."</td><td style=\"padding-top: 11px;\"><span class=\"label label-pill label-".tiket_label($row['status'])." myLabel\">".tiket_status($row['status'])."</span></td></tr>";
+	}
+	return $data;
+}
+
+function support_create($uid){
+	global $db;
+	if(empty(trim($_POST['title'])) || empty(trim($_POST['msg']))) return('empty_post_value');
+	$title = filter_var($_POST["title"], FILTER_SANITIZE_STRING);
+	$msg = nl2br(htmlentities($_POST["msg"], ENT_QUOTES, 'UTF-8'));
+	$query = $db->prepare("INSERT INTO `support` (`uid`, `title`, `open`, `status`) VALUES (:uid, :title, :open, 1)");
+	$query->bindParam(':uid', $uid, PDO::PARAM_STR);
+	$query->bindParam(':title', $title, PDO::PARAM_STR);
+	$query->bindParam(':open', time(), PDO::PARAM_STR);
+	$query->execute();
+	$tid = $db->lastInsertId();
+
+	$query = $db->prepare("INSERT INTO `support_msg` (`tid`, `msg`, `time`) VALUES (:tid, :msg, :time)");
+	$query->bindParam(':tid', $tid, PDO::PARAM_STR);
+	$query->bindParam(':msg', $msg, PDO::PARAM_STR);
+	$query->bindParam(':time', time(), PDO::PARAM_STR);
+	$query->execute();
+}
+

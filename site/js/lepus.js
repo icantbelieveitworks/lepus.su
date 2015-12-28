@@ -188,3 +188,13 @@ $(document).on("click", "[data-dns-zone-add]", function(e) {
 		}
 	});
 });
+
+$(document).on("click", "[data-open-new-tiket]", function(e) {
+	$(this).blur();
+	e.preventDefault();
+	title = $('input[id=tiketTitle]').val();
+	msg = $('textarea[id=tiketMsg]').val();
+	$.post("//"+document.domain+"/public/support.php", {title: title, msg: msg}, function( data ){
+		alertify.error(data);
+	});
+});

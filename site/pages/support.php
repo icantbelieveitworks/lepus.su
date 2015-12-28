@@ -53,9 +53,15 @@ if(empty($user)){
 								<div class="col-lg-12">
 									Дорогие пользователи, мы работаем без выходных и праздников с 10.00 до 20.00
 									<hr>
-									<textarea class="form-control" rows="5" id="comment" style="resize:vertical;"></textarea>
-									<input class="btn btn-sm btn-danger btn-block" data-dns-domain-add="" style="margin-top: 2px;" type="submit" value="Открыть новый тикет">
-									
+									<div class="form-inline">
+										<center>
+											<input class="form-control" id="tiketTitle" style="width: 44%;" type="text" name="count" value="" required="" placeholder="Заголовок">
+											<input class="form-control btn btn-sm btn-danger btn-block" data-open-new-tiket style="width: 55%;" type="submit" value="Открыть новый тикет">
+										</center>
+									</div>
+									<div style="padding-top: 5px;">
+										<textarea id="tiketMsg" class="form-control" rows="5" id="comment" style="resize:vertical;" placeholder="Подробное описание вашей проблемы."></textarea>
+									</div>
 									<hr>	
 									<table id="supportList" class="table table-striped table-bordered" cellspacing="0" width="100%">
 										<thead>
@@ -64,35 +70,11 @@ if(empty($user)){
 												<th>Тема</th>
 												<th>Создан</th>
 												<th>Ответ</th>
-												<th>Назначен</th>
 												<th>Статус</th>
 											</tr>
 										</thead>
 										<tbody>
-											<tr>
-												<td style="background-color: #d9edf7;"><a href="./cp-support.html?id=6&amp;tid=276" title="Открыть" rel="tooltip">#275</a></td>
-												<td>Сервер мне запили!</td>
-												<td>12/10/2015 00:33</td>
-												<td>12/10/2015 16:22</td>
-												<td>support5</td>
-												<td style="padding-top: 11px;"><span class="label label-pill label-danger myLabel">Закрыт</span></td>
-											</tr>
-											<tr>
-												<td style="background-color: #d9edf7;"><a href="./cp-support.html?id=6&amp;tid=276" title="Открыть" rel="tooltip">#276</a></td>
-												<td>Сервер мне запили!</td>
-												<td>12/10/2015 00:33</td>
-												<td>12/10/2015 16:22</td>
-												<td>support5</td>
-												<td style="padding-top: 11px;"><span class="label label-pill label-warning myLabel">В обработке</span></td>
-											</tr>
-											<tr>
-												<td style="background-color: #d9edf7;"><a href="./cp-support.html?id=6&amp;tid=276" title="Открыть" rel="tooltip">#277</a></td>
-												<td>Сервер мне запили!</td>
-												<td>12/10/2015 00:33</td>
-												<td>12/10/2015 16:22</td>
-												<td>support5</td>
-												<td style="padding-top: 11px;"><span class="label label-pill label-success myLabel">Ответ получен</span></td>
-											</tr>
+											<?php echo lepus_get_supportList($user['id']); ?>
 										</tbody>
 									</table>
 								</div>

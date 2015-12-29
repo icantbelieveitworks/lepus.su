@@ -174,7 +174,7 @@ function lepus_new_account($login){
 	if($is_user['0'] != 0) return 'user_exist';
 	$passwd = genRandStr(8);
 	// {"balance":500,"phone":"7495xxxx80","regDate":"1448450707","access":"1","lastIP":"127.0.0.1","apiKey":"ec374361f6e0d83147924890027c28e8"}
-	$data = ['balance' => 0, 'phone' => NULL, 'regDate' => time(), 'accsess' => 1, 'lastIP' => NULL, 'apiKey' => genRandStr(32)];
+	$data = ['balance' => 0, 'phone' => NULL, 'regDate' => time(), 'access' => 1, 'lastIP' => NULL, 'apiKey' => genRandStr(32)];
 	$json = json_encode($data);
 	$query = $db->prepare("INSERT INTO `users` (`login`, `passwd`, `data`) VALUES (:login, :passwd, :data)");
 	$query->bindParam(':login', $login, PDO::PARAM_STR);
@@ -393,13 +393,7 @@ function support_create($uid){
 	$query->bindParam(':title', $title, PDO::PARAM_STR);
 	$query->bindParam(':open', time(), PDO::PARAM_STR);
 	$query->execute();
-	$tid = $db->lastInsertId();
-
-	$query = $db->prepare("INSERT INTO `support_msg` (`tid`, `msg`, `time`) VALUES (:tid, :msg, :time)");
-	$query->bindParam(':tid', $tid, PDO::PARAM_STR);
-	$query->bindParam(':msg', $msg, PDO::PARAM_STR);
-	$query->bindParam(':time', time(), PDO::PARAM_STR);
-	$query->execute();
+	return $db->lastInsertId();
 }
 
 function lepus_get_supportMsg($uid, $access, $data = ''){
@@ -410,7 +404,7 @@ function lepus_get_supportMsg($uid, $access, $data = ''){
 	$row = $query->fetch();
 	if($row['uid'] != $uid && $access < 2) return 'no_access';
 
-	$query = $db->prepare("SELECT * FROM `support_msg` WHERE `tid` = :id");
+	$query = $db->prepare("SELECT * FROM `support_msg` WHERE `tid` = :id ORDER BY `time` DESC");
 	$query->bindParam(':id', $row['id'], PDO::PARAM_STR);
 	$query->execute();
 	while($msg = $query->fetch()){
@@ -418,15 +412,28 @@ function lepus_get_supportMsg($uid, $access, $data = ''){
 		$tmpQuery->bindParam(':id', $msg['uid'], PDO::PARAM_STR);
 		$tmpQuery->execute();
 		$tmpRow = $tmpQuery->fetch();
-		if($msg['uid'] == $uid){
-			$panel = 'panel-info';
-			$who = "Пользователь написал ({$tmpRow['login']})";
-		}else{
+		$tmpData = json_decode($tmpRow['data'], true);
+		if($tmpData['access'] > 1){
 			$panel = 'panel-danger';
 			$who = "Ответ службы поддержи";
+		}else{
+			$panel = 'panel-info';
+			$who = "Пользователь написал ({$tmpRow['login']})";
 		}
 		$msg['time'] = date("Y-m-d H:i", $msg['time']);
 		$data .= "<div class=\"panel $panel panelbg\"><div class=\"panel-heading\"><span class=\"label label-pill label-default myLabel\">{$msg['time']}</span><font color=\"black\"> $who</font></div><div class=\"panel-body\">{$msg['msg']}</div></div>";
 	}
 	return ['title' => $row['title'], 'msg' => $data];
+}
+
+function support_msg($uid, $tid){
+	global $db;
+	$msg = nl2br(htmlentities($_POST["msg"], ENT_QUOTES, 'UTF-8'));
+
+	$query = $db->prepare("INSERT INTO `support_msg` (`tid`, `msg`, `uid`, `time`) VALUES (:tid, :msg, :uid, :time)");
+	$query->bindParam(':tid', $tid, PDO::PARAM_STR);
+	$query->bindParam(':msg', $msg, PDO::PARAM_STR);
+	$query->bindParam(':uid', $uid, PDO::PARAM_STR);
+	$query->bindParam(':time', time(), PDO::PARAM_STR);
+	$query->execute();
 }

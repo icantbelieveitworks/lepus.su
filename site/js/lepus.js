@@ -194,7 +194,17 @@ $(document).on("click", "[data-open-new-tiket]", function(e) {
 	e.preventDefault();
 	title = $('input[id=tiketTitle]').val();
 	msg = $('textarea[id=tiketMsg]').val();
-	$.post("//"+document.domain+"/public/support.php", {title: title, msg: msg}, function( data ){
+	$.post("//"+document.domain+"/public/support.php", {do: 'new', title: title, msg: msg}, function( data ){
+		alertify.error(data);
+	});
+});
+
+$(document).on("click", "[data-tiket-send-msg]", function(e) {
+	$(this).blur();
+	e.preventDefault();
+	tid = $('input[id=tiketID]').val();
+	msg = $('textarea[id=tiketMsg]').val();	
+	$.post("//"+document.domain+"/public/support.php", {do: 'send_msg', tid: tid, msg: msg}, function( data ){
 		alertify.error(data);
 	});
 });

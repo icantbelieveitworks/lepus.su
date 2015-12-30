@@ -200,14 +200,23 @@ $(document).on("click", "[data-open-new-tiket]", function(e) {
 	});
 });
 
-$(document).on("click", "[data-tiket-send-msg], [data-tiket-send-close]", function(e) {
+$(document).on("click", "[data-tiket-send-msg], [data-tiket-send-close], [data-tiket-send-reopen]", function(e) {
 	$(this).blur();
 	e.preventDefault();
 	input_click = e.target.id;
 	tid = $('input[id=tiketID]').val();
 	msg = $('textarea[id=tiketMsg]').val();
 	count = parseInt($('input[id=countMSG]').val());
-	if(input_click == 'endTiket') msg = 'END';
+	if(input_click == 'endTiket'){
+		msg = 'END';
+		$("#tiketStatus1").hide();
+		$("#tiketStatus2").show();
+	}
+	if(input_click == 'reopenTiket'){
+		msg = 'OPEN';
+		$("#tiketStatus1").show();
+		$("#tiketStatus2").hide();
+	}
 	$.post("//"+document.domain+"/public/support.php", {do: 'send_msg', tid: tid, msg: msg}, function( data ){
 		$('input[id=countMSG]').val(count+1);
 		$("#messageList").prepend(data);

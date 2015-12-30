@@ -5,6 +5,7 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/init/memcache.php');
 require_once($_SERVER['DOCUMENT_ROOT'].'/private/init/session.php');
 require_once($_SERVER['DOCUMENT_ROOT'].'/private/func.main.php');
 require_once($_SERVER['DOCUMENT_ROOT'].'/private/auth.php');
+
 switch($_POST['do']){
 	default: echo "wrong do"; break;
 	case 'new': support_msg($user['id'], support_create($user['id']), $user['data']['access']); break;
@@ -15,7 +16,8 @@ switch($_POST['do']){
 	break;
 	case 'update_msg':
 		$tmpData = lepus_get_supportMsg($_POST["tid"], $user['id'], $user['data']['access'], 0, $_POST["count"]);
-		if(!is_array($tmpData)) echo "no_mes";
-			else echo $tmpData['msg'];
+		if(!is_array($tmpData)) $tmpArr = ['error' => 'OK', 'mes' => 'no_mes'];
+			else $tmpArr = ['error' => 'OK', 'mes' => $tmpData['msg'], 'do' => $tmpData['status']];
+		echo json_encode($tmpArr);			
 	break;
 }

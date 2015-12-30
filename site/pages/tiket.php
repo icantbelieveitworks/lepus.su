@@ -43,16 +43,29 @@ if(!is_array($tmpData)) die('no accsess');
 			function f(){
 				count = parseInt($('input[id=countMSG]').val());
 				tid = $('input[id=tiketID]').val();
-				$.post("//"+document.domain+"/public/support.php", {do: 'update_msg', tid: tid, count: count}, function( data ){
-					if(data != 'no_mes'){
-						snd.play();
-						$('input[id=countMSG]').val(count+1);
-						$("#messageList").prepend(data);		
+				$.post("//"+document.domain+"/public/support.php", {do: 'update_msg', tid: tid, count: count}, function(json){
+					data = JSON.parse(json);
+					if(data.error == 'OK'){
+						if(data.mes != 'no_mes'){
+							snd.play();
+							$('input[id=countMSG]').val(count+1);
+							$("#messageList").prepend(data.mes);		
+						}
+						if(data.do){
+							if(data.do == 1){
+								$("#tiketStatus1").show();
+								$("#tiketStatus2").hide();
+							}else{
+								$("#tiketStatus1").hide();
+								$("#tiketStatus2").show();
+							}
+							
+						}
 					}else{
-						alertify.error(data);
+						alertify.error(data.error);
 					}
 				});
-				setTimeout(f, 10000);
+				setTimeout(f,10000);
 			}
 			$(document).ready(function(){
 				f();
@@ -72,18 +85,21 @@ if(!is_array($tmpData)) die('no accsess');
 						<div class="content-text">
 							<div class="page-title"><?php echo $tmpData['title']; ?></div>
 							<div class="row">					
-								<div class="col-lg-12">							
+								<div class="col-lg-12">
+									<div id="tiketStatus1" <?php if($tmpData['status'] == 2) echo 'style="display: none;"'; ?>>
 									<textarea id="tiketMsg" class="form-control" rows="5" id="comment" style="resize:vertical;" placeholder=""></textarea>
 									<input id="tiketID" type="hidden" value="<?php echo $_GET['id']; ?>">
 									<input id="countMSG" type="hidden" value="<?php echo $tmpData['countMSG']; ?>">
-									
 										<div class="form-inline" style="padding-top: 7px;">
 											<center>
 												<input id="sendMSG" class="form-control btn btn-sm btn-danger" style="width: 49%;" data-tiket-send-msg type="submit" value="Написать ответ в тикет">
 												<input id="endTiket" class="form-control btn btn-sm btn-danger" style="width: 49%;" data-tiket-send-close type="submit" value="Проблема решена">
 											</center>
 										</div>
-									
+										</div>
+									<div id="tiketStatus2" <?php if($tmpData['status'] == 2) echo 'style="display: inline;"'; else echo 'style="display: none;"'; ?>>
+										<center><input id="reopenTiket" class="form-control btn btn-sm btn-danger" style="width: 49%;" data-tiket-send-reopen type="submit" value="Проблема не решена?"></center>
+									</div>
 									<hr>
 									<div id="messageList" style="word-wrap: break-word;">
 										<?php echo $tmpData['msg']; ?>

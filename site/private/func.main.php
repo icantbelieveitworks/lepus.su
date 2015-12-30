@@ -368,12 +368,9 @@ function lepus_get_tiketLabel($id, $uid, $tid, $access){
 		$info = [1 => 'Ответ получен', 2 => 'Закрыт'];
 		$label = [1 => 'success', 2 => 'danger'];
 	}else{
-		if($access > 1){
-			$info = [1 => 'Обработан', 2 => 'Закрыт'];
-		}else{
-			$info = [1 => 'В обработке', 2 => 'Закрыт'];
-		}
+		$info = [1 => 'В обработке', 2 => 'Закрыт'];
 		$label = [1 => 'warning', 2 => 'danger'];
+		if($access > 1) $info[1] = 'Обработан';
 	}
 	return  ['info' => $info[$id], 'label' => $label[$id]];
 }
@@ -416,6 +413,7 @@ function lepus_get_supportMsg($tid, $uid, $access, $msgID = 0, $update = 0, $dat
 	$query->execute();
 	$row = $query->fetch();
 	if($row['uid'] != $uid && $access < 2) return 'no_access';
+	$tstatus = $row['status'];
 	if($msgID == 0){
 		if($update != 0){
 			$query = $db->prepare("SELECT * FROM `support_msg` WHERE `tid` = :tid ORDER BY `time` ASC");
@@ -430,7 +428,7 @@ function lepus_get_supportMsg($tid, $uid, $access, $msgID = 0, $update = 0, $dat
 	}
 	$query->execute();
 	$countMSG = $query->rowCount();
-	if($update != 0 && $countMSG <= $update ) return 'no_new_msg';
+	if($update != 0 && $countMSG <= $update ) return 'no_mes';
 	while($msg = $query->fetch()){
 		$j++;
 		if($update != 0 && $update+1 > $j) continue;
@@ -450,7 +448,7 @@ function lepus_get_supportMsg($tid, $uid, $access, $msgID = 0, $update = 0, $dat
 		$data .= "<div class=\"panel $panel panelbg\"><div class=\"panel-heading\"><span class=\"label label-pill label-default myColor myLabel\">{$msg['time']}</span><font color=\"black\"> $who</font></div><div class=\"panel-body\">{$msg['msg']}</div></div>";
 		if($update != 0 && strlen($data) > 10) break 1;
 	}
-	return ['title' => $row['title'], 'msg' => $data, 'countMSG' => $countMSG];
+	return ['title' => $row['title'], 'msg' => $data, 'countMSG' => $countMSG, 'status' => $tstatus];
 }
 
 function support_msg($uid, $tid, $access){
@@ -463,7 +461,12 @@ function support_msg($uid, $tid, $access){
 		$query->bindParam(':tid', $tid, PDO::PARAM_STR);
 		$query->execute();
 	}
-	if($msg == 'OPEN') $msg = '<span class="label label-pill label-success myLabel">Тикет открыт</span>';
+	if($msg == 'OPEN'){
+		$msg = '<span class="label label-pill label-success myLabel">Тикет открыт</span>';
+		$query = $db->prepare("UPDATE `support` SET `status` = 1 WHERE `id` = :tid");
+		$query->bindParam(':tid', $tid, PDO::PARAM_STR);
+		$query->execute();
+	}
 
 	$query = $db->prepare("UPDATE `support` SET `last` = :time WHERE `id` = :tid");
 	$query->bindParam(':time', time(), PDO::PARAM_STR);

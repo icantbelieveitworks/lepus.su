@@ -44,6 +44,7 @@ if(!is_array($tmpData)) die('no accsess');
 				tid = $('input[id=tiketID]').val();
 				$.post("//"+document.domain+"/public/support.php", {do: 'update_msg', tid: tid, count: count}, function( data ){
 					if(data != 'no_mes'){
+						snd.play();
 						$('input[id=countMSG]').val(count+1);
 						$("#messageList").prepend(data);		
 					}else{
@@ -68,12 +69,12 @@ if(!is_array($tmpData)) die('no accsess');
 				<div class="content-box">
 					<div class="content-info">
 						<div class="content-text">
-							<div class="page-title"><?php echo $tmpData['title']." ".$tmpData['countMSG']; ?></div>
+							<div class="page-title"><?php echo $tmpData['title']; ?></div>
 							<div class="row">					
 								<div class="col-lg-12">							
 									<textarea id="tiketMsg" class="form-control" rows="5" id="comment" style="resize:vertical;" placeholder=""></textarea>
 									<input id="tiketID" type="hidden" value="<?php echo $_GET['id']; ?>">
-									<input id="countMSG" type="hidden" value=<?php echo $tmpData['countMSG']; ?>>
+									<input id="countMSG" type="hidden" value="<?php echo $tmpData['countMSG']; ?>">
 									
 										<div class="form-inline" style="padding-top: 7px;">
 											<center>
@@ -83,7 +84,7 @@ if(!is_array($tmpData)) die('no accsess');
 										</div>
 									
 									<hr>
-									<div id="messageList">
+									<div id="messageList" style="word-wrap: break-word;">
 										<?php echo $tmpData['msg']; ?>
 									</div>	
 								</div>

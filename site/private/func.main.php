@@ -440,9 +440,10 @@ function lepus_get_supportMsg($tid, $uid, $access, $msgID = 0, $update = 0, $dat
 	return ['title' => $row['title'], 'msg' => $data, 'countMSG' => $countMSG];
 }
 
-function support_msg($uid, $tid){
+function support_msg($uid, $tid, $access){
 	global $db;
-	$msg = nl2br(htmlentities($_POST["msg"], ENT_QUOTES, 'UTF-8'));
+	if($access > 1) $_POST['msg'] .= "\n\n\n[i]С уважением, команда технической поддержки.[/i]";
+	$msg = parse_bb_code(nl2br(htmlentities($_POST['msg'], ENT_QUOTES, 'UTF-8')));
 
 	$query = $db->prepare("INSERT INTO `support_msg` (`tid`, `msg`, `uid`, `time`) VALUES (:tid, :msg, :uid, :time)");
 	$query->bindParam(':tid', $tid, PDO::PARAM_STR);
@@ -452,3 +453,13 @@ function support_msg($uid, $tid){
 	$query->execute();
 	return ['tid' => $tid, 'msgID' => $db->lastInsertId()];
 }
+
+function parse_bb_code($text){
+	$text = preg_replace('/\[(\/?)(b|i|u|s)\s*\]/', "<$1$2>", $text);
+	$text = preg_replace('/\[url\](?:http:\/\/)?(.+)\[\/url\]/', "<a href=\"http://$1\" target=\"_blank\">$1</a>", $text);
+	$text = preg_replace('/\[url\s?=\s?([\'"]?)(?:http:\/\/)?(.+)\1\](.*?)\[\/url\]/', "<a href=\"http://$2\" target=\"_blank\">$3</a>", $text);
+	$text = preg_replace('/\[urls\](?:https:\/\/)?(.+)\[\/urls\]/', "<a href=\"https://$1\" target=\"_blank\">$1</a>", $text);
+	$text = preg_replace('/\[urls\s?=\s?([\'"]?)(?:https:\/\/)?(.+)\1\](.*?)\[\/urls\]/', "<a href=\"https://$2\" target=\"_blank\">$3</a>", $text);
+	return $text;
+}
+

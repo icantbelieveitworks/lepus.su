@@ -1,5 +1,6 @@
 var widgetId1;
 var widgetId2;
+var snd	= new Audio("//"+document.domain+"/media/new.ogg");
 var onloadCallback = function() {
 	widgetId1 = grecaptcha.render(document.getElementById('captcha_reg'), { 'sitekey' : '6LcI6RETAAAAAOGz1Pbig57ErQ70tIRlvbhECQIw' });
 	widgetId2 = grecaptcha.render(document.getElementById('captcha_lost'), { 'sitekey' : '6LcI6RETAAAAAOGz1Pbig57ErQ70tIRlvbhECQIw' });

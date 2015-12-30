@@ -358,16 +358,28 @@ function lepus_dnsValid($type, $value, $j = 'ok'){
 	return $j;
 }
 
+function lepus_get_tiketLabel($id, $uid, $tid, $access){
+	global $db;
+	$query = $db->prepare("SELECT * FROM `support_msg` WHERE `tid` = :tid ORDER BY `time` DESC LIMIT 1"); //
+	$query->bindParam(':tid', $tid, PDO::PARAM_STR);
+	$query->execute();
+	$row = $query->fetch();
+	if($row['uid'] != $uid){
+		$info = [1 => 'Ответ получен', 2 => 'Закрыт'];
+		$label = [1 => 'success', 2 => 'danger'];
+	}else{
+		if($access > 1){
+			$info = [1 => 'Обработан', 2 => 'Закрыт'];
+		}else{
+			$info = [1 => 'В обработке', 2 => 'Закрыт'];
+		}
+		$label = [1 => 'warning', 2 => 'danger'];
+	}
+	return  ['info' => $info[$id], 'label' => $label[$id]];
+}
+
 function lepus_get_supportList($uid, $access){
 	global $db;
-	function tiket_status($id){
-		$arr = [1 => 'Открыт', 2 => 'Закрыт'];
-		return $arr[$id];
-	}
-	function tiket_label($id){
-		$arr = [1 => 'success', 2 => 'warning', 3 => 'danger'];
-		return $arr[$id];
-	}
 	if($access >= 2){
 		$query = $db->prepare("SELECT * FROM `support`");
 	}else{
@@ -378,7 +390,8 @@ function lepus_get_supportList($uid, $access){
 	while($row = $query->fetch()){
 		if(!empty($row['open'])) $row['open'] = date("Y-m-d H:i", $row['open']); else $row['open'] = '-';
 		if(!empty($row['last'])) $row['last'] = date("Y-m-d H:i", $row['last']); else $row['last'] = '-';
-		$data .= "<tr><td><a href=\"/pages/tiket.php?id={$row['id']}\" title=\"Открыть\">#".$row['id']."</a></td><td>".$row['title']."</td><td>".$row['open']."</td><td>".$row['last']."</td><td style=\"padding-top: 11px;\"><span class=\"label label-pill label-".tiket_label($row['status'])." myLabel\">".tiket_status($row['status'])."</span></td></tr>";
+		$ldata = lepus_get_tiketLabel($row['status'], $uid, $row['id'], $access);
+		$data .= "<tr><td><a href=\"/pages/tiket.php?id={$row['id']}\" title=\"Открыть\">#".$row['id']."</a></td><td>".$row['title']."</td><td>".$row['open']."</td><td>".$row['last']."</td><td style=\"padding-top: 11px;\"><span class=\"label label-pill label-".$ldata['label']." myLabel\">".$ldata['info']."</span></td></tr>";
 	}
 	return $data;
 }
@@ -444,8 +457,18 @@ function support_msg($uid, $tid, $access){
 	global $db;
 	if($access > 1 && $_POST['msg'] != 'END' && $_POST['msg'] != 'OPEN') $_POST['msg'] .= "\n\n\n[i]С уважением, команда технической поддержки.[/i]";
 	$msg = parse_bb_code(nl2br(htmlentities($_POST['msg'], ENT_QUOTES, 'UTF-8')));
-	if($msg == 'END') $msg = '<span class="label label-pill label-danger myLabel">Тикет закрыт</span>';
+	if($msg == 'END'){
+		$msg = '<span class="label label-pill label-danger myLabel">Тикет закрыт</span>';
+		$query = $db->prepare("UPDATE `support` SET `status` = 2 WHERE `id` = :tid");
+		$query->bindParam(':tid', $tid, PDO::PARAM_STR);
+		$query->execute();
+	}
 	if($msg == 'OPEN') $msg = '<span class="label label-pill label-success myLabel">Тикет открыт</span>';
+
+	$query = $db->prepare("UPDATE `support` SET `last` = :time WHERE `id` = :tid");
+	$query->bindParam(':time', time(), PDO::PARAM_STR);
+	$query->bindParam(':tid', $tid, PDO::PARAM_STR);
+	$query->execute();
 
 	$query = $db->prepare("INSERT INTO `support_msg` (`tid`, `msg`, `uid`, `time`) VALUES (:tid, :msg, :uid, :time)");
 	$query->bindParam(':tid', $tid, PDO::PARAM_STR);

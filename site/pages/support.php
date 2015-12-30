@@ -69,7 +69,7 @@ if(empty($user)){
 												<th>ID</th>
 												<th>Тема</th>
 												<th>Создан</th>
-												<th>Ответ</th>
+												<th>Последний ответ</th>
 												<th>Статус</th>
 											</tr>
 										</thead>

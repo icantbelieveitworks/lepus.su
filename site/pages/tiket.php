@@ -11,6 +11,11 @@ if(empty($user)){
 }
 $tmpData = lepus_get_supportMsg($_GET['id'], $user['id'], $user['data']['access']);
 if(!is_array($tmpData)) die('no accsess');
+$tmpTitle = '';
+if(strlen($tmpData['title']) > 30){
+	$tmpTitle = "title='{$tmpData['title']}'";
+	$tmpData['title'] = mb_substr($tmpData['title'], 0, 28,'utf-8')."...";	 
+}
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
@@ -83,7 +88,7 @@ if(!is_array($tmpData)) die('no accsess');
 				<div class="content-box">
 					<div class="content-info">
 						<div class="content-text">
-							<div class="page-title"><?php echo $tmpData['title']; ?></div>
+							<div class="page-title" <?php echo $tmpTitle; ?>><?php echo "Тикет #".$_GET['id'].": {$tmpData['title']}"; ?></div>
 							<div class="row">					
 								<div class="col-lg-12">
 									<div id="tiketStatus1" <?php if($tmpData['status'] == 2) echo 'style="display: none;"'; ?>>

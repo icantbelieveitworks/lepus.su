@@ -388,7 +388,12 @@ function lepus_get_supportList($uid, $access){
 		if(!empty($row['open'])) $row['open'] = date("Y-m-d H:i", $row['open']); else $row['open'] = '-';
 		if(!empty($row['last'])) $row['last'] = date("Y-m-d H:i", $row['last']); else $row['last'] = '-';
 		$ldata = lepus_get_tiketLabel($row['status'], $uid, $row['id'], $access);
-		$data .= "<tr><td><a href=\"/pages/tiket.php?id={$row['id']}\" title=\"Открыть\">#".$row['id']."</a></td><td>".$row['title']."</td><td>".$row['open']."</td><td>".$row['last']."</td><td style=\"padding-top: 11px;\"><span class=\"label label-pill label-".$ldata['label']." myLabel\">".$ldata['info']."</span></td></tr>";
+		if(strlen($row['title']) > 25){
+			$tmpTitle = "title='{$row['title']}'";
+			$row['title'] = mb_substr($row['title'], 0, 23,'utf-8')."...";	 
+		}
+		$data .= "<tr><td><a href=\"/pages/tiket.php?id={$row['id']}\" title=\"Открыть\">#".$row['id']."</a></td><td $tmpTitle>".$row['title']."</td><td>".$row['open']."</td><td>".$row['last']."</td><td style=\"padding-top: 11px;\"><span class=\"label label-pill label-".$ldata['label']." myLabel\">".$ldata['info']."</span></td></tr>";
+		$tmpTitle = '';
 	}
 	return $data;
 }

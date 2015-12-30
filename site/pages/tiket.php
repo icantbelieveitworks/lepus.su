@@ -9,7 +9,7 @@ if(empty($user)){
 	header('refresh: 3; url=http://lepus.dev');
 	die;
 }
-$tmpData = lepus_get_supportMsg($user['id'], $user['data']['access']);
+$tmpData = lepus_get_supportMsg($_GET['id'], $user['id'], $user['data']['access']);
 if(!is_array($tmpData)) die('no accsess');
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -55,14 +55,18 @@ if(!is_array($tmpData)) die('no accsess');
 								<div class="col-lg-12">							
 									<textarea id="tiketMsg" class="form-control" rows="5" id="comment" style="resize:vertical;" placeholder=""></textarea>
 									<input id="tiketID" type="hidden" value="<?php echo $_GET['id']; ?>">
-									<div class="form-inline" style="padding-top: 7px;">
-										<center>
-											<input class="form-control btn btn-sm btn-danger" style="width: 49%;" data-tiket-send-msg type="submit" value="Написать ответ в тикет">
-											<input class="form-control btn btn-sm btn-danger" style="width: 49%;" type="submit" value="Проблема решена">
-										</center>
-									</div>
+									
+										<div class="form-inline" style="padding-top: 7px;">
+											<center>
+												<input class="form-control btn btn-sm btn-danger" style="width: 49%;" data-tiket-send-msg type="submit" value="Написать ответ в тикет">
+												<input class="form-control btn btn-sm btn-danger" style="width: 49%;" type="submit" value="Проблема решена">
+											</center>
+										</div>
+									
 									<hr>
+									<div id="messageList">
 									<?php echo $tmpData['msg']; ?>
+									</div>
 									<!--<div class="panel panel-danger panelbg">
 										<div class="panel-heading">
 											<span class="label label-pill label-default myLabel">27.12.15 в 21:41</span>

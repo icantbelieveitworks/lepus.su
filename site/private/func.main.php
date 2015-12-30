@@ -396,16 +396,20 @@ function support_create($uid){
 	return $db->lastInsertId();
 }
 
-function lepus_get_supportMsg($uid, $access, $data = ''){
+function lepus_get_supportMsg($tid, $uid, $access, $msgID = 0, $data = ''){
 	global $db;
 	$query = $db->prepare("SELECT * FROM `support` WHERE `id` = :id");
-	$query->bindParam(':id', $_GET['id'], PDO::PARAM_STR);
+	$query->bindParam(':id', $tid, PDO::PARAM_STR);
 	$query->execute();
 	$row = $query->fetch();
 	if($row['uid'] != $uid && $access < 2) return 'no_access';
-
-	$query = $db->prepare("SELECT * FROM `support_msg` WHERE `tid` = :id ORDER BY `time` DESC");
-	$query->bindParam(':id', $row['id'], PDO::PARAM_STR);
+	if($msgID == 0){
+		$query = $db->prepare("SELECT * FROM `support_msg` WHERE `tid` = :id ORDER BY `time` DESC");
+		$query->bindParam(':id', $row['id'], PDO::PARAM_STR);
+	}else{
+		$query = $db->prepare("SELECT * FROM `support_msg` WHERE `tid` = :id ORDER BY `time` DESC");
+		$query->bindParam(':id', $row['id'], PDO::PARAM_STR);
+	}
 	$query->execute();
 	while($msg = $query->fetch()){
 		$tmpQuery = $db->prepare("SELECT * FROM `users` WHERE `id` =:id");
@@ -436,4 +440,5 @@ function support_msg($uid, $tid){
 	$query->bindParam(':uid', $uid, PDO::PARAM_STR);
 	$query->bindParam(':time', time(), PDO::PARAM_STR);
 	$query->execute();
+	return ['tid' => $tid, 'msgID' => $db->lastInsertId()];
 }

@@ -203,8 +203,9 @@ $(document).on("click", "[data-tiket-send-msg]", function(e) {
 	$(this).blur();
 	e.preventDefault();
 	tid = $('input[id=tiketID]').val();
-	msg = $('textarea[id=tiketMsg]').val();	
+	msg = $('textarea[id=tiketMsg]').val();
 	$.post("//"+document.domain+"/public/support.php", {do: 'send_msg', tid: tid, msg: msg}, function( data ){
-		alertify.error(data);
+		$("#messageList").prepend(data);
+		//alertify.error(data);
 	});
 });

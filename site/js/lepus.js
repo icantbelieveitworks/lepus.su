@@ -1,6 +1,6 @@
 var widgetId1;
 var widgetId2;
-var snd	= new Audio("//"+document.domain+"/media/new.ogg");
+var snd = new Audio("//"+document.domain+"/media/new.ogg");
 var onloadCallback = function() {
 	widgetId1 = grecaptcha.render(document.getElementById('captcha_reg'), { 'sitekey' : '6LcI6RETAAAAAOGz1Pbig57ErQ70tIRlvbhECQIw' });
 	widgetId2 = grecaptcha.render(document.getElementById('captcha_lost'), { 'sitekey' : '6LcI6RETAAAAAOGz1Pbig57ErQ70tIRlvbhECQIw' });
@@ -200,14 +200,17 @@ $(document).on("click", "[data-open-new-tiket]", function(e) {
 	});
 });
 
-$(document).on("click", "[data-tiket-send-msg]", function(e) {
+$(document).on("click", "[data-tiket-send-msg], [data-tiket-send-close]", function(e) {
 	$(this).blur();
 	e.preventDefault();
+	input_click = e.target.id;
 	tid = $('input[id=tiketID]').val();
 	msg = $('textarea[id=tiketMsg]').val();
 	count = parseInt($('input[id=countMSG]').val());
+	if(input_click == 'endTiket') msg = 'END';
 	$.post("//"+document.domain+"/public/support.php", {do: 'send_msg', tid: tid, msg: msg}, function( data ){
 		$('input[id=countMSG]').val(count+1);
 		$("#messageList").prepend(data);
+		$('textarea[id=tiketMsg]').val('');
 	});
 });

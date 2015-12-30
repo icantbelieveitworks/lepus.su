@@ -29,7 +29,8 @@ if(!is_array($tmpData)) die('no accsess');
 		<link rel="stylesheet" href="//cdn.datatables.net/plug-ins/1.10.10/integration/bootstrap/3/dataTables.bootstrap.css">
 		<style>
 			.panelbg { background: #FAFAFA; }
-			.myLabel { font-size: 85%; background: #999999;}
+			.myLabel { font-size: 85%; }
+			.myColor { background: #999999; }
 		</style>
 		<script src="/js/jquery.min.js"></script>
 		<script src="//cdn.datatables.net/1.10.10/js/jquery.dataTables.min.js"></script>
@@ -78,8 +79,8 @@ if(!is_array($tmpData)) die('no accsess');
 									
 										<div class="form-inline" style="padding-top: 7px;">
 											<center>
-												<input class="form-control btn btn-sm btn-danger" style="width: 49%;" data-tiket-send-msg type="submit" value="Написать ответ в тикет">
-												<input class="form-control btn btn-sm btn-danger" style="width: 49%;" type="submit" value="Проблема решена">
+												<input id="sendMSG" class="form-control btn btn-sm btn-danger" style="width: 49%;" data-tiket-send-msg type="submit" value="Написать ответ в тикет">
+												<input id="endTiket" class="form-control btn btn-sm btn-danger" style="width: 49%;" data-tiket-send-close type="submit" value="Проблема решена">
 											</center>
 										</div>
 									

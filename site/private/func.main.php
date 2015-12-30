@@ -434,7 +434,7 @@ function lepus_get_supportMsg($tid, $uid, $access, $msgID = 0, $update = 0, $dat
 			$who = "Пользователь написал ({$tmpRow['login']})";
 		}
 		$msg['time'] = date("Y-m-d H:i", $msg['time']);
-		$data .= "<div class=\"panel $panel panelbg\"><div class=\"panel-heading\"><span class=\"label label-pill label-default myLabel\">{$msg['time']}</span><font color=\"black\"> $who</font></div><div class=\"panel-body\">{$msg['msg']}</div></div>";
+		$data .= "<div class=\"panel $panel panelbg\"><div class=\"panel-heading\"><span class=\"label label-pill label-default myColor myLabel\">{$msg['time']}</span><font color=\"black\"> $who</font></div><div class=\"panel-body\">{$msg['msg']}</div></div>";
 		if($update != 0 && strlen($data) > 10) break 1;
 	}
 	return ['title' => $row['title'], 'msg' => $data, 'countMSG' => $countMSG];
@@ -442,8 +442,10 @@ function lepus_get_supportMsg($tid, $uid, $access, $msgID = 0, $update = 0, $dat
 
 function support_msg($uid, $tid, $access){
 	global $db;
-	if($access > 1) $_POST['msg'] .= "\n\n\n[i]С уважением, команда технической поддержки.[/i]";
+	if($access > 1 && $_POST['msg'] != 'END' && $_POST['msg'] != 'OPEN') $_POST['msg'] .= "\n\n\n[i]С уважением, команда технической поддержки.[/i]";
 	$msg = parse_bb_code(nl2br(htmlentities($_POST['msg'], ENT_QUOTES, 'UTF-8')));
+	if($msg == 'END') $msg = '<span class="label label-pill label-danger myLabel">Тикет закрыт</span>';
+	if($msg == 'OPEN') $msg = '<span class="label label-pill label-success myLabel">Тикет открыт</span>';
 
 	$query = $db->prepare("INSERT INTO `support_msg` (`tid`, `msg`, `uid`, `time`) VALUES (:tid, :msg, :uid, :time)");
 	$query->bindParam(':tid', $tid, PDO::PARAM_STR);

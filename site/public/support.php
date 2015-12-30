@@ -13,4 +13,9 @@ switch($_POST['do']){
 		$tmpData = lepus_get_supportMsg($tmpData['tid'], $user['id'], $user['data']['access'], $tmpData['msgID']);
 		echo $tmpData['msg'];
 	break;
+	case 'update_msg':
+		$tmpData = lepus_get_supportMsg($_POST["tid"], $user['id'], $user['data']['access'], 0, $_POST["count"]);
+		if(!is_array($tmpData)) echo "no_mes";
+			else echo $tmpData['msg'];
+	break;
 }

@@ -204,8 +204,9 @@ $(document).on("click", "[data-tiket-send-msg]", function(e) {
 	e.preventDefault();
 	tid = $('input[id=tiketID]').val();
 	msg = $('textarea[id=tiketMsg]').val();
+	count = parseInt($('input[id=countMSG]').val());
 	$.post("//"+document.domain+"/public/support.php", {do: 'send_msg', tid: tid, msg: msg}, function( data ){
+		$('input[id=countMSG]').val(count+1);
 		$("#messageList").prepend(data);
-		//alertify.error(data);
 	});
 });

@@ -396,7 +396,7 @@ function support_create($uid){
 	return $db->lastInsertId();
 }
 
-function lepus_get_supportMsg($tid, $uid, $access, $msgID = 0, $data = ''){
+function lepus_get_supportMsg($tid, $uid, $access, $msgID = 0, $update = 0, $data = '', $j = 0){
 	global $db;
 	$query = $db->prepare("SELECT * FROM `support` WHERE `id` = :id");
 	$query->bindParam(':id', $tid, PDO::PARAM_STR);
@@ -404,14 +404,23 @@ function lepus_get_supportMsg($tid, $uid, $access, $msgID = 0, $data = ''){
 	$row = $query->fetch();
 	if($row['uid'] != $uid && $access < 2) return 'no_access';
 	if($msgID == 0){
-		$query = $db->prepare("SELECT * FROM `support_msg` WHERE `tid` = :id ORDER BY `time` DESC");
-		$query->bindParam(':id', $row['id'], PDO::PARAM_STR);
+		if($update != 0){
+			$query = $db->prepare("SELECT * FROM `support_msg` WHERE `tid` = :tid ORDER BY `time` ASC");
+		}else{
+			$query = $db->prepare("SELECT * FROM `support_msg` WHERE `tid` = :tid ORDER BY `time` DESC");
+		}
+		$query->bindParam(':tid', $tid, PDO::PARAM_STR);
 	}else{
-		$query = $db->prepare("SELECT * FROM `support_msg` WHERE `tid` = :id ORDER BY `time` DESC");
-		$query->bindParam(':id', $row['id'], PDO::PARAM_STR);
+		$query = $db->prepare("SELECT * FROM `support_msg` WHERE `id` = :id AND `tid` = :tid");
+		$query->bindParam(':id', $msgID, PDO::PARAM_STR);
+		$query->bindParam(':tid', $tid, PDO::PARAM_STR);
 	}
 	$query->execute();
+	$countMSG = $query->rowCount();
+	if($update != 0 && $countMSG <= $update ) return 'no_new_msg';
 	while($msg = $query->fetch()){
+		$j++;
+		if($update != 0 && $update+1 > $j) continue;
 		$tmpQuery = $db->prepare("SELECT * FROM `users` WHERE `id` =:id");
 		$tmpQuery->bindParam(':id', $msg['uid'], PDO::PARAM_STR);
 		$tmpQuery->execute();
@@ -426,8 +435,9 @@ function lepus_get_supportMsg($tid, $uid, $access, $msgID = 0, $data = ''){
 		}
 		$msg['time'] = date("Y-m-d H:i", $msg['time']);
 		$data .= "<div class=\"panel $panel panelbg\"><div class=\"panel-heading\"><span class=\"label label-pill label-default myLabel\">{$msg['time']}</span><font color=\"black\"> $who</font></div><div class=\"panel-body\">{$msg['msg']}</div></div>";
+		if($update != 0 && strlen($data) > 10) break 1;
 	}
-	return ['title' => $row['title'], 'msg' => $data];
+	return ['title' => $row['title'], 'msg' => $data, 'countMSG' => $countMSG];
 }
 
 function support_msg($uid, $tid){

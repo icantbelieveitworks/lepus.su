@@ -38,6 +38,24 @@ if(!is_array($tmpData)) die('no accsess');
 		<script type="text/javascript" charset="utf-8"> $(document).ready(function() { $('#supportList').dataTable({ "order": [[ 0, "desc" ]] }); }); </script>
 		<script src="/js/alertify.js"></script>
 		<script src="/js/lepus.js"></script>
+		<script>
+			function f(){
+				count = parseInt($('input[id=countMSG]').val());
+				tid = $('input[id=tiketID]').val();
+				$.post("//"+document.domain+"/public/support.php", {do: 'update_msg', tid: tid, count: count}, function( data ){
+					if(data != 'no_mes'){
+						$('input[id=countMSG]').val(count+1);
+						$("#messageList").prepend(data);		
+					}else{
+						alertify.error(data);
+					}
+				});
+				setTimeout(f, 10000);
+			}
+			$(document).ready(function(){
+				f();
+			});
+		</script>
 	</head>
 	<body>
 		<div class="wrapper">
@@ -50,11 +68,12 @@ if(!is_array($tmpData)) die('no accsess');
 				<div class="content-box">
 					<div class="content-info">
 						<div class="content-text">
-							<div class="page-title"><?php echo $tmpData['title']; ?></div>
+							<div class="page-title"><?php echo $tmpData['title']." ".$tmpData['countMSG']; ?></div>
 							<div class="row">					
 								<div class="col-lg-12">							
 									<textarea id="tiketMsg" class="form-control" rows="5" id="comment" style="resize:vertical;" placeholder=""></textarea>
 									<input id="tiketID" type="hidden" value="<?php echo $_GET['id']; ?>">
+									<input id="countMSG" type="hidden" value=<?php echo $tmpData['countMSG']; ?>>
 									
 										<div class="form-inline" style="padding-top: 7px;">
 											<center>
@@ -65,26 +84,8 @@ if(!is_array($tmpData)) die('no accsess');
 									
 									<hr>
 									<div id="messageList">
-									<?php echo $tmpData['msg']; ?>
-									</div>
-									<!--<div class="panel panel-danger panelbg">
-										<div class="panel-heading">
-											<span class="label label-pill label-default myLabel">27.12.15 в 21:41</span>
-											<font color="black">Ответ службы поддержи</font>
-										</div>
-										<div class="panel-body">
-											Panel content
-										</div>
-									</div>
-									<div class="panel panel-info panelbg">
-										<div class="panel-heading">
-											<span class="label label-pill label-default myLabel">27.12.15 в 14:32</span>
-											<font color="black">Пользователь написал (xxx@xxx.com)</font>
-										</div>
-										<div class="panel-body">
-											Panel content
-										</div>
-									</div> -->			
+										<?php echo $tmpData['msg']; ?>
+									</div>	
 								</div>
 							</div>
 						</div>

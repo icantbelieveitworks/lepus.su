@@ -100,7 +100,10 @@ function error($message, $j = 0){
 			"bad_passwd" => "Неправильный пароль.",
 			"block_user" => "Пользователь заблокирован",
 			"empty_message" => "Пустое сообщение",
-			"no_access" => "Нет доступа"
+			"no_access" => "Нет доступа",
+			"close_tiket" => "Тикет уже закрыт",
+			"already_open" => "Тикет уже открыт",
+			"empty_post_value" => "Пустой POST",
 		];
 		if (array_key_exists($message, $err)) $j = 1;
 	}
@@ -376,13 +379,24 @@ function lepus_get_tiketLabel($id, $uid, $tid, $access){
 	return  ['info' => $info[$id], 'label' => $label[$id]];
 }
 
-function lepus_get_supportList($uid, $access){
+function lepus_get_supportList($uid, $access, $id = 0){
 	global $db;
-	if($access >= 2){
-		$query = $db->prepare("SELECT * FROM `support`");
+	if($access > 1){
+		if($id == 0){
+			$query = $db->prepare("SELECT * FROM `support`");
+		}else{
+			$query = $db->prepare("SELECT * FROM `support` WHERE `id` = :id");
+			$query->bindParam(':id', $id, PDO::PARAM_STR);
+		}
 	}else{
-		$query = $db->prepare("SELECT * FROM `support` WHERE `uid` = :uid");
-		$query->bindParam(':uid', $uid, PDO::PARAM_STR);
+		if($id == 0){
+			$query = $db->prepare("SELECT * FROM `support` WHERE `uid` = :uid");
+			$query->bindParam(':uid', $uid, PDO::PARAM_STR);
+		}else{
+			$query = $db->prepare("SELECT * FROM `support` WHERE `uid` = :uid AND `id` = :id");
+			$query->bindParam(':uid', $uid, PDO::PARAM_STR);
+			$query->bindParam(':id', $id, PDO::PARAM_STR);
+		}
 	}
 	$query->execute();
 	while($row = $query->fetch()){
@@ -393,13 +407,22 @@ function lepus_get_supportList($uid, $access){
 			$tmpTitle = "title='{$row['title']}'";
 			$row['title'] = mb_substr($row['title'], 0, 23,'utf-8')."...";	 
 		}
-		$data .= "<tr><td><a href=\"/pages/tiket.php?id={$row['id']}\" title=\"Открыть\">#".$row['id']."</a></td><td $tmpTitle>".$row['title']."</td><td>".$row['open']."</td><td>".$row['last']."</td><td style=\"padding-top: 11px;\"><span class=\"label label-pill label-".$ldata['label']." myLabel\">".$ldata['info']."</span></td></tr>";
+
+		if($id == 0){
+			$data .= "<tr><td><a href=\"/pages/tiket.php?id={$row['id']}\" title=\"Открыть\">".$row['id']."</a></td><td $tmpTitle>".$row['title']."</td><td>".$row['open']."</td><td>".$row['last']."</td><td style=\"padding-top: 11px;\"><span class=\"label label-pill label-".$ldata['label']." myLabel\">".$ldata['info']."</span></td></tr>";
+		}else{
+			$data = ['a' => "<a href=\"/pages/tiket.php?id={$row['id']}\" title=\"Открыть\">".$row['id']."</a>",
+					 'b' => $row['title'],
+					 'c' => $row['open'],
+					 'd' => $row['last'],
+					 'e' => "<span class=\"label label-pill label-".$ldata['label']." myLabel\">".$ldata['info']."</span>"];
+		}
 		$tmpTitle = '';
 	}
 	return $data;
 }
 
-function support_create($uid){
+function support_create($uid, $title, $msg){
 	global $db;
 	if(empty(trim($_POST['title'])) || empty(trim($_POST['msg']))) return('empty_post_value');
 	$title = filter_var($_POST["title"], FILTER_SANITIZE_STRING);
@@ -462,7 +485,7 @@ function lepus_get_supportMsg($tid, $uid, $access, $msgID = 0, $update = 0, $dat
 	return ['title' => $row['title'], 'msg' => $data, 'countMSG' => $countMSG, 'status' => $tstatus];
 }
 
-function support_msg($uid, $tid, $access){
+function support_msg($uid, $tid, $access, $no_last = 0){
 	global $db;
 	$tiket = lepus_get_supportAccess($tid);
 	if($tiket['uid'] != $uid && $access < 2) return 'no_access';
@@ -483,10 +506,12 @@ function support_msg($uid, $tid, $access){
 		$query->bindParam(':tid', $tid, PDO::PARAM_STR);
 		$query->execute();
 	}
-	$query = $db->prepare("UPDATE `support` SET `last` = :time WHERE `id` = :tid");
-	$query->bindParam(':time', time(), PDO::PARAM_STR);
-	$query->bindParam(':tid', $tid, PDO::PARAM_STR);
-	$query->execute();
+	if($no_last == 0){
+		$query = $db->prepare("UPDATE `support` SET `last` = :time WHERE `id` = :tid");
+		$query->bindParam(':time', time(), PDO::PARAM_STR);
+		$query->bindParam(':tid', $tid, PDO::PARAM_STR);
+		$query->execute();
+	}
 	$query = $db->prepare("INSERT INTO `support_msg` (`tid`, `msg`, `uid`, `time`) VALUES (:tid, :msg, :uid, :time)");
 	$query->bindParam(':tid', $tid, PDO::PARAM_STR);
 	$query->bindParam(':msg', $msg, PDO::PARAM_STR);

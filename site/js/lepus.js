@@ -75,7 +75,6 @@ $(document).keypress(function(e) {
 	if(e.which == 13 && document.getElementById("check_auth") !== null) {
 		login_email = $('input[id=login_email]').val();
 		login_passwd = $('input[id=login_passwd]').val();
-
 		$.post("//"+document.domain+"/public/login.php", {command: 'login', email: login_email, passwd: login_passwd}, function( data ){
 			$('#myModal').modal('hide');
 			if(data == '1'){
@@ -107,7 +106,6 @@ $(document).on("click", "[data-do-login]", function(e) {
 		return;
 	});
 });
-
 
 $(document).on("click", "[data-cp-change-passwd]", function(e) {
 	$(this).blur();
@@ -193,10 +191,23 @@ $(document).on("click", "[data-dns-zone-add]", function(e) {
 $(document).on("click", "[data-open-new-tiket]", function(e) {
 	$(this).blur();
 	e.preventDefault();
+	var table = $('#supportList').DataTable();	
 	title = $('input[id=tiketTitle]').val();
 	msg = $('textarea[id=tiketMsg]').val();
-	$.post("//"+document.domain+"/public/support.php", {do: 'new', title: title, msg: msg}, function( data ){
-		alertify.error(data);
+	$.post("//"+document.domain+"/public/support.php", {do: 'new', title: title, msg: msg}, function(json){
+		data = JSON.parse(json);
+		if(data.err == 'OK'){
+			alertify.success("Тикет создан");
+			table.row.add({
+				0:     data.mes.a,
+				1:     data.mes.b,
+				2:     data.mes.c,
+				3:     data.mes.d,
+				4:     data.mes.e,
+			}).draw( false );
+		}else{
+			alertify.error(data.mes);
+		}
 	});
 });
 
@@ -219,8 +230,8 @@ $(document).on("click", "[data-tiket-send-msg], [data-tiket-send-close], [data-t
 	}
 	$.post("//"+document.domain+"/public/support.php", {do: 'send_msg', tid: tid, msg: msg}, function(json){
 		data = JSON.parse(json);
-		console.log(json);
 		if(data.err == 'OK'){
+			alertify.success("Сообщение отправлено");
 			$('input[id=countMSG]').val(count+1);
 			$("#messageList").prepend(data.mes.msg);
 			$('textarea[id=tiketMsg]').val('');

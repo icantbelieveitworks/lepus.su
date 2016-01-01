@@ -491,8 +491,8 @@ function support_msg($uid, $tid, $access, $no_last = 0){
 	if($tiket['uid'] != $uid && $access < 2) return 'no_access';
 	if(strlen($_POST['msg']) < 1) return "empty_message";
 	if($access > 1 && $_POST['msg'] != 'END' && $_POST['msg'] != 'OPEN') $_POST['msg'] .= "\n\n\n[i]С уважением, команда технической поддержки.[/i]";
-	if($tiket['status'] == 2 && $msg != 'OPEN') return 'close_tiket'; // if tiket close => we need first open it
-	if($tiket['status'] == 1 && $msg == 'OPEN') return 'already_open'; // dont open - open tiket
+	if($tiket['status'] == 2 && $_POST['msg'] != 'OPEN') return 'close_tiket'; // if tiket close => we need first open it
+	if($tiket['status'] == 1 && $_POST['msg'] == 'OPEN') return 'already_open'; // dont open - open tiket
 	$msg = parse_bb_code(nl2br(htmlentities($_POST['msg'], ENT_QUOTES, 'UTF-8')));
 	if($msg == 'END'){
 		$msg = '<span class="label label-pill label-danger myLabel">Тикет закрыт</span>';

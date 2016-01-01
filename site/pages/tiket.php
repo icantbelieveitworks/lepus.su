@@ -50,27 +50,27 @@ if(strlen($tmpData['title']) > 30){
 				tid = $('input[id=tiketID]').val();
 				$.post("//"+document.domain+"/public/support.php", {do: 'update_msg', tid: tid, count: count}, function(json){
 					data = JSON.parse(json);
-					if(data.error == 'OK'){
+					if(data.err == 'OK'){
 						if(data.mes != 'no_mes'){
 							snd.play();
+							alertify.success('Новое сообщение');
 							$('input[id=countMSG]').val(count+1);
-							$("#messageList").prepend(data.mes);		
+							$("#messageList").prepend(data.mes.msg);		
 						}
-						if(data.do){
-							if(data.do == 1){
+						if(data.mes.status){
+							if(data.mes.status == 1){
 								$("#tiketStatus1").show();
 								$("#tiketStatus2").hide();
 							}else{
 								$("#tiketStatus1").hide();
 								$("#tiketStatus2").show();
 							}
-							
 						}
 					}else{
-						alertify.error(data.error);
+						alertify.error(data.err);
 					}
 				});
-				setTimeout(f,10000);
+				setTimeout(f, 10000);
 			}
 			$(document).ready(function(){
 				f();

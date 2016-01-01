@@ -15,7 +15,6 @@ switch($_POST['do']){
 		if($tmpData['err'] == 'OK')
 			$tmpData = error(lepus_get_supportList($user['id'], $user['data']['access'], $tmpData['mes']['tid']));
 		echo json_encode($tmpData);
-		//var_dump($tmpData);
 	break;
 	case 'send_msg':
 		$tmpData = error(support_msg($user['id'], $_POST['tid'], $user['data']['access']));
@@ -24,9 +23,7 @@ switch($_POST['do']){
 		echo json_encode($tmpData);
 	break;
 	case 'update_msg':
-		$tmpData = lepus_get_supportMsg($_POST['tid'], $user['id'], $user['data']['access'], 0, $_POST['count']);
-		if(!is_array($tmpData)) $tmpArr = ['error' => 'OK', 'mes' => 'no_mes'];
-			else $tmpArr = ['error' => 'OK', 'mes' => $tmpData['msg'], 'do' => $tmpData['status']];
-		echo json_encode($tmpArr);			
+		$tmpData = error(lepus_get_supportMsg($_POST['tid'], $user['id'], $user['data']['access'], 0, $_POST['count']));
+		echo json_encode($tmpData);			
 	break;
 }

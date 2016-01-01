@@ -217,9 +217,15 @@ $(document).on("click", "[data-tiket-send-msg], [data-tiket-send-close], [data-t
 		$("#tiketStatus1").show();
 		$("#tiketStatus2").hide();
 	}
-	$.post("//"+document.domain+"/public/support.php", {do: 'send_msg', tid: tid, msg: msg}, function( data ){
-		$('input[id=countMSG]').val(count+1);
-		$("#messageList").prepend(data);
-		$('textarea[id=tiketMsg]').val('');
+	$.post("//"+document.domain+"/public/support.php", {do: 'send_msg', tid: tid, msg: msg}, function(json){
+		data = JSON.parse(json);
+		console.log(json);
+		if(data.err == 'OK'){
+			$('input[id=countMSG]').val(count+1);
+			$("#messageList").prepend(data.mes.msg);
+			$('textarea[id=tiketMsg]').val('');
+		}else{
+			alertify.error(data.mes);
+		}
 	});
 });

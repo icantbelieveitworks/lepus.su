@@ -98,15 +98,16 @@ function error($message, $j = 0){
 			"no_auth" => "Неудачная попытка входа.",
 			"no_user" => "Неправильный логин.",
 			"bad_passwd" => "Неправильный пароль.",
-			"block_user" => "Пользователь заблокирован"
+			"block_user" => "Пользователь заблокирован",
+			"empty_message" => "Пустое сообщение"
 		];
 		if (array_key_exists($message, $err)) $j = 1;
 	}
 	
 	if($j == 1){
-		$message = ['mess' => $message, 'err' => $err[$message]];
+		$message = ['mes' => $err[$message], 'err' => $message];
 	}else{
-		$message = ['mess' => $message, 'err' => 'OK'];
+		$message = ['mes' => $message, 'err' => 'OK'];
 	}
 	
 	return $message;
@@ -304,7 +305,6 @@ function lepus_get_dnsRecord($type, $id){
 	$query->bindParam(':id', $id, PDO::PARAM_STR);
 	$query->execute();
 	$row = $query->fetch();
-	//return htmlspecialchars(idn_to_utf8($row[$type]));
 	return idn_to_utf8($row[$type]);
 }
 
@@ -417,7 +417,7 @@ function lepus_get_supportMsg($tid, $uid, $access, $msgID = 0, $update = 0, $dat
 	$query->bindParam(':id', $tid, PDO::PARAM_STR);
 	$query->execute();
 	$row = $query->fetch();
-	if($row['uid'] != $uid && $access < 2) return 'no_access';
+	if($row['uid'] != $uid && $access < 2) return 'no_access '.$access;
 	$tstatus = $row['status'];
 	if($msgID == 0){
 		if($update != 0){
@@ -458,7 +458,17 @@ function lepus_get_supportMsg($tid, $uid, $access, $msgID = 0, $update = 0, $dat
 
 function support_msg($uid, $tid, $access){
 	global $db;
+
+	$query = $db->prepare("SELECT * FROM `support` WHERE `id` = :tid");
+	$query->bindParam(':tid', $tid, PDO::PARAM_STR);
+	$query->execute();
+	$tiket = $query->fetch();
+
+	if(strlen($_POST['msg']) < 1) return "empty_message";
+	
 	if($access > 1 && $_POST['msg'] != 'END' && $_POST['msg'] != 'OPEN') $_POST['msg'] .= "\n\n\n[i]С уважением, команда технической поддержки.[/i]";
+	if($tiket['status'] == 2 && $msg != 'OPEN') return 'close_tiket'; // if tiket close => we need first open it
+	if($tiket['status'] == 1 && $msg == 'OPEN') return 'already_open'; // dont open - open tiket
 	$msg = parse_bb_code(nl2br(htmlentities($_POST['msg'], ENT_QUOTES, 'UTF-8')));
 	if($msg == 'END'){
 		$msg = '<span class="label label-pill label-danger myLabel">Тикет закрыт</span>';
@@ -472,6 +482,8 @@ function support_msg($uid, $tid, $access){
 		$query->bindParam(':tid', $tid, PDO::PARAM_STR);
 		$query->execute();
 	}
+
+	
 
 	$query = $db->prepare("UPDATE `support` SET `last` = :time WHERE `id` = :tid");
 	$query->bindParam(':time', time(), PDO::PARAM_STR);

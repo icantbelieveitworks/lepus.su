@@ -425,7 +425,7 @@ function lepus_get_supportList($uid, $access, $id = 0){
 function support_create($uid, $title, $msg){
 	global $db;
 	if(empty(trim($_POST['title'])) || empty(trim($_POST['msg']))) return('empty_post_value');
-	$title = filter_var($_POST["title"], FILTER_SANITIZE_STRING);
+	$title = filter_var($_POST["title"], FILTER_SANITIZE_STRING);	
 	$msg = nl2br(htmlentities($_POST["msg"], ENT_QUOTES, 'UTF-8'));
 	$query = $db->prepare("INSERT INTO `support` (`uid`, `title`, `open`, `status`) VALUES (:uid, :title, :open, 1)");
 	$query->bindParam(':uid', $uid, PDO::PARAM_STR);

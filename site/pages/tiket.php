@@ -6,11 +6,16 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/init/session.php');
 require_once($_SERVER['DOCUMENT_ROOT'].'/private/func.main.php');
 require_once($_SERVER['DOCUMENT_ROOT'].'/private/auth.php');
 if(empty($user)){
-	header('refresh: 3; url=http://lepus.dev');
+	header('refresh: 3; url=https://lepus.dev');
 	die;
 }
+$_GET['id'] = intval($_GET['id']);
 $tmpData = lepus_get_supportMsg($_GET['id'], $user['id'], $user['data']['access']);
 if(!is_array($tmpData)) die('no accsess');
+if($tmpData["title"] === NULL){
+	header('refresh: 3; url=https://lepus.dev/pages/support.php');
+	die;
+}
 $tmpTitle = '';
 if(strlen($tmpData['title']) > 30){
 	$tmpTitle = "title='{$tmpData['title']}'";
@@ -36,6 +41,7 @@ if(strlen($tmpData['title']) > 30){
 			.panelbg { background: #FAFAFA; }
 			.myLabel { font-size: 85%; }
 			.myColor { background: #999999; }
+			blockquote { background: #f9f9f9; border-left: 10px solid #ccc; margin: 1.5em 10px; padding: 0.5em 10px; font-size: 100%; }
 		</style>
 		<script src="/js/jquery.min.js"></script>
 		<script src="//cdn.datatables.net/1.10.10/js/jquery.dataTables.min.js"></script>
@@ -92,6 +98,17 @@ if(strlen($tmpData['title']) > 30){
 							<div class="row">					
 								<div class="col-lg-12">
 									<div id="tiketStatus1" <?php if($tmpData['status'] == 2) echo 'style="display: none;"'; ?>>
+									<blockquote>
+										[b]жирный шрифт[/b] => <b>жирный шрифт</b><br/>
+										[i]наклонный шрифт[/i] => <i>наклонный шрифт</i><br/>
+										[u]подчеркнутый текст[/u] => <u>подчеркнутый текст</u><br/>
+										[s]зачеркнутый шрифт[/s] => <s>зачеркнутый шрифт</s><br/><br/>
+										[url]http://google.ru[/url] => <a href="http://google.ru" target="_blank">google.ru</a><br>
+										[urls]https://google.ru[/urls] => <a href="https://google.ru" target="_blank">google.ru</a><br><br>
+										[url=http://google.ru]google google google![/url] => <a href="http://google.ru" target="_blank"> google google google!</a><br>
+										[urls=https://google.ru]google google google![/urls] => <a href="https://google.ru" target="_blank">google google google!</a><br>	
+									</blockquote>
+									<hr>
 									<textarea id="tiketMsg" class="form-control" rows="5" id="comment" style="resize:vertical;" placeholder=""></textarea>
 									<input id="tiketID" type="hidden" value="<?php echo $_GET['id']; ?>">
 									<input id="countMSG" type="hidden" value="<?php echo $tmpData['countMSG']; ?>">

@@ -74,13 +74,12 @@ $(document).on("click", "[data-lost-passwd]", function(e) {
 var lepus_login = function() {
 	login_email = $('input[id=login_email]').val();
 	login_passwd = $('input[id=login_passwd]').val();
-	$.post("//"+document.domain+"/public/login.php", {command: 'login', email: login_email, passwd: login_passwd}, function( data ){
-		$('#myModal').modal('hide');
-		if(data == '1'){
-			alertify.success("Success");
+	$.post("//"+document.domain+"/public/login.php", {command: 'login', email: login_email, passwd: login_passwd}, function(json){
+		data = JSON.parse(json);
+		if(data.err == 'OK'){
 			location.reload();
 		}else{
-			alertify.error(data);
+			alertify.error(data.mes);
 		}
 		return;
 	});

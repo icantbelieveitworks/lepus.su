@@ -44,6 +44,8 @@ function lost_passwd($login){
 
 function login($login, $passwd){
 	global $db;
+	if(empty($login) || empty($passwd)) return 'empty_post_value';
+	if(!filter_var($login, FILTER_VALIDATE_EMAIL)) return 'bad_email';
 	$is_user = is_lepus_user($login);
 	if($is_user['0'] != 1) return 'no_user';
 	$row = $is_user['1'];
@@ -89,15 +91,16 @@ function auth($id, $session){
 function error($message, $j = 0){
 	if(!is_array($message)){
 		$err = [
-			"no_auth" => "Неудачная попытка входа.",
-			"no_user" => "Неправильный логин.",
-			"bad_passwd" => "Неправильный пароль.",
+			"no_auth" => "Неудачная попытка входа",
+			"no_user" => "Неправильный логин",
+			"bad_passwd" => "Неправильный пароль",
 			"block_user" => "Пользователь заблокирован",
 			"empty_message" => "Пустое сообщение",
 			"no_access" => "Нет доступа",
 			"close_tiket" => "Тикет уже закрыт",
 			"already_open" => "Тикет уже открыт",
 			"empty_post_value" => "Пустой POST",
+			"bad_email" => "Неправильный email"
 		];
 		if (array_key_exists($message, $err)) $j = 1;
 	}

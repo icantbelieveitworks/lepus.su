@@ -72,8 +72,6 @@ $(document).on("click", "[data-lost-passwd]", function(e) {
 });
 
 var lepus_login = function() {
-	alertify.error("lolka!");
-	return;
 	login_email = $('input[id=login_email]').val();
 	login_passwd = $('input[id=login_passwd]').val();
 	$.post("//"+document.domain+"/public/login.php", {command: 'login', email: login_email, passwd: login_passwd}, function( data ){
@@ -202,10 +200,7 @@ $(document).on("click", "[data-open-new-tiket]", function(e) {
 	});
 });
 
-$(document).on("click", "[data-tiket-send-msg], [data-tiket-send-close], [data-tiket-send-reopen]", function(e) {
-	$(this).blur();
-	e.preventDefault();
-	input_click = e.target.id;
+var lepus_support_send = function(input_click) {
 	tid = $('input[id=tiketID]').val();
 	msg = $('textarea[id=tiketMsg]').val();
 	count = parseInt($('input[id=countMSG]').val());
@@ -230,4 +225,15 @@ $(document).on("click", "[data-tiket-send-msg], [data-tiket-send-close], [data-t
 			alertify.error(data.mes);
 		}
 	});
+}
+
+$(document).keydown(function(e) {
+    if (e.ctrlKey && e.keyCode == 13 && document.getElementById("sendMSG") !== null)
+		lepus_support_send();
+});
+
+$(document).on("click", "[data-tiket-send-msg], [data-tiket-send-close], [data-tiket-send-reopen]", function(e) {
+	$(this).blur();
+	e.preventDefault();
+	lepus_support_send(e.target.id);
 });

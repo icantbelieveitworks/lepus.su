@@ -51,22 +51,18 @@ function login($login, $passwd){
 		$new_passwd = rehash($passwd, $row['passwd']);
 		$_SESSION['id'] = $row['id'];
 		$_SESSION['sess'] = hash('sha512' ,$login.$passwd.$_SERVER['REMOTE_ADDR'].$_SERVER['HTTP_USER_AGENT']);
-		
 		if($new_passwd != 'no_hash'){
 			$query = $db->prepare("UPDATE `users` SET `passwd` = :passwd WHERE `id` = :id");
 			$query->bindParam(':passwd', $new_passwd, PDO::PARAM_STR);
 			$query->bindParam(':id', $row['id'], PDO::PARAM_STR);
 			$query->execute();
 		}
-			
 		$query = $db->prepare("UPDATE `users` SET `session` = :sess WHERE `id` = :id");
 		$query->bindParam(':id', $row['id'], PDO::PARAM_STR);
 		$query->bindParam(':sess', $_SESSION['sess'], PDO::PARAM_STR);
 		$query->execute();
-		
 		lepus_log_ip($row['id'], ip2long($_SERVER["REMOTE_ADDR"]));
 		return 'enter';
-		
 	} else return 'bad_passwd';
 }
 
@@ -75,8 +71,7 @@ function auth($id, $session){
 	$query = $db->prepare("SELECT * FROM `users` WHERE `id` = :id AND `session` = :session");
 	$query->bindParam(':id', $id, PDO::PARAM_STR);
 	$query->bindParam(':session', $session, PDO::PARAM_STR);
-	$query->execute();
-	
+	$query->execute();	
 	if($query->rowCount() != 1){
 		$query = $db->prepare("UPDATE `users` SET `session` = NULL WHERE `login` = :login AND `session` = :session");
 		$query->bindParam(':login', $login, PDO::PARAM_STR);
@@ -87,7 +82,6 @@ function auth($id, $session){
 		session_destroy();
 		return 'no_auth';
 	}
-	
 	$row = $query->fetch();
 	return ["id" => $row['id'], "login" => $row['login'], "passwd" => $row['passwd'], "data" => $row['data']];
 }
@@ -107,13 +101,8 @@ function error($message, $j = 0){
 		];
 		if (array_key_exists($message, $err)) $j = 1;
 	}
-	
-	if($j == 1){
-		$message = ['mes' => $err[$message], 'err' => $message];
-	}else{
-		$message = ['mes' => $message, 'err' => 'OK'];
-	}
-	
+	if($j == 1) $message = ['mes' => $err[$message], 'err' => $message];
+	else $message = ['mes' => $message, 'err' => 'OK'];
 	return $message;
 }
 
@@ -178,7 +167,6 @@ function lepus_new_account($login){
 	$is_user = is_lepus_user($login);
 	if($is_user['0'] != 0) return 'user_exist';
 	$passwd = genRandStr(8);
-	// {"balance":500,"phone":"7495xxxx80","regDate":"1448450707","access":"1","lastIP":"127.0.0.1","apiKey":"ec374361f6e0d83147924890027c28e8"}
 	$data = ['balance' => 0, 'phone' => NULL, 'regDate' => time(), 'access' => 1, 'lastIP' => NULL, 'apiKey' => genRandStr(32)];
 	$json = json_encode($data);
 	$query = $db->prepare("INSERT INTO `users` (`login`, `passwd`, `data`) VALUES (:login, :passwd, :data)");
@@ -191,10 +179,8 @@ function lepus_new_account($login){
 
 function lepus_log_ip($id, $ip){
 	global $db; $info = get_browser(null, true);
-
 	if(preg_match('/[^0-9A-Za-z.]/', $info['platform'])) $info['platform'] = "unknown";
 	if(preg_match('/[^0-9A-Za-z.]/', $info['browser'])) $info['browser'] = "unknown";
-	
 	$query = $db->prepare("INSERT INTO `log_ip` (`uid`, `ip`, `platform`, `browser`, `time`) VALUES (:id, :ip, :platform, :browser, :time)");
 	$query->bindParam(':id', $id, PDO::PARAM_STR);
 	$query->bindParam(':ip', $ip, PDO::PARAM_STR);
@@ -284,7 +270,6 @@ function lepus_delete_dnsDomain($id){
 	$query = $pdns->prepare("DELETE FROM `domains` WHERE `id` = :id");
 	$query->bindParam(':id', $id, PDO::PARAM_STR);
 	$query->execute();
-
 	$query = $pdns->prepare("DELETE FROM `records` WHERE `domain_id` = :id");
 	$query->bindParam(':id', $id, PDO::PARAM_STR);
 	$query->execute();
@@ -407,7 +392,6 @@ function lepus_get_supportList($uid, $access, $id = 0){
 			$tmpTitle = "title='{$row['title']}'";
 			$row['title'] = mb_substr($row['title'], 0, 23,'utf-8')."...";	 
 		}
-
 		if($id == 0){
 			$data .= "<tr><td><a href=\"/pages/tiket.php?id={$row['id']}\" title=\"Открыть\">".$row['id']."</a></td><td $tmpTitle>".$row['title']."</td><td>".$row['open']."</td><td>".$row['last']."</td><td style=\"padding-top: 11px;\"><span class=\"label label-pill label-".$ldata['label']." myLabel\">".$ldata['info']."</span></td></tr>";
 		}else{
@@ -529,4 +513,3 @@ function parse_bb_code($text){
 	$text = preg_replace('/\[urls\s?=\s?([\'"]?)(?:https:\/\/)?(.+)\1\](.*?)\[\/urls\]/', "<a href=\"https://$2\" target=\"_blank\">$3</a>", $text);
 	return $text;
 }
-

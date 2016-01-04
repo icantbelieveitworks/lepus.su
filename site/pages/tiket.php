@@ -6,8 +6,8 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/init/session.php');
 require_once($_SERVER['DOCUMENT_ROOT'].'/private/func.main.php');
 require_once($_SERVER['DOCUMENT_ROOT'].'/private/auth.php');
 if(empty($user)){
-	header('refresh: 3; url=https://lepus.dev');
-	die;
+	$tmpData = error('no_auth_page');
+	die(lepus_error_page($tmpData['mes']));
 }
 $_GET['id'] = intval($_GET['id']);
 $tmpData = lepus_get_supportMsg($_GET['id'], $user['id'], $user['data']['access']);

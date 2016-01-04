@@ -110,7 +110,8 @@ function error($message, $j = 0){
 			"user_exist" => "Такой пользователь уже существует",
 			"captcha_fail" => "Проверка на бота не пройдена",
 			"wrong_hash" => "Неправильный hash",
-			"lost_passwd_time" => "Ссылка устарела, для восстановления пароля - получите новую ссылку"
+			"lost_passwd_time" => "Ссылка устарела, для восстановления пароля - получите новую ссылку",
+			"no_auth_page" => "У вас нет доступа к этой странице"
 		];
 		if (array_key_exists($message, $err)) $j = 1;
 	}
@@ -531,5 +532,5 @@ function parse_bb_code($text){
 }
 
 function lepus_error_page($mes){
-	return "<html><head><title>Lepus info page</title><meta http-equiv=\"refresh\" content=\"5;url=https://lepus.dev\"><style>.boxInfo{width: 80%;max-width: 600px;margin: 2em auto;padding: 1em;box-shadow: 0 0 10px 5px rgba(221, 221, 221, 1);}</style><head><body><div class=\"boxInfo\">$mes<br/>Через 5 секунд вы будете перенаправлены на главную страницу сайта.</div></body></html>";
+	return "<html><head><title>Lepus info page</title><meta http-equiv=\"refresh\" content=\"5;url=https://lepus.dev\"><style>.boxInfo{width: 80%;max-width: 600px;margin: 2em auto;padding: 1em;box-shadow: 0 0 10px 5px rgba(221, 221, 221, 1);word-wrap: break-word;}</style><head><body><div class=\"boxInfo\">$mes<br/>Через 5 секунд вы будете перенаправлены на главную страницу сайта.</div></body></html>";
 }

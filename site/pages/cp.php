@@ -6,8 +6,8 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/init/session.php');
 require_once($_SERVER['DOCUMENT_ROOT'].'/private/func.main.php');
 require_once($_SERVER['DOCUMENT_ROOT'].'/private/auth.php');
 if(empty($user)){
-	header('refresh: 3; url=http://lepus.dev');
-	die;
+	$tmpData = error('no_auth_page');
+	die(lepus_error_page($tmpData['mes']));
 }
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -25,12 +25,7 @@ if(empty($user)){
 		<link rel="stylesheet" type="text/css" href="/css/alertify.core.css" />
 		<link rel="stylesheet" type="text/css" href="/css/alertify.bootstrap.css" />
 		<link rel="stylesheet" href="//cdn.datatables.net/plug-ins/1.10.10/integration/bootstrap/3/dataTables.bootstrap.css">
-		<style>
-td,th {
-  text-align: center;
-  vertical-align: middle;
-}
-		</style>
+		<style> td,th { text-align: center; vertical-align: middle; } </style>
 		<script src="/js/jquery.min.js"></script>
 		<script src="//cdn.datatables.net/1.10.10/js/jquery.dataTables.min.js"></script>
 		<script src="//cdn.datatables.net/plug-ins/1.10.10/integration/bootstrap/3/dataTables.bootstrap.js"></script>

@@ -116,7 +116,9 @@ function error($message, $j = 0){
 			"captcha_fail" => "Проверка на бота не пройдена",
 			"wrong_hash" => "Неправильный hash",
 			"lost_passwd_time" => "Ссылка устарела, для восстановления пароля - получите новую ссылку",
-			"no_auth_page" => "У вас нет доступа к этой странице"
+			"no_auth_page" => "У вас нет доступа к этой странице",
+			"wrong_phone" => "Неправильный телефонный номер",
+			"only_numeric" => "Только цифры"
 		];
 		if (array_key_exists($message, $err)) $j = 1;
 	}
@@ -541,4 +543,13 @@ function parse_bb_code($text){
 
 function lepus_error_page($mes){
 	return "<html><head><title>Lepus info page</title><meta http-equiv=\"refresh\" content=\"5;url=https://lepus.dev\"><style>.boxInfo{width: 80%;max-width: 600px;margin: 2em auto;padding: 1em;box-shadow: 0 0 10px 5px rgba(221, 221, 221, 1);word-wrap: break-word;}</style><head><body><div class=\"boxInfo\">$mes<br/>Через 5 секунд вы будете перенаправлены на главную страницу сайта.</div></body></html>";
+}
+
+function lepus_change_phone($num, $user){
+	if(empty($num)) return 'empty_post_value';
+	if(!ctype_digit($num)) return 'only_numeric';
+	if(strlen($num) > 15) return 'wrong_phone';
+	$user['data']['phone'] = $num;
+	save_user_data($user['id'], $user['data']);
+	return 'Мы сохранили ваш новый номер телефона';
 }

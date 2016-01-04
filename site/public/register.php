@@ -6,9 +6,9 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/init/session.php');
 require_once($_SERVER['DOCUMENT_ROOT'].'/private/func.main.php');
 require_once($_SERVER['DOCUMENT_ROOT'].'/private/recaptcha/check.php');
 
-if(empty($_POST['email'])) die("Empty data");
-if(!filter_var($_POST['email'], FILTER_VALIDATE_EMAIL)) die("Wrong email format");
-$result = lepus_new_account($_POST['email']);
-if($result == 'user_exist') die("User already exist");
-_mail($_POST['email'], "Регистрация нового аккаунта", "Дорогой клиент,<br/>ваш аккаунт готов.<br/>Ваш логин: ".$_POST['email']."<br/>Ваш пароль: $result<br/>Для активации, пожалуйста, авторизуйтесь на нашем сайте.<br/>В противном случае аккаунт будет автоматически удален через 7 дней.");
-echo 1;
+$tmpData = error(lepus_new_account($_POST['email']));
+if($tmpData['err'] == 'OK'){
+	_mail($_POST['email'], "Регистрация нового аккаунта", "Дорогой клиент,<br/>ваш аккаунт готов.<br/>Ваш логин: {$_POST['email']}<br/>Ваш пароль: {$tmpData['mes']}<br/>Для активации, пожалуйста, авторизуйтесь на нашем сайте.<br/>В противном случае аккаунт будет автоматически удален через 7 дней.");
+	$tmpData = ['mes' => 'Мы отправили пароль на ваш email', 'err' => 'OK'];
+}
+echo json_encode($tmpData);

@@ -55,12 +55,14 @@ $(document).on("click", "[data-register-send]", function(e) {
 	$(this).blur();
 	regEmail = $('input[id=regEmail]').val();
 	$('#regModal').modal('hide');
-	$.post("//"+document.domain+"/public/register.php", { email: regEmail, 'g-recaptcha-response': grecaptcha.getResponse(widgetId1)}, function( data ){
-		if(data == '1'){
-			alertify.success("Check your email");
+	$.post("//"+document.domain+"/public/register.php", { email: regEmail, 'g-recaptcha-response': grecaptcha.getResponse(widgetId1)}, function(json){
+		data = JSON.parse(json);
+		if(data.err == 'OK'){
+			alertify.success(data.mes);
 		}else{
-			alertify.error(data);
+			alertify.error(data.mes);
 		}
+		return;
 	});
 });
 

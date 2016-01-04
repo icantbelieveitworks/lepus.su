@@ -100,7 +100,9 @@ function error($message, $j = 0){
 			"close_tiket" => "Тикет уже закрыт",
 			"already_open" => "Тикет уже открыт",
 			"empty_post_value" => "Пустой POST",
-			"bad_email" => "Неправильный email"
+			"bad_email" => "Неправильный email",
+			"user_exist" => "Такой пользователь уже существует",
+			"captcha_fail" => "Проверка на бота не пройдена"
 		];
 		if (array_key_exists($message, $err)) $j = 1;
 	}
@@ -167,6 +169,8 @@ function lepus_crypt($input, $do = 'encode', $key = 'Jml*Zwde4a#%ix$m'){
 
 function lepus_new_account($login){
 	global $db;
+	if(empty($login)) return 'empty_post_value';
+	if(!filter_var($login, FILTER_VALIDATE_EMAIL)) return 'bad_email';
 	$is_user = is_lepus_user($login);
 	if($is_user['0'] != 0) return 'user_exist';
 	$passwd = genRandStr(8);

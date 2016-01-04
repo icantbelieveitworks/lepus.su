@@ -181,7 +181,8 @@ function lepus_new_account($login){
 	$query->bindParam(':passwd', rehash($passwd), PDO::PARAM_STR);
 	$query->bindParam(':data', $json, PDO::PARAM_STR);
 	$query->execute();
-	return $passwd;
+	_mail($login, "Регистрация нового аккаунта", "Дорогой клиент, ваш аккаунт готов.<br/>Ваш логин: $login<br/>Ваш пароль: $passwd<br/>Для активации, пожалуйста, авторизуйтесь на нашем сайте.<br/>В противном случае аккаунт будет автоматически удален через 7 дней.");
+	return 'Мы отправили пароль на ваш email';
 }
 
 function lepus_log_ip($id, $ip){

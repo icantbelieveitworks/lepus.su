@@ -25,21 +25,30 @@ function is_lepus_user($login){
 	return ['0' => $query->rowCount(), '1' => $query->fetch()];
 }
 
-function lost_passwd_change($arr){
+function lost_passwd_change($arr){ // need make page
 	$data = json_decode(lepus_crypt($arr, 'decode'), true);
 	$is_user = is_lepus_user($data[0]);
 	if($is_user['0'] != 1) return 'no_user';
-	$row = $is_user['1'];
-	$real_hash = hash('sha512' ,$_SERVER['HTTP_USER_AGENT'].$_SERVER['REMOTE_ADDR'].$row['passwd'].$row['login']);
+	$real_hash = hash('sha512' ,$_SERVER['HTTP_USER_AGENT'].$_SERVER['REMOTE_ADDR'].$is_user['1']['passwd'].$is_user['1']['login']);
 	if($data[1] != $real_hash) return 'wrong_hash';
-		else return ['id' => $row['id'], 'email' => $data[0], 'time' => $data[2]];
+	if(time() > $data[2]){
+		header('refresh: 3; url=https://lepus.dev');
+		die("Ссылка устарела, для восстановления пароля - получите новую ссылку.");
+	}
+	$new_passwd = genRandStr(8);
+	change_passwd(password_hash($new_passwd, PASSWORD_DEFAULT), $is_user['1']['id']);
+	_mail($is_user['1']['login'], "Новый пароль", "Дорогой клиент,<br/>по-вашему запросу, мы поменяли пароль.<br/>Ваш новый пароль: $new_passwd");
+	header('Location: http://lepus.dev');
 }
 
 function lost_passwd($login){
+	if(empty($login)) return 'empty_post_value';
+	if(!filter_var($login, FILTER_VALIDATE_EMAIL)) return 'bad_email';
 	$is_user = is_lepus_user($login);
 	if($is_user['0'] != 1) return 'no_user';
-	$row = $is_user['1'];
-	return hash('sha512' ,$_SERVER['HTTP_USER_AGENT'].$_SERVER['REMOTE_ADDR'].$row['passwd'].$row['login']);
+	$arr = [$_POST['email'], hash('sha512' ,$_SERVER['HTTP_USER_AGENT'].$_SERVER['REMOTE_ADDR'].$is_user['1']['passwd'].$is_user['1']['login']), time()+60*60*24];
+	_mail($_POST['email'], "Забыли пароль?", "Дорогой клиент,<br/>после того как вы перейдете <a href=\"http://lepus.dev/public/lost_passwd.php?hash=".urlencode(lepus_crypt(json_encode($arr)))."\">по этой ссылке</a> - вы получите второе письмо с паролем от вашего аккаунта.<br/>");
+	return 'Мы отправили пароль на ваш email';
 }
 
 function login($login, $passwd){
@@ -102,7 +111,8 @@ function error($message, $j = 0){
 			"empty_post_value" => "Пустой POST",
 			"bad_email" => "Неправильный email",
 			"user_exist" => "Такой пользователь уже существует",
-			"captcha_fail" => "Проверка на бота не пройдена"
+			"captcha_fail" => "Проверка на бота не пройдена",
+			"wrong_hash" => "Неправильный hash"
 		];
 		if (array_key_exists($message, $err)) $j = 1;
 	}

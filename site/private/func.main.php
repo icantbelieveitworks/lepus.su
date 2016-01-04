@@ -7,6 +7,12 @@ function rehash($passwd, $hash = 0){
 }
 
 function _exit(){
+	global $db;
+	$query = $db->prepare("UPDATE `users` SET `session` = :null where `session` = :sess");
+	$query->bindValue(':null', null, PDO::PARAM_INT);
+	$query->bindParam(':sess', $_SESSION["sess"], PDO::PARAM_STR);
+	$query->execute();
+	
     $params = session_get_cookie_params();
     setcookie(session_name(), '', time() - 42000,
         $params["path"], $params["domain"],

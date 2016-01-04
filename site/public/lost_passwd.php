@@ -10,5 +10,6 @@ if(!isset($_GET['hash'])){
 	$tmpData = error(lost_passwd($_POST['email']));
 	echo json_encode($tmpData);
 }else{
-	echo lost_passwd_change($_GET['hash']);
+	$tmpData = error(lost_passwd_change($_GET['hash']));
+	echo lepus_error_page($tmpData['mes']);
 }

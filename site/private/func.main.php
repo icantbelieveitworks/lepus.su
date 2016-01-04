@@ -25,20 +25,17 @@ function is_lepus_user($login){
 	return ['0' => $query->rowCount(), '1' => $query->fetch()];
 }
 
-function lost_passwd_change($arr){ // need make page
+function lost_passwd_change($arr){
 	$data = json_decode(lepus_crypt($arr, 'decode'), true);
 	$is_user = is_lepus_user($data[0]);
 	if($is_user['0'] != 1) return 'no_user';
 	$real_hash = hash('sha512' ,$_SERVER['HTTP_USER_AGENT'].$_SERVER['REMOTE_ADDR'].$is_user['1']['passwd'].$is_user['1']['login']);
 	if($data[1] != $real_hash) return 'wrong_hash';
-	if(time() > $data[2]){
-		header('refresh: 3; url=https://lepus.dev');
-		die("Ссылка устарела, для восстановления пароля - получите новую ссылку.");
-	}
+	if(time() > $data[2]) return 'lost_passwd_time';
 	$new_passwd = genRandStr(8);
 	change_passwd(password_hash($new_passwd, PASSWORD_DEFAULT), $is_user['1']['id']);
 	_mail($is_user['1']['login'], "Новый пароль", "Дорогой клиент,<br/>по-вашему запросу, мы поменяли пароль.<br/>Ваш новый пароль: $new_passwd");
-	header('Location: http://lepus.dev');
+	return 'Мы отправили новый пароль на ваш email';
 }
 
 function lost_passwd($login){
@@ -48,7 +45,7 @@ function lost_passwd($login){
 	if($is_user['0'] != 1) return 'no_user';
 	$arr = [$_POST['email'], hash('sha512' ,$_SERVER['HTTP_USER_AGENT'].$_SERVER['REMOTE_ADDR'].$is_user['1']['passwd'].$is_user['1']['login']), time()+60*60*24];
 	_mail($_POST['email'], "Забыли пароль?", "Дорогой клиент,<br/>после того как вы перейдете <a href=\"http://lepus.dev/public/lost_passwd.php?hash=".urlencode(lepus_crypt(json_encode($arr)))."\">по этой ссылке</a> - вы получите второе письмо с паролем от вашего аккаунта.<br/>");
-	return 'Мы отправили пароль на ваш email';
+	return 'Мы отправили письмо с инструкцией на ваш email';
 }
 
 function login($login, $passwd){
@@ -112,7 +109,8 @@ function error($message, $j = 0){
 			"bad_email" => "Неправильный email",
 			"user_exist" => "Такой пользователь уже существует",
 			"captcha_fail" => "Проверка на бота не пройдена",
-			"wrong_hash" => "Неправильный hash"
+			"wrong_hash" => "Неправильный hash",
+			"lost_passwd_time" => "Ссылка устарела, для восстановления пароля - получите новую ссылку"
 		];
 		if (array_key_exists($message, $err)) $j = 1;
 	}
@@ -530,4 +528,8 @@ function parse_bb_code($text){
 	$text = preg_replace('/\[urls\](?:https:\/\/)?(.+)\[\/urls\]/', "<a href=\"https://$1\" target=\"_blank\">$1</a>", $text);
 	$text = preg_replace('/\[urls\s?=\s?([\'"]?)(?:https:\/\/)?(.+)\1\](.*?)\[\/urls\]/', "<a href=\"https://$2\" target=\"_blank\">$3</a>", $text);
 	return $text;
+}
+
+function lepus_error_page($mes){
+	return "<html><head><title>Lepus info page</title><meta http-equiv=\"refresh\" content=\"5;url=https://lepus.dev\"><style>.boxInfo{width: 80%;max-width: 600px;margin: 2em auto;padding: 1em;box-shadow: 0 0 10px 5px rgba(221, 221, 221, 1);}</style><head><body><div class=\"boxInfo\">$mes<br/>Через 5 секунд вы будете перенаправлены на главную страницу сайта.</div></body></html>";
 }

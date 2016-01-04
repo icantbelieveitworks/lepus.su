@@ -1,6 +1,6 @@
 <?php
-function rehash($passwd, $hash){
-	if(password_needs_rehash($hash, PASSWORD_DEFAULT) || empty($hash))
+function rehash($passwd, $hash = 0){	
+	if(empty($hash) || password_needs_rehash($hash, PASSWORD_DEFAULT))
 		return password_hash($passwd, PASSWORD_DEFAULT);
 	else
 		return 'no_hash';
@@ -32,8 +32,7 @@ function lost_passwd_change($arr){
 	$real_hash = hash('sha512' ,$_SERVER['HTTP_USER_AGENT'].$_SERVER['REMOTE_ADDR'].$is_user['1']['passwd'].$is_user['1']['login']);
 	if($data[1] != $real_hash) return 'wrong_hash';
 	if(time() > $data[2]) return 'lost_passwd_time';
-	$new_passwd = genRandStr(8);
-	change_passwd(password_hash($new_passwd, PASSWORD_DEFAULT), $is_user['1']['id']);
+	$new_passwd = change_passwd($is_user['1']['id']);
 	_mail($is_user['1']['login'], "Новый пароль", "Дорогой клиент,<br/>по-вашему запросу, мы поменяли пароль.<br/>Ваш новый пароль: $new_passwd");
 	return 'Мы отправили новый пароль на ваш email';
 }
@@ -146,12 +145,15 @@ function genRandStr($length){
 	return $randomString;
 }
 
-function change_passwd($passwd, $id){
+function change_passwd($id){
 	global $db;
+	$passwd = genRandStr(8);
+	$hash = rehash($passwd);
 	$query = $db->prepare("UPDATE `users` SET `passwd` = :passwd WHERE `id` = :id");
-	$query->bindParam(':passwd', $passwd, PDO::PARAM_STR);
+	$query->bindParam(':passwd', $hash, PDO::PARAM_STR);
 	$query->bindParam(':id', $id, PDO::PARAM_STR);
 	$query->execute();
+	return $passwd;
 }
 
 function lepus_crypt($input, $do = 'encode', $key = 'Jml*Zwde4a#%ix$m'){
@@ -165,7 +167,7 @@ function lepus_crypt($input, $do = 'encode', $key = 'Jml*Zwde4a#%ix$m'){
 		$ciphertext = $iv . $ciphertext;
 		$result = base64_encode($ciphertext);
 		break;
-		
+			
 		case 'decode':
 		$ciphertext_dec = base64_decode($input);
 		$iv_dec = substr($ciphertext_dec, 0, $iv_size);

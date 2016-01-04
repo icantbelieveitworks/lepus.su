@@ -102,13 +102,14 @@ $(document).on("click", "[data-cp-change-passwd]", function(e) {
 	$(this).blur();
 	e.preventDefault();
 	passwd = $('input[id=real_passwd]').val();
-	$.post("//"+document.domain+"/public/change_passwd.php", {passwd: passwd}, function( data ){
-		if(data == '1'){
-			alertify.success("Success");
+	$.post("//"+document.domain+"/public/change_passwd.php", {passwd: passwd}, function(json){
+		data = JSON.parse(json);
+		if(data.err == 'OK'){
+			alertify.success(data.mes);
 			$('#changePasswdModal').modal('show');
 			setTimeout(function(){location.reload()},2500);
 		}else{
-			alertify.error(data);
+			alertify.error(data.mes);
 		}
 		return;
 	});

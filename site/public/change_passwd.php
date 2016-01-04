@@ -6,13 +6,10 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/init/session.php');
 require_once($_SERVER['DOCUMENT_ROOT'].'/private/func.main.php');
 require_once($_SERVER['DOCUMENT_ROOT'].'/private/auth.php');
 
-if(empty($_POST['passwd'])) die("Empty data");
-
-if(login($user['login'], $_POST['passwd']) == 'enter'){
-	$new_passwd = genRandStr(8);
-	change_passwd(password_hash($new_passwd, PASSWORD_DEFAULT), $user['id']);
+$tmpData = error(login($user['login'], $_POST['passwd']));
+if($tmpData['err'] == 'OK'){
+	$new_passwd = change_passwd($user['id']);
 	_mail($user['login'], "Новый пароль", "Дорогой клиент,<br/>по-вашему запросу, мы поменяли пароль.<br/>Ваш новый пароль: $new_passwd");
-	echo "1";
-}else{
-	echo "Wrong password!";
+	$tmpData = ['mes' => 'Новый пароль отправлен вам на email', 'err' => 'OK'];
 }
+echo json_encode($tmpData);

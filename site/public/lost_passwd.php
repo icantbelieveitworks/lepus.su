@@ -6,7 +6,7 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/init/session.php');
 require_once($_SERVER['DOCUMENT_ROOT'].'/private/func.main.php');
 
 if(!isset($_GET['hash'])){
-	require_once($_SERVER['DOCUMENT_ROOT'].'/private/recaptcha/check.php'); // check only when we create link
+	require_once($_SERVER['DOCUMENT_ROOT'].'/private/recaptcha/check.php');
 	$tmpData = error(lost_passwd($_POST['email']));
 	echo json_encode($tmpData);
 }else{

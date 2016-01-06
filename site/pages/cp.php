@@ -63,6 +63,7 @@ if(empty($user)){
 												<select class="form-control" name="type">
 													<option value="master" selected="">Paymaster</option>
 													<option value="paypal">PayPal</option>
+													<option value="paypal">Bitcoin</option>
 												</select>
 											<input class="btn btn-sm btn-danger btn-block" style="margin-top: 2px;" type="submit" value="Пополнить счет">
 										</div>

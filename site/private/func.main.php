@@ -553,3 +553,32 @@ function lepus_change_phone($num, $user){
 	save_user_data($user['id'], $user['data']);
 	return 'Мы сохранили ваш новый номер телефона';
 }
+
+function lepus_update_balance($pid, $uid, $amount, $system){
+	global $db; $uid = intval($uid); $amount = intval($amount);
+	if($system != 'bitcoin'){
+		$query = $db->prepare("SELECT * FROM `log_income` WHERE `payment_id` =:pid");
+		$query->bindParam(':pid', $pid, PDO::PARAM_STR);
+		$query->execute();
+		if($query->rowCount() == 1) return 'already';
+		
+		$query = $db->prepare("SELECT * FROM `users` WHERE `id` = :uid");
+		$query->bindParam(':uid', $uid, PDO::PARAM_STR);
+		$query->execute();
+		if($query->rowCount() != 1) return 'no_user';
+		$row = $query->fetch();
+		$tmp['data'] = json_decode($row['data'], true);
+	}
+	$query = $db->prepare("INSERT INTO `log_income` (`payment_id`, `user_id`, `amount`, `system`, `time`) VALUES (:pid, :uid, :amount, :system, :time)");
+	$query->bindParam(':pid', $pid, PDO::PARAM_STR);
+	$query->bindParam(':uid', $uid, PDO::PARAM_STR);
+	$query->bindParam(':amount', $amount, PDO::PARAM_STR);
+	$query->bindParam(':system', $system, PDO::PARAM_STR);
+	$query->bindParam(':time', time(), PDO::PARAM_STR);
+	$query->execute();
+	$tmp['data']['balance'] += $amount;
+	save_user_data($row['id'], $tmp['data']);
+	_mail($row['login'], "Пополнение счета", "Дорогой клиент,<br/>ваш баланс увеличен на $amount RUR.<br/>Благодарим за оплату.");
+	return "OK$pid\n";
+}
+

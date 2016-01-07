@@ -38,7 +38,7 @@ if(empty($user)){ ?>
 				<hr/>
 				<li><a href="/pages/support.php">Тех. поддержка</a></li>
 				<li><a href="/cp-buylogs.html">Логи оплаты услуг</a></li>
-				<li><a href="/cp-finlogs.html">Логи пополнения счета</a></li>
+				<li><a href="/pages/income.php">Логи пополнения счета</a></li>
 				<hr/>
 				<li><b>Баланс</b>: <?php echo $user['data']['balance']; ?> рублей</li>
 				<hr/>

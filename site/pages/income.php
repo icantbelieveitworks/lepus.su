@@ -46,7 +46,7 @@ if(empty($user)){
 				<div class="content-box">
 					<div class="content-info">
 						<div class="content-text">
-							<div class="page-title">Настройки</div>
+							<div class="page-title">ывыва</div>
 							<div class="row">					
 								<div class="col-lg-14">
 									<div class="col-lg-4">
@@ -60,31 +60,32 @@ if(empty($user)){
 									<div class="col-lg-4">
 										<div class="form-inline">
 											<input class="form-control" style="width: 98px;" type="text" name="count" value="" maxlength="5" required="" placeholder="Сумма">
-												<select id="psystem" class="form-control" name="type">
+												<select class="form-control" name="type">
 													<option value="master" selected="">Paymaster</option>
 													<option value="paypal">PayPal</option>
-													<option value="bitcoin">Bitcoin</option>
+													<option value="paypal">Bitcoin</option>
 												</select>
-											<input data-make-payment class="btn btn-sm btn-danger btn-block" style="margin-top: 2px;" type="submit" value="Пополнить счет">
+											<input class="btn btn-sm btn-danger btn-block" style="margin-top: 2px;" type="submit" value="Пополнить счет">
 										</div>
 									</div>
 									<div class="col-lg-12">
 										<hr/>
-										<table id="log_ip" class="table table-striped table-bordered" cellspacing="0" width="100%">
-											<thead>
-												<tr>
-													<th>ID</th>
-													<th>IP</th>
-													<th>Страна</th>
-													<th>Система</th>
-													<th>Браузер</th>
-													<th>Время</th>
-												</tr>
-											</thead>
-											<tbody>
-												<?php echo lepus_get_logip($user['id']); ?>
-											</tbody>
-										</table>
+										
+			<table id="log_ip" class="table table-striped table-bordered" cellspacing="0" width="100%">
+				<thead>
+					<tr>
+						<th>ID</th>
+						<th>IP</th>
+						<th>Страна</th>
+						<th>Система</th>
+						<th>Браузер</th>
+						<th>Время</th>
+					</tr>
+				</thead>
+				<tbody>
+				<?php echo lepus_get_logip($user['id']); ?>
+				</tbody>
+			</table>
 									</div>
 								</div>
 							</div>

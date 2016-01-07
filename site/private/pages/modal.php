@@ -1,5 +1,3 @@
-<!--<div id="myModal" class="modal fade" data-backdrop="static">  -->
-<!-- https://github.com/poiuty/gamecp/blob/master/web/private/template/include/modal.php -->
 <div id="regModal" class="modal fade">
 	<div class="modal-dialog">
 		<div class="modal-content">
@@ -54,6 +52,25 @@
 		<div class="modal-content">
 			<div id="modal_info" class="modal-body">
 				<center>По-вашему запросу, мы поменяли номер телефона.</center>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div id="bitcoinModal" class="modal fade">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+				<h4 class="modal-title">Пополнение счета через bitcoin</h4>
+			</div>
+			<div id="modal_info" class="modal-body">
+				Вы можете оплатить хостинг с помощью bitcoin. Внутренний курс 1 BTC = 30000 рублей.<br/>
+				Переведите произвольную сумму на адрес: <u><?php echo @$user['bitcoin']; ?></u><br/>
+				После 6 подтверждений транзакции - мы автоматически увеличим ваш баланс на сайте.
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">Закрыть</button>
 			</div>
 		</div>
 	</div>

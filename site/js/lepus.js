@@ -241,3 +241,11 @@ $(document).on("click", "[data-tiket-send-msg], [data-tiket-send-close], [data-t
 	e.preventDefault();
 	lepus_support_send(e.target.id);
 });
+
+$(document).on("click", "[data-make-payment]", function(e) {
+	pay_system = $('select[id=psystem]').val();
+	if(pay_system=='bitcoin'){
+		$('#bitcoinModal').modal('show');
+	}
+	alertify.error(pay_system);
+});

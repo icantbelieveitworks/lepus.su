@@ -96,7 +96,7 @@ function auth($id, $session){
 		return 'no_auth';
 	}
 	$row = $query->fetch();
-	return ["id" => $row['id'], "login" => $row['login'], "passwd" => $row['passwd'], "data" => $row['data']];
+	return ["id" => $row['id'], "login" => $row['login'], "passwd" => $row['passwd'], "bitcoin" => $row['bitcoin'], "data" => $row['data']];
 }
 
 function error($message, $j = 0){

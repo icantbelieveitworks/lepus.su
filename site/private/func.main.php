@@ -415,7 +415,7 @@ function lepus_get_supportList($uid, $access, $id = 0){
 		if(!empty($row['open'])) $row['open'] = date("Y-m-d H:i", $row['open']); else $row['open'] = '-';
 		if(!empty($row['last'])) $row['last'] = date("Y-m-d H:i", $row['last']); else $row['last'] = '-';
 		$ldata = lepus_get_tiketLabel($row['status'], $uid, $row['id'], $access);
-		if(strlen($row['title']) > 25){
+		if(strlen($row['title']) > 23){
 			$tmpTitle = "title='{$row['title']}'";
 			$row['title'] = mb_substr($row['title'], 0, 23,'utf-8')."...";	 
 		}
@@ -590,4 +590,23 @@ function lepus_update_balance($pid, $uid, $amount, $system){
 	save_user_data($row['id'], $tmp['data']);
 	_mail($row['login'], "Пополнение счета", "Дорогой клиент,<br/>ваш баланс увеличен на $amount RUR.<br/>Благодарим за оплату.");
 	return "OK$pid\n";
+}
+
+function lepus_getLogIncome($uid, $i = 0){
+	global $db; $data = '';
+	$query = $db->prepare("SELECT * FROM `log_income` WHERE `user_id` = :uid");
+	$query->bindParam(':uid', $uid, PDO::PARAM_STR);
+	$query->execute();
+	while($row = $query->fetch()){
+		if(strlen($row['payment_id']) > 20){
+			$tmpPID = $row['payment_id'];	
+			$row['payment_id'] = mb_substr($row['payment_id'], 0, 20,'utf-8')."...";
+		}
+		if($row['system'] == 'bitcoin'){
+			$row['payment_id'] = "<a href=\"https://blockchain.info/tx/$tmpPID\" target=\"_blank\">{$row['payment_id']}</a>";
+		}
+		$row['time'] = date("[Y-m-d] h:i:s", $row['time']);
+		$i++; $data .= "<tr><td>$i</td><td>{$row['system']}</td><td>{$row['payment_id']}</td><td> {$row['amount']} </td><td>{$row['time']}</td></tr>";
+	}
+	return $data;
 }

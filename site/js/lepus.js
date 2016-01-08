@@ -243,9 +243,33 @@ $(document).on("click", "[data-tiket-send-msg], [data-tiket-send-close], [data-t
 });
 
 $(document).on("click", "[data-make-payment]", function(e) {
+	$(this).blur();
+	e.preventDefault();
 	pay_system = $('select[id=psystem]').val();
 	if(pay_system=='bitcoin'){
 		$('#bitcoinModal').modal('show');
 	}
 	alertify.error(pay_system);
+});
+
+$(document).on("click", "[data-cron-add]", function(e) {
+	$(this).blur();
+	e.preventDefault();
+	time = $('input[id=cronTime]').val();
+	url = $('input[id=cronURL]').val();
+	$.post("//"+document.domain+"/public/add_cron.php", {do: 'add', time: time, url: url}, function(json){
+		console.log(json);
+		data = JSON.parse(json);
+		if(data.err == 'OK'){
+			var table = $('#cronTable').DataTable();
+			var cronNumber = $('#cronTable tr').length;
+			table.row.add({
+				0:     cronNumber,
+				1:     data.mes.a,
+				2:     data.mes.b,
+			}).draw( false );
+		}else{
+			alertify.error(data.mes);
+		}
+	});
 });

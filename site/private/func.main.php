@@ -118,7 +118,9 @@ function error($message, $j = 0){
 			"lost_passwd_time" => "Ссылка устарела, для восстановления пароля - получите новую ссылку",
 			"no_auth_page" => "У вас нет доступа к этой странице",
 			"wrong_phone" => "Неправильный телефонный номер",
-			"only_numeric" => "Только цифры"
+			"only_numeric" => "Только цифры",
+			"wrong_action" => "Неправильное действие",
+			"not_valid" => "Неправильное значение у переменной"
 		];
 		if (array_key_exists($message, $err)) $j = 1;
 	}
@@ -607,6 +609,49 @@ function lepus_getLogIncome($uid, $i = 0){
 		}
 		$row['time'] = date("[Y-m-d] h:i:s", $row['time']);
 		$i++; $data .= "<tr><td>$i</td><td>{$row['system']}</td><td>{$row['payment_id']}</td><td> {$row['amount']} </td><td>{$row['time']}</td></tr>";
+	}
+	return $data;
+}
+
+function lepus_validCron($time, $url, $i = 0){
+	if(strlen($url) > 128) return 'not_valid';
+	if(preg_match('/[^0-9a-zA-Z.=_\&\-\?\:\/]/', $url)) return 'not_valid'; // only 0-9a-zA-Z.=_&-?:/
+	$arr = explode(" ", $time);
+	if(count($arr) != 5) return 'not_valid';
+	foreach($arr as $val){
+		$i++; if($i == 5) $len = 1; else $len = 2;
+		if(strlen($val) > $len) return 'not_valid';
+		if(preg_match('/[^0-9\*]/', $val)) return 'not_valid';
+	}
+	return 'valid';
+}
+
+function lepus_getCronList($uid, $i = 0){
+	global $db; $data = '';
+	$query = $db->prepare("SELECT * FROM `cron` WHERE `uid` = :uid");
+	$query->bindParam(':uid', $uid, PDO::PARAM_STR);
+	$query->execute();
+	while($row = $query->fetch()){
+		$i++; $data .= "<tr><td>$i</td><td>{$row['time']}</td><td>{$row['url']}</td></tr>";
+	}
+	return $data;
+}
+
+function lepus_addCron($uid, $time, $url, $do){
+	global $db;
+	if(empty($time) || empty($url)) return 'empty_post_value';
+	if(lepus_validCron($time, $url) != 'valid') return 'not_valid';
+	switch($do){
+		default: return 'wrong_action'; break;
+		case 'add':
+			$query = $db->prepare("INSERT INTO `cron` (`uid`, `time`, `url`) VALUES (:uid, :time, :url)");
+			$query->bindParam(':uid', $uid, PDO::PARAM_STR);
+			$query->bindParam(':time', $time, PDO::PARAM_STR);
+			$query->bindParam(':url', $url, PDO::PARAM_STR);
+			$query->execute();
+			$lastId = $db->lastInsertId();
+			$data = ['a' => $time, 'b' => $url, 'c' => $lastId];
+		break;
 	}
 	return $data;
 }

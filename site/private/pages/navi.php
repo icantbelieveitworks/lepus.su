@@ -16,7 +16,6 @@ if(empty($user)){ ?>
 	</div>
 </div>
 <?php }else{ ?>
-
 <div class="blocks">
 	<div class="block-login">
 		<div class="block-body">
@@ -27,7 +26,7 @@ if(empty($user)){ ?>
 				<hr/>
 				<li><a href="/pages/cp.php">Настройки</a></li>
 				<li><a href="/pages/cp.php">Пополнить счет</a></li>
-				<li><a href="/cp-cron.html">Планировщик задач</a></li>
+				<li><a href="/pages/cron.php">Планировщик задач</a></li>
 				<hr>
 				<li><a href="http://dom.lepus.su" target="_blank">Домены</a></li>
 				<li><a href="/cp-vps.html">VPS хостинг</a></li>
@@ -47,4 +46,3 @@ if(empty($user)){ ?>
 	</div>
 </div>
 <?php } ?>
-

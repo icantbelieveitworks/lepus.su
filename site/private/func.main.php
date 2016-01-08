@@ -631,7 +631,12 @@ function lepus_getCronList($uid){
 	$query->bindParam(':uid', $uid, PDO::PARAM_STR);
 	$query->execute();
 	while($row = $query->fetch()){
-		$data .= "<tr><td>{$row['id']}</td><td>{$row['time']}</td><td>{$row['url']}</td><td><a href=\"nourl\" data-cron-task-id=\"{$row['id']}\"><i class=\"glyphicon glyphicon-remove\"></i></a></td></tr>";
+		$tmpURL = '';
+		if(strlen($row['url']) > 50){
+			$tmpURL = $row['url'];	
+			$row['url'] = mb_substr($row['url'], 0, 50,'utf-8')."...";
+		}
+		$data .= "<tr><td>{$row['id']}</td><td>{$row['time']}</td><td><lu title=\"$tmpURL\">{$row['url']}</lu></td><td><a href=\"nourl\" data-cron-task-id=\"{$row['id']}\"><i class=\"glyphicon glyphicon-remove\"></i></a></td></tr>";
 	}
 	return $data;
 }
@@ -667,7 +672,12 @@ function lepus_addCron($uid, $time, $url, $do, $id = 0){
 			$query->bindParam(':url', $url, PDO::PARAM_STR);
 			$query->execute();
 			$lastId = $db->lastInsertId();
-			$data = ['a' => $time, 'b' => $url, 'c' => "<a href=\"nourl\" data-cron-task-id=\"$lastId\"><i class=\"glyphicon glyphicon-remove\"></i></a>", 'd' => $lastId];
+			$tmpURL = '';
+			if(strlen($url) > 50){
+				$tmpURL = $url;	
+				$url = mb_substr($url, 0, 50,'utf-8')."...";
+			}
+			$data = ['a' => $time, 'b' => "<lu title=\"$tmpURL\">$url</lu>", 'c' => "<a href=\"nourl\" data-cron-task-id=\"$lastId\"><i class=\"glyphicon glyphicon-remove\"></i></a>", 'd' => $lastId];
 		break;
 	}
 	return $data;

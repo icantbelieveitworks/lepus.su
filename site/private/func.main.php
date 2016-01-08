@@ -613,44 +613,61 @@ function lepus_getLogIncome($uid, $i = 0){
 	return $data;
 }
 
-function lepus_validCron($time, $url, $i = 0){
+function lepus_validCron($time, $url){
 	if(strlen($url) > 128) return 'not_valid';
 	if(preg_match('/[^0-9a-zA-Z.=_\&\-\?\:\/]/', $url)) return 'not_valid'; // only 0-9a-zA-Z.=_&-?:/
 	$arr = explode(" ", $time);
 	if(count($arr) != 5) return 'not_valid';
 	foreach($arr as $val){
-		$i++; if($i == 5) $len = 1; else $len = 2;
-		if(strlen($val) > $len) return 'not_valid';
-		if(preg_match('/[^0-9\*]/', $val)) return 'not_valid';
+		if(strlen($val) > 4) return 'not_valid';
+		if(preg_match('/[^0-9\*\/]/', $val)) return 'not_valid';
 	}
 	return 'valid';
 }
 
-function lepus_getCronList($uid, $i = 0){
+function lepus_getCronList($uid){
 	global $db; $data = '';
 	$query = $db->prepare("SELECT * FROM `cron` WHERE `uid` = :uid");
 	$query->bindParam(':uid', $uid, PDO::PARAM_STR);
 	$query->execute();
 	while($row = $query->fetch()){
-		$i++; $data .= "<tr><td>$i</td><td>{$row['time']}</td><td>{$row['url']}</td></tr>";
+		$data .= "<tr><td>{$row['id']}</td><td>{$row['time']}</td><td>{$row['url']}</td><td><a href=\"nourl\" data-cron-task-id=\"{$row['id']}\"><i class=\"glyphicon glyphicon-remove\"></i></a></td></tr>";
 	}
 	return $data;
 }
 
-function lepus_addCron($uid, $time, $url, $do){
+function lepus_getCronAccess($id, $uid){
 	global $db;
-	if(empty($time) || empty($url)) return 'empty_post_value';
-	if(lepus_validCron($time, $url) != 'valid') return 'not_valid';
+	if(empty($id) || empty($uid)) return 'empty_post_value';
+	$query = $db->prepare("SELECT * FROM `cron` WHERE `id` = :id AND `uid` = :uid");
+	$query->bindParam(':id', $id, PDO::PARAM_STR);
+	$query->bindParam(':uid', $uid, PDO::PARAM_STR);
+	$query->execute();
+	return $query->rowCount();
+}
+
+function lepus_addCron($uid, $time, $url, $do, $id = 0){
+	global $db;
 	switch($do){
 		default: return 'wrong_action'; break;
+		case 'remove':
+			if(empty($id)) return 'empty_post_value';
+			if(lepus_getCronAccess($id, $uid) != 1) return 'no_access';
+			$query = $db->prepare("DELETE FROM `cron` WHERE `id` = :id");
+			$query->bindParam(':id', $id, PDO::PARAM_STR);
+			$query->execute();
+			$data = 'Мы удалили это задание';			
+		break;
 		case 'add':
+			if(empty($time) || empty($url)) return 'empty_post_value';
+			if(lepus_validCron($time, $url) != 'valid') return 'not_valid';
 			$query = $db->prepare("INSERT INTO `cron` (`uid`, `time`, `url`) VALUES (:uid, :time, :url)");
 			$query->bindParam(':uid', $uid, PDO::PARAM_STR);
 			$query->bindParam(':time', $time, PDO::PARAM_STR);
 			$query->bindParam(':url', $url, PDO::PARAM_STR);
 			$query->execute();
 			$lastId = $db->lastInsertId();
-			$data = ['a' => $time, 'b' => $url, 'c' => $lastId];
+			$data = ['a' => $time, 'b' => $url, 'c' => "<a href=\"nourl\" data-cron-task-id=\"$lastId\"><i class=\"glyphicon glyphicon-remove\"></i></a>", 'd' => $lastId];
 		break;
 	}
 	return $data;

@@ -28,6 +28,7 @@ if(empty($user)){
 		<style>
 			td,th { text-align: center; vertical-align: middle; }
 			.col-centered{ float: none; margin: 0 auto; }
+			blockquote { background: #f9f9f9; border-left: 10px solid #ccc; margin: 1.5em 10px; padding: 0.5em 10px; }
 		</style>
 		<script src="/js/jquery.min.js"></script>
 		<script src="//cdn.datatables.net/1.10.10/js/jquery.dataTables.min.js"></script>
@@ -49,11 +50,22 @@ if(empty($user)){
 				<div class="content-box">
 					<div class="content-info">
 						<div class="content-text">
-							<div class="page-title">Планировщик задач CRON</div>
+							<div class="page-title">Планировщик задач</div>
 							<div class="row">					
 								<div class="col-lg-14">
 									<div class="col-lg-12">
-										sdfsfsdf
+										Допустимые символы в поне время: 0-9 и *<br/>
+										Допустимые символы в поле URL: 0-9a-zA-Z.=_&-?:/<br/>
+										Формат времени: минута (0-59), час (0-23), день месяца (1-31), месяц (1-12), день_недели (0-6).<br/><br/>
+
+										Например мы хотим, чтобы скрипт http://mysite.ru/cron.php запускался раз в две минуты.
+										<blockquote>
+											*/2 * * * * http://mysite.ru/cron.php
+										</blockquote>
+										Или чтобы скрипт запускался каждый день в 12 часов.
+										<blockquote>
+											0 12 * * * http://mysite.ru/cron.php
+										</blockquote>
 										<hr/>
 									</div>
 									<div class="col-lg-9 col-centered">
@@ -71,6 +83,7 @@ if(empty($user)){
 													<th>ID</th>
 													<th>Время</th>
 													<th>URL</th>
+													<th>Действия</th>
 												</tr>
 											</thead>
 											<tbody>

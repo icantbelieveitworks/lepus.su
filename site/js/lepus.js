@@ -257,17 +257,36 @@ $(document).on("click", "[data-cron-add]", function(e) {
 	e.preventDefault();
 	time = $('input[id=cronTime]').val();
 	url = $('input[id=cronURL]').val();
+	var table = $('#cronTable').DataTable();
 	$.post("//"+document.domain+"/public/add_cron.php", {do: 'add', time: time, url: url}, function(json){
+		data = JSON.parse(json);
+		if(data.err == 'OK'){
+			alertify.success('Задание добавлено');
+			table.row.add({
+				0:     data.mes.d,
+				1:     data.mes.a,
+				2:     data.mes.b,
+				3:     data.mes.c,
+			}).draw( false );
+		}else{
+			alertify.error(data.mes);
+		}
+	});
+});
+
+$(document).on("click", "[data-cron-task-id]", function(e) {
+	$(this).blur();
+	e.preventDefault();
+	if(!confirm("Вы подтверждаете удаление?")) return;
+	var table = $('#cronTable').DataTable();
+	var this_cron = $(this).parents('tr');
+	idTask = $(this).data("cron-task-id");
+    $.post("//"+document.domain+"/public/add_cron.php", {do: 'remove', id: idTask}, function(json){
 		console.log(json);
 		data = JSON.parse(json);
 		if(data.err == 'OK'){
-			var table = $('#cronTable').DataTable();
-			var cronNumber = $('#cronTable tr').length;
-			table.row.add({
-				0:     cronNumber,
-				1:     data.mes.a,
-				2:     data.mes.b,
-			}).draw( false );
+			alertify.success(data.mes);
+			table.row(this_cron).remove().draw();
 		}else{
 			alertify.error(data.mes);
 		}

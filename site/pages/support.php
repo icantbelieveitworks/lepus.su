@@ -9,6 +9,15 @@ if(empty($user)){
 	$tmpData = error('no_auth_page');
 	die(lepus_error_page($tmpData['mes']));
 }
+function lepus_getAllUsers(){
+	global $db; $data = '';
+	$query = $db->prepare("SELECT * FROM `users`");
+	$query->execute();
+	while($row=$query->fetch()){
+		$data .= "<option value=\"{$row['id']}\">{$row['login']}</option>";
+	}
+	return $data;
+}
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
@@ -24,6 +33,7 @@ if(empty($user)){
 		<link rel="stylesheet" type="text/css" href="/css/style.css"/>
 		<link rel="stylesheet" type="text/css" href="/css/alertify.core.css" />
 		<link rel="stylesheet" type="text/css" href="/css/alertify.bootstrap.css" />
+		<link rel="stylesheet"  type="text/css" href="/css/chosen.css">
 		<link rel="stylesheet" href="//cdn.datatables.net/plug-ins/1.10.10/integration/bootstrap/3/dataTables.bootstrap.css">
 		<style>
 			td,th { text-align: center; vertical-align: middle; }
@@ -56,8 +66,17 @@ if(empty($user)){
 									<hr>
 									<div class="form-inline">
 										<center>
-											<input class="form-control" id="tiketTitle" style="width: 44%;" type="text" name="count" value="" required="" placeholder="Заголовок">
-											<input class="form-control btn btn-sm btn-danger btn-block" data-open-new-tiket style="width: 55%;" type="submit" value="Открыть новый тикет">
+											<?php if($user['data']['access'] < 2){ ?>
+												<input class="form-control" id="tiketTitle" style="width: 44%;" type="text" name="count" value="" required="" placeholder="Заголовок">
+												<input class="form-control btn btn-sm btn-danger btn-block" data-open-new-tiket style="width: 55%;" type="submit" value="Открыть новый тикет">
+											<?php }else{ ?>
+												<select id="tiketUser" data-placeholder="Выберите пользователя..." class="chosen-select" style="width: 29%;">
+													<option value=""></option>
+													<?php echo lepus_getAllUsers(); ?>
+												</select>	
+												<input class="form-control" id="tiketTitle" style="width: 39%;" type="text" name="count" value="" required="" placeholder="Заголовок">
+												<input class="form-control btn btn-sm btn-danger btn-block" data-open-new-tiket style="width: 30%;" type="submit" value="Открыть новый тикет">
+											<?php } ?>
 										</center>
 									</div>
 									<div style="padding-top: 5px;">
@@ -88,6 +107,19 @@ if(empty($user)){
 		</div>
 		<?php require_once($_SERVER['DOCUMENT_ROOT'].'/private/pages/footer.php'); ?>
 		<?php require_once($_SERVER['DOCUMENT_ROOT'].'/private/pages/modal.php'); ?>
+		<script src="/js/chosen.jquery.min.js" type="text/javascript"></script>
+		<script type="text/javascript">
+			var config = {
+				'.chosen-select'           : {},
+				'.chosen-select-deselect'  : {allow_single_deselect:true},
+				'.chosen-select-no-single' : {disable_search_threshold:10},
+				'.chosen-select-no-results': {no_results_text:'Oops, nothing found!'},
+				'.chosen-select-width'     : {width:"95%"}
+			}
+			for (var selector in config) {
+				$(selector).chosen(config[selector]);
+			}
+		</script>
 		<script src="//www.google.com/recaptcha/api.js?onload=onloadCallback&render=explicit" async defer></script>
 	</body>
 </html>

@@ -438,17 +438,17 @@ function lepus_get_supportList($uid, $access, $id = 0){
 
 function support_create($uid, $title, $msg, $access){
 	global $db;
-	if(empty(trim($_POST['title'])) || empty(trim($_POST['msg']))) return('empty_post_value');
+	if(empty(trim($title)) || empty(trim($msg)) || empty($uid)) return('empty_post_value');
 	if($access < 2){
 		$tmpTime = time()-60*60*24;
 		$query = $db->prepare("SELECT * FROM `support` WHERE `uid` = :uid AND `open` > :time");
 		$query->bindParam(':uid', $uid, PDO::PARAM_STR);
 		$query->bindParam(':time', $tmpTime, PDO::PARAM_STR);
 		$query->execute();
-		if($query->rowCount() > 6) return 'max_limit';
+		if($query->rowCount() > 10) return 'max_limit';
 	}
-	$title = filter_var($_POST["title"], FILTER_SANITIZE_STRING);	
-	$msg = nl2br(htmlentities($_POST["msg"], ENT_QUOTES, 'UTF-8'));
+	$title = filter_var($title, FILTER_SANITIZE_STRING);	
+	$msg = nl2br(htmlentities($msg, ENT_QUOTES, 'UTF-8'));
 	$query = $db->prepare("INSERT INTO `support` (`uid`, `title`, `open`, `status`) VALUES (:uid, :title, :open, 1)");
 	$query->bindParam(':uid', $uid, PDO::PARAM_STR);
 	$query->bindParam(':title', $title, PDO::PARAM_STR);
@@ -460,7 +460,7 @@ function support_create($uid, $title, $msg, $access){
 	$query->bindParam(':id', $uid, PDO::PARAM_STR);
 	$query->execute();
 	$row = $query->fetch();
-	_mail($_row['login'], "[Lepus Support] Заявка №[$id]", "Благодарим за общение в службу технической поддержки.<br/>Наши специалисты постараются как можно скорее ответить вам.<br/>Ваш тикет доступен в личном кабинете  <a href=\"https://lepus.dev/pages/tiket.php?id=$id\">по ссылке</a>.<br/><br/>Это сообщение отправлено автоматически. Пожалуйста, не отвечайте на него.<br/>------------------------<br/>Lepus Support<br/><a href=\"http://lepus.su\">https://lepus.su</a>");
+	_mail($row['login'], "[Lepus Support] Заявка №[$id]", "Благодарим за общение в службу технической поддержки.<br/>Наши специалисты постараются как можно скорее ответить вам.<br/>Ваш тикет доступен в личном кабинете  <a href=\"https://lepus.dev/pages/tiket.php?id=$id\">по ссылке</a>.<br/><br/>Это сообщение отправлено автоматически. Пожалуйста, не отвечайте на него.<br/>------------------------<br/>Lepus Support<br/><a href=\"http://lepus.su\">https://lepus.su</a>");
 	return $id;
 }
 

@@ -187,7 +187,9 @@ $(document).on("click", "[data-open-new-tiket]", function(e) {
 	var table = $('#supportList').DataTable();	
 	title = $('input[id=tiketTitle]').val();
 	msg = $('textarea[id=tiketMsg]').val();
-	$.post("//"+document.domain+"/public/support.php", {do: 'new', title: title, msg: msg}, function(json){
+	user = $('select[id=tiketUser]').val();
+	if(!user) user = 'no';
+	$.post("//"+document.domain+"/public/support.php", {do: 'new', title: title, msg: msg, user: user}, function(json){
 		data = JSON.parse(json);
 		if(data.err == 'OK'){
 			alertify.success("Тикет создан");

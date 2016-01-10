@@ -120,7 +120,8 @@ function error($message, $j = 0){
 			"wrong_phone" => "Неправильный телефонный номер",
 			"only_numeric" => "Только цифры",
 			"wrong_action" => "Неправильное действие",
-			"not_valid" => "Неправильное значение у переменной"
+			"not_valid" => "Неправильное значение у переменной",
+			"max_limit" => "Вы превысили лимит"
 		];
 		if (array_key_exists($message, $err)) $j = 1;
 	}
@@ -435,9 +436,17 @@ function lepus_get_supportList($uid, $access, $id = 0){
 	return $data;
 }
 
-function support_create($uid, $title, $msg){
+function support_create($uid, $title, $msg, $access){
 	global $db;
 	if(empty(trim($_POST['title'])) || empty(trim($_POST['msg']))) return('empty_post_value');
+	if($access < 2){
+		$tmpTime = time()-60*60*24;
+		$query = $db->prepare("SELECT * FROM `support` WHERE `uid` = :uid AND `open` > :time");
+		$query->bindParam(':uid', $uid, PDO::PARAM_STR);
+		$query->bindParam(':time', $tmpTime, PDO::PARAM_STR);
+		$query->execute();
+		if($query->rowCount() > 6) return 'max_limit';
+	}
 	$title = filter_var($_POST["title"], FILTER_SANITIZE_STRING);	
 	$msg = nl2br(htmlentities($_POST["msg"], ENT_QUOTES, 'UTF-8'));
 	$query = $db->prepare("INSERT INTO `support` (`uid`, `title`, `open`, `status`) VALUES (:uid, :title, :open, 1)");
@@ -514,6 +523,14 @@ function support_msg($uid, $tid, $access, $no_last = 0){
 	if($tiket['status'] == 2 && $_POST['msg'] != 'OPEN') return 'close_tiket'; // if tiket close => we need first open it
 	if($tiket['status'] == 1 && $_POST['msg'] == 'OPEN') return 'already_open'; // dont open - open tiket
 	$msg = parse_bb_code(nl2br(htmlentities($_POST['msg'], ENT_QUOTES, 'UTF-8')));
+	if($access < 2 && $msg != 'END'){
+		$tmpTime = time()-5;
+		$query = $db->prepare("SELECT * FROM `support_msg` WHERE `uid` = :uid AND `time` > :time");
+		$query->bindParam(':uid', $uid, PDO::PARAM_STR);
+		$query->bindParam(':time', $tmpTime, PDO::PARAM_STR);
+		$query->execute();
+		if($query->rowCount() != 0) return 'max_limit';
+	}
 	if($msg == 'END'){
 		$msg = '<span class="label label-pill label-danger myLabel">Тикет закрыт</span>';
 		$query = $db->prepare("UPDATE `support` SET `status` = 2 WHERE `id` = :tid");

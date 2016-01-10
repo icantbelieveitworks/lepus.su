@@ -445,7 +445,14 @@ function support_create($uid, $title, $msg){
 	$query->bindParam(':title', $title, PDO::PARAM_STR);
 	$query->bindParam(':open', time(), PDO::PARAM_STR);
 	$query->execute();
-	return $db->lastInsertId();
+	$id = $db->lastInsertId();
+
+	$query = $db->prepare("SELECT * FROM `users` WHERE `id` = :id");
+	$query->bindParam(':id', $uid, PDO::PARAM_STR);
+	$query->execute();
+	$row = $query->fetch();
+	_mail($_row['login'], "[Lepus Support] Заявка №[$id]", "Благодарим за общение в службу технической поддержки.<br/>Наши специалисты постараются как можно скорее ответить вам.<br/>Ваш тикет доступен в личном кабинете  <a href=\"https://lepus.dev/pages/tiket.php?id=$id\">по ссылке</a>.<br/><br/>Это сообщение отправлено автоматически. Пожалуйста, не отвечайте на него.<br/>------------------------<br/>Lepus Support<br/><a href=\"http://lepus.su\">https://lepus.su</a>");
+	return $id;
 }
 
 function lepus_get_supportAccess($tid){
@@ -531,7 +538,17 @@ function support_msg($uid, $tid, $access, $no_last = 0){
 	$query->bindParam(':uid', $uid, PDO::PARAM_STR);
 	$query->bindParam(':time', time(), PDO::PARAM_STR);
 	$query->execute();
-	return ['tid' => $tid, 'msgID' => $db->lastInsertId()];
+	$lastID = $db->lastInsertId();
+	if($tiket['uid'] == $uid){
+			telegram_send("Заявка №[$tid]\nНовый ответ от клиента.\nhttps://lepus.dev/pages/tiket.php?id=$tid");
+	}else{
+		$query = $db->prepare("SELECT * FROM `users` WHERE `id` = :id");
+		$query->bindParam(':id', $tiket['uid'], PDO::PARAM_STR);
+		$query->execute();
+		$row = $query->fetch();
+		_mail($row['login'], "[Lepus Support] Заявка №[$tid]", "Новое сообщение от службы технической поддержки.<br/>Ваш тикет доступен в личном кабинете  <a href=\"https://lepus.dev/pages/tiket.php?id=$tid\">по ссылке</a>.<br/><br/>Это сообщение отправлено автоматически. Пожалуйста, не отвечайте на него.<br/>------------------------<br/>Lepus Support<br/><a href=\"http://lepus.su\">https://lepus.su</a>");
+	}
+	return ['tid' => $tid, 'msgID' => $lastID];
 }
 
 function parse_bb_code($text){
@@ -682,4 +699,8 @@ function lepus_addCron($uid, $time, $url, $do, $id = 0){
 		break;
 	}
 	return $data;
+}
+
+function telegram_send($msg){
+	file_get_contents("https://api.telegram.org/bot160840517:AAGEazjmMcxvwbjhQvzzftJcbFzVKIX2RLA/sendMessage?chat_id=160138276&text=".urlencode($msg));
 }

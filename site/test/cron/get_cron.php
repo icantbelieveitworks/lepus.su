@@ -1,4 +1,3 @@
-<pre>
 <?php
 $arrContextOptions=array(
     "ssl"=>array(

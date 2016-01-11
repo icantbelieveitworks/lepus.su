@@ -700,6 +700,10 @@ function lepus_addCron($uid, $time, $url, $do, $id = 0){
 		case 'add':
 			if(empty($time) || empty($url)) return 'empty_post_value';
 			if(lepus_validCron($time, $url) != 'valid') return 'not_valid';
+			$query = $db->prepare("SELECT * FROM `cron` WHERE `uid` = : uid");
+			$query->bindParam(':uid', $uid, PDO::PARAM_STR);
+			$query->execute();
+			if($query->rowCount() > 100) return 'max_limit';
 			$query = $db->prepare("INSERT INTO `cron` (`uid`, `time`, `url`, `date`) VALUES (:uid, :time, :url, :date)");
 			$query->bindParam(':uid', $uid, PDO::PARAM_STR);
 			$query->bindParam(':time', $time, PDO::PARAM_STR);

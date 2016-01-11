@@ -71,7 +71,7 @@ function lepus_getAllUsers(){
 												<input class="form-control btn btn-sm btn-danger btn-block" data-open-new-tiket style="width: 55%;" type="submit" value="Открыть новый тикет">
 											<?php }else{ ?>
 												<select id="tiketUser" data-placeholder="Выберите пользователя..." class="chosen-select" style="width: 29%;">
-													<option value=""></option>
+													<option value="no"></option>
 													<?php echo lepus_getAllUsers(); ?>
 												</select>	
 												<input class="form-control" id="tiketTitle" style="width: 39%;" type="text" name="count" value="" required="" placeholder="Заголовок">

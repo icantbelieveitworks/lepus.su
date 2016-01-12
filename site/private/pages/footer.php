@@ -5,7 +5,7 @@
 			<a href="https://www.kernel.org/" target="_blank"><img src="/images/other/linux_logo.png"/></a>
 		</p>
 		<p class="copyright">
-			&copy; Lepus Hosting (<a href="https://lepus.su/oferta.html">публичный договор оферты</a>)
+			&copy; Lepus Hosting (<a href="/pages/oferta.php">публичный договор оферты</a>)
 		</p>
 		<div class="banners">
 			<div>

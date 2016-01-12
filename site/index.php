@@ -28,33 +28,27 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/auth.php');
 	<body>
 		<div class="wrapper">
 			<?php require_once($_SERVER['DOCUMENT_ROOT'].'/private/pages/menu.php'); ?>
-			<div class="logo"></div>
-			<div class="information">
-			<?php require_once($_SERVER['DOCUMENT_ROOT'].'/private/pages/news.php'); ?>
-			</div>
-			<div class="container">
-				<div class="content-box">
-					<div class="content-info">
-						<div class="content-text">
-							<div class="page-title">Lepus хостинг</div>
-							<p>
-								— <a href="/domains.html" target="_blank" rel="nofollow">Регистрация доменов</a>.<br/>
-								— Moneyback по первому требованию.<br/>
-								— <a href="/ispmanager.html" rel="nofollow">Лицензии ISPmanager</a> по доступным ценам.<br/>
-								— Мощные <a href="/vps.html">администрируемые VPS</a> на SSD дисках.<br/>
-								— Бесплатный перенос ваших сайтов на наш хостинг.<br/>
-								— <a href="/shared.html">Виртуальный хостинг</a> и <a href="/vip.html" rel="nofollow">VIP хостинг</a> для ваших сайтов.<br/>
-								— Быстрые администрируемые <a href="/dedicated.html">выделенные серверы</a> по выгодной цене.<br/><br/>
-								Наша миссия - предоставление качественных услуг хостинга. 
-								Находим индивидуальный подход к каждому клиенту.  <br/>
-								Оказываем профессиональные услуги по технической поддержке, администрированию и сопровождению проектов.<br/>
-								Самое ценное - это вы, наши клиенты. Мы болеем за вас, радуемся вашим победам и успехам! Добро пожаловать!<br/>
-							</p>
-						</div>
+			<div class="content-box">
+				<div class="content-info box-shadow--2dp">
+					<div class="content-text">
+						<div class="page-title">Lepus хостинг</div>
+						<p>
+							— <a href="/domains.html" target="_blank" rel="nofollow">Регистрация доменов</a>.<br/>
+							— Moneyback по первому требованию.<br/>
+							— <a href="/ispmanager.html" rel="nofollow">Лицензии ISPmanager</a> по доступным ценам.<br/>
+							— Мощные <a href="/vps.html">администрируемые VPS</a> на SSD дисках.<br/>
+							— Бесплатный перенос ваших сайтов на наш хостинг.<br/>
+							— <a href="/shared.html">Виртуальный хостинг</a> и <a href="/vip.html" rel="nofollow">VIP хостинг</a> для ваших сайтов.<br/>
+							— Быстрые администрируемые <a href="/dedicated.html">выделенные серверы</a> по выгодной цене.<br/><br/>
+							Наша миссия - предоставление качественных услуг хостинга. 
+							Находим индивидуальный подход к каждому клиенту.<br/>
+							Оказываем профессиональные услуги по технической поддержке, администрированию и сопровождению проектов.<br/>
+							Самое ценное - это вы, наши клиенты. Мы болеем за вас, радуемся вашим победам и успехам! Добро пожаловать!<br/>
+						</p>
 					</div>
 				</div>
-				<?php require_once($_SERVER['DOCUMENT_ROOT'].'/private/pages/navi.php'); ?>
 			</div>
+			<?php require_once($_SERVER['DOCUMENT_ROOT'].'/private/pages/navi.php'); ?>
 		</div>
 		<?php require_once($_SERVER['DOCUMENT_ROOT'].'/private/pages/footer.php'); ?>
 		<?php require_once($_SERVER['DOCUMENT_ROOT'].'/private/pages/modal.php'); ?>

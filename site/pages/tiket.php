@@ -86,13 +86,8 @@ if(strlen($tmpData['title']) > 30){
 	<body>
 		<div class="wrapper">
 			<?php require_once($_SERVER['DOCUMENT_ROOT'].'/private/pages/menu.php'); ?>
-			<div class="logo"></div>
-			<div class="information">
-			<?php require_once($_SERVER['DOCUMENT_ROOT'].'/private/pages/news.php'); ?>
-			</div>
-			<div class="container">
 				<div class="content-box">
-					<div class="content-info">
+					<div class="content-info box-shadow--2dp">
 						<div class="content-text">
 							<div class="page-title" <?php echo $tmpTitle; ?>><?php echo "Тикет #".$_GET['id'].": {$tmpData['title']}"; ?></div>
 							<div class="row">					
@@ -132,7 +127,6 @@ if(strlen($tmpData['title']) > 30){
 					</div>
 				</div>
 				<?php require_once($_SERVER['DOCUMENT_ROOT'].'/private/pages/navi.php'); ?>
-			</div>
 		</div>
 		<?php require_once($_SERVER['DOCUMENT_ROOT'].'/private/pages/footer.php'); ?>
 		<?php require_once($_SERVER['DOCUMENT_ROOT'].'/private/pages/modal.php'); ?>

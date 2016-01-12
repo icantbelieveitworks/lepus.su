@@ -1,14 +1,14 @@
 <?php
 if(empty($user)){ ?>
 <div class="blocks">
-	<div class="block-login">
+	<div class="block-login box-shadow--2dp">
 		<div class="block-body">
 			<input class="form-control" id="login_email" placeholder="E-mail" name="email" type="email" value="" autofocus="">
 			<input class="form-control" id="login_passwd" style="margin-top: 3px;" placeholder="Password" name="password" type="password" value="" autofocus="">
 			<input id="check_auth" type="submit" name="login" class="btn btn-sm btn-success btn-block" style="margin-top: 15px;" data-do-login value="Войти">
 		</div>
 	</div>
-	<div class="block-info1" style="margin-top: 15px;">
+	<div class="block-info1 box-shadow--2dp" style="margin-top: 15px;">
 		<div class="block-body">
 			<input type="submit" name="login" class="btn btn-sm btn-success btn-block" data-register-open value="Регистрация">
 			<input type="submit" name="login" class="btn btn-sm btn-success btn-block" data-lost-passwd value="Забыл пароль">
@@ -17,12 +17,12 @@ if(empty($user)){ ?>
 </div>
 <?php }else{ ?>
 <div class="blocks">
-	<div class="block-login">
-		<div class="block-body">
+	<div class="block-login box-shadow--2dp">
+		<center style="padding-top:15px;">
+			<a href="/public/logout.php" title="Выход"><b><?php echo $user['login']; ?></b></a>
+		</center>
+		<div class="block-body" style="margin-left: 15px; padding-top: 0px;">
 			<ul>
-				<center>
-					<a href="/public/logout.php" title="Выход"><b><?php echo $user['login']; ?></b></a>
-				</center>
 				<hr/>
 				<li><a href="/pages/cp.php">Настройки</a></li>
 				<li><a href="/pages/cp.php">Пополнить счет</a></li>

@@ -2,7 +2,7 @@
 	<div class="container-fluid">
 		<div class="navbar-header">
 			<a class="navbar-brand" href="#">
-				<img alt="Brand" src="...">
+				<img src="/images/lepuslogo.png" style="max-width: 100px;">
 			</a>
 			<ul class="nav navbar-nav">
 				<li class="active"><a href="/">Главная</a></li>
@@ -24,15 +24,15 @@
 	</ol>
 	<div class="carousel-inner" role="listbox">
 		<div class="item active">
-				<img src="/images/logo.png">
+				<img src="/images/lepusbar1.png">
 				<div class="carousel-caption"></div>
 		</div>
 		<div class="item">
-			<img src="/images/logo.png">
+			<img src="/images/lepusbar1.png">
 			<div class="carousel-caption"></div>
 		</div>
 		<div class="item">
-			<img src="/images/logo.png">
+			<img src="/images/lepusbar1.png">
 			<div class="carousel-caption"></div>
 		</div>
 		<a class="left carousel-control" href="#carousel-example-generic" role="button" data-slide="prev">

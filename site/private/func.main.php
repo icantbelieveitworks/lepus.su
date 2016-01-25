@@ -748,3 +748,14 @@ function admin_lepus_getIPlist(){
 	}
 	return $data;
 }
+
+function lepus_getHTMLSelect($table, $column){
+	global $db; $data = '';
+	$query = $db->prepare("SELECT * FROM `$table`");
+	$query->execute();
+	while($row=$query->fetch()){
+		$data .= "<option value=\"{$row['id']}\">{$row[$column]}</option>";
+	}
+	return $data;
+}
+

@@ -20,6 +20,7 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/auth.php');
 		<link rel="stylesheet" type="text/css" href="/css/style.css"/>
 		<link rel="stylesheet" type="text/css" href="/css/alertify.core.css" />
 		<link rel="stylesheet" type="text/css" href="/css/alertify.bootstrap.css" />
+		<link rel="stylesheet" type="text/css" href="/css/chosen.css">
 		<link rel="stylesheet" href="//cdn.datatables.net/plug-ins/1.10.10/integration/bootstrap/3/dataTables.bootstrap.css">
 		<style>
 			.col-centered{ float: none; margin: 0 auto; }
@@ -44,10 +45,19 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/auth.php');
 						На этой странице вы можете выполнить следующие действия с IP адресами.<br/>
 						Просмотр, поиск свободных адресов, редактирование, добавление, удаление.<br/>
 						<hr/>
-						<div class="col-lg-9 col-centered">
+						<div class="col-lg-12 col-centered">
 							<div class="form-inline">
-								<input class="form-control" id="dnsDomain" style="width: 25%;" type="text" name="count" value="" required="" placeholder="127.0.0.1">
-								<input class="form-control" id="dnsDomainMaster"  style="width: 28%;"  type="text" name="count" value="" required="" placeholder="00:0a:95:9d:68:16">
+								<center><input class="form-control" id="dnsDomain" style="width: 19%;" type="text" name="count" value="" required="" placeholder="127.0.0.1">
+								<input class="form-control" id="dnsDomainMaster"  style="width: 20%;"  type="text" name="count" value="" required="" placeholder="00:0a:95:9d:68:16">
+								<input class="form-control" id="dnsDomainMaster"  style="width: 18%;"  type="text" name="count" value="" required="" placeholder="hostname">
+								<select id="tiketUser" data-placeholder="Сервер..." class="chosen-select" style="width: 20%;">
+									<option value=""></option>
+										<?php echo lepus_getHTMLSelect('servers', 'domain'); ?>
+								</select>
+								<select id="tiketUser" data-placeholder="Пользователь..." class="chosen-select" style="width: 20%;">
+									<option value=""></option>
+										<?php echo lepus_getHTMLSelect('users', 'login'); ?>
+								</select></center>
 								<input class="btn btn-sm btn-danger btn-block" data-dns-domain-add style="margin-top: 2px;" type="submit" value="Добавить IP адрес">
 							</div>
 						</div>
@@ -76,6 +86,19 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/auth.php');
 		</div>
 		<?php require_once($_SERVER['DOCUMENT_ROOT'].'/private/pages/footer.php'); ?>
 		<?php require_once($_SERVER['DOCUMENT_ROOT'].'/private/pages/modal.php'); ?>
+		<script src="/js/chosen.jquery.min.js" type="text/javascript"></script>
+		<script type="text/javascript">
+			var config = {
+				'.chosen-select'           : {},
+				'.chosen-select-deselect'  : {allow_single_deselect:true},
+				'.chosen-select-no-single' : {disable_search_threshold:10},
+				'.chosen-select-no-results': {no_results_text:'Oops, nothing found!'},
+				'.chosen-select-width'     : {width:"95%"}
+			}
+			for (var selector in config) {
+				$(selector).chosen(config[selector]);
+			}
+		</script>
 		<script src="//www.google.com/recaptcha/api.js?onload=onloadCallback&render=explicit" async defer></script>
 	</body>
 </html>

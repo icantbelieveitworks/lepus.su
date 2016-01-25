@@ -61,8 +61,6 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/auth.php');
 							<td>unlim</td>
 							<td>unlim</td>
 						</tr>
-						
-						
 						<tr>
 							<td>Диск (Мб)</td>
 							<td>1000</td>
@@ -74,7 +72,6 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/auth.php');
 							<td>15000</td>
 							<td>20000</td>
 						</tr>
-						
 						<tr>
 							<td>MySQL</td>
 							<td>+</td>
@@ -86,7 +83,6 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/auth.php');
 							<td>+</td>
 							<td>+</td>
 						</tr>
-						
 						<tr>
 							<td>FTP</td>
 							<td>+</td>
@@ -98,7 +94,6 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/auth.php');
 							<td>+</td>
 							<td>+</td>
 						</tr>
-						
 						<tr>
 							<td>ISPmanager</td>
 							<td>+</td>
@@ -110,7 +105,6 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/auth.php');
 							<td>+</td>
 							<td>+</td>
 						</tr>
-						
 						<tr>
 							<td>Cron</td>
 							<td>+</td>
@@ -121,8 +115,7 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/auth.php');
 							<td>+</td>
 							<td>+</td>
 							<td>+</td>
-						</tr>
-						
+						</tr>	
 						<tr>
 							<td>SSL</td>
 							<td>+</td>
@@ -134,7 +127,6 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/auth.php');
 							<td>+</td>
 							<td>+</td>
 						</tr>
-						
 						<tr>
 							<td>PHP</td>
 							<td>+</td>
@@ -146,7 +138,6 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/auth.php');
 							<td>+</td>
 							<td>+</td>
 						</tr>
-						
 						<tr>
 							<td>MySQL</td>
 							<td>+</td>
@@ -158,7 +149,6 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/auth.php');
 							<td>+</td>
 							<td>+</td>
 						</tr>
-						
 						<tr>
 							<td>FTP-доступ</td>
 							<td>+</td>
@@ -170,7 +160,6 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/auth.php');
 							<td>+</td>
 							<td>+</td>
 						</tr>
-						
 						<tr>
 							<td>ionCube</td>
 							<td>+</td>
@@ -182,7 +171,6 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/auth.php');
 							<td>+</td>
 							<td>+</td>
 						</tr>
-						
 						<tr>
 							<td>Zend Guard</td>
 							<td>+</td>
@@ -194,8 +182,6 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/auth.php');
 							<td>+</td>
 							<td>+</td>
 						</tr>
-						
-						
 						<tr>
 							<td>phpMyAdmin</td>
 							<td>+</td>
@@ -209,60 +195,55 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/auth.php');
 						</tr>	
 						<tr>
 							<td>Расположение</td>
-							<th><center><img src="https://lepus.su/images/flags/germany-flag.png" title="Germany"></center></th>
-							<th><center><img src="https://lepus.su/images/flags/germany-flag.png" title="Germany"></center></th>
-							<th><center><img src="https://lepus.su/images/flags/germany-flag.png" title="Germany"></center></th>
-							<th><center><img src="https://lepus.su/images/flags/germany-flag.png" title="Germany"></center></th>
-							<th><center><img src="https://lepus.su/images/flags/germany-flag.png" title="Germany"></center></th>
-							<th><center><img src="https://lepus.su/images/flags/germany-flag.png" title="Germany"></center></th>
-							<th><center><img src="https://lepus.su/images/flags/germany-flag.png" title="Germany"></center></th>
-							<th><center><img src="https://lepus.su/images/flags/germany-flag.png" title="Germany"></center></th>
+							<th><img src="https://lepus.su/images/flags/germany-flag.png" title="Germany"></th>
+							<th><img src="https://lepus.su/images/flags/germany-flag.png" title="Germany"></th>
+							<th><img src="https://lepus.su/images/flags/germany-flag.png" title="Germany"></th>
+							<th><img src="https://lepus.su/images/flags/germany-flag.png" title="Germany"></th>
+							<th><img src="https://lepus.su/images/flags/germany-flag.png" title="Germany"></th>
+							<th><img src="https://lepus.su/images/flags/germany-flag.png" title="Germany"></th>
+							<th><img src="https://lepus.su/images/flags/germany-flag.png" title="Germany"></th>
+							<th><img src="https://lepus.su/images/flags/germany-flag.png" title="Germany"></th>
 						</tr>
 						<tr>
 							<td><font color="green"><i>Тест. период</i></font></td>
-							<td><font color="green"><center>+</center></font></td>
-							<td><font color="green"><center>+</center></font></td>
-							<td><font color="green"><center>+</center></font></td>
-							<td><font color="green"><center>+</center></font></td>
-							<td><font color="green"><center>+</center></font></td>
-							<td><font color="green"><center>+</center></font></td>
-							<td><font color="green"><center>+</center></font></td>
-							<td><font color="green"><center>+</center></font></td>
+							<td><font color="green">+</font></td>
+							<td><font color="green">+</font></td>
+							<td><font color="green">+</font></td>
+							<td><font color="green">+</font></td>
+							<td><font color="green">+</font></td>
+							<td><font color="green">+</font></td>
+							<td><font color="green">+</font></td>
+							<td><font color="green">+</font></td>
 						</tr>
 						<tr>
 							<th>Цена</th>
-							<th><center>50</center></th>
-							<th><center>100</center></th>
-							<th><center>200</center></th>
-							<th><center>300</center></th>
-							<th><center>400</center></th>
-							<th><center>500</center></th>
-							<th><center>600</center></th>
-							<th><center>700</center></th>
+							<th>50</th>
+							<th>100</th>
+							<th>200</th>
+							<th>300</th>
+							<th>400</th>
+							<th>500</th>
+							<th>600</th>
+							<th>700</th>
 						</tr>
 						<tfoot>
 						<tr>
 							<td>&nbsp;</td>
-							
-							
-							
-							<td><center><a class="btn btn-danger btn-xs" rel="nofollow">заказать</a></center></td>
-							<td><center><a class="btn btn-danger btn-xs" rel="nofollow">заказать</a></center></td>
-							<td><center><a class="btn btn-danger btn-xs" rel="nofollow">заказать</a></center></td>
-							<td><center><a class="btn btn-danger btn-xs" rel="nofollow">заказать</a></center></td>
-							<td><center><a class="btn btn-danger btn-xs" rel="nofollow">заказать</a></center></td>
-							<td><center><a class="btn btn-danger btn-xs" rel="nofollow">заказать</a></center></td>
-							<td><center><a class="btn btn-danger btn-xs" rel="nofollow">заказать</a></center></td>
-							<td><center><a class="btn btn-danger btn-xs" rel="nofollow">заказать</a></center></td>						
+							<td><a class="btn btn-danger btn-xs" rel="nofollow">заказать</a></td>
+							<td><a class="btn btn-danger btn-xs" rel="nofollow">заказать</a></td>
+							<td><a class="btn btn-danger btn-xs" rel="nofollow">заказать</a></td>
+							<td><a class="btn btn-danger btn-xs" rel="nofollow">заказать</a></td>
+							<td><a class="btn btn-danger btn-xs" rel="nofollow">заказать</a></td>
+							<td><a class="btn btn-danger btn-xs" rel="nofollow">заказать</a></td>
+							<td><a class="btn btn-danger btn-xs" rel="nofollow">заказать</a></td>
+							<td><a class="btn btn-danger btn-xs" rel="nofollow">заказать</a></td>
 						</tr>
 					</tfoot>
 					</tbody>
 				</table>
-
 							Наш виртуальный хостинг отлично подходит для размещения небольших сайтов: визитки, личные блоги.<br/>
 							Вы сможете разместить сайты на таких популярных CMS как Wordpress, Joomla, Drupal, DLE и других PHP движках.<br/>
 							Для новых клиентов мы предоставляем бесплатный тестовый период! Попробуйте наш php хостинг прямо сейчас!<br/>
-							
 						</div>
 				</div>
 			</div>

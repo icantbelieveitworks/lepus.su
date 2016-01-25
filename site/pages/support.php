@@ -9,15 +9,6 @@ if(empty($user)){
 	$tmpData = error('no_auth_page');
 	die(lepus_error_page($tmpData['mes']));
 }
-function lepus_getAllUsers(){
-	global $db; $data = '';
-	$query = $db->prepare("SELECT * FROM `users`");
-	$query->execute();
-	while($row=$query->fetch()){
-		$data .= "<option value=\"{$row['id']}\">{$row['login']}</option>";
-	}
-	return $data;
-}
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
@@ -33,7 +24,7 @@ function lepus_getAllUsers(){
 		<link rel="stylesheet" type="text/css" href="/css/style.css"/>
 		<link rel="stylesheet" type="text/css" href="/css/alertify.core.css" />
 		<link rel="stylesheet" type="text/css" href="/css/alertify.bootstrap.css" />
-		<link rel="stylesheet"  type="text/css" href="/css/chosen.css">
+		<link rel="stylesheet" type="text/css" href="/css/chosen.css">
 		<link rel="stylesheet" href="//cdn.datatables.net/plug-ins/1.10.10/integration/bootstrap/3/dataTables.bootstrap.css">
 		<style>
 			td,th { text-align: center; vertical-align: middle; }
@@ -67,7 +58,7 @@ function lepus_getAllUsers(){
 											<?php }else{ ?>
 												<select id="tiketUser" data-placeholder="Выберите пользователя..." class="chosen-select" style="width: 29%;">
 													<option value="no"></option>
-													<?php echo lepus_getAllUsers(); ?>
+													<?php echo lepus_getHTMLSelect('users', 'login'); ?>
 												</select>	
 												<input class="form-control" id="tiketTitle" style="width: 39%;" type="text" name="count" value="" required="" placeholder="Заголовок">
 												<input class="form-control btn btn-sm btn-danger btn-block" data-open-new-tiket style="width: 30%;" type="submit" value="Открыть новый тикет">

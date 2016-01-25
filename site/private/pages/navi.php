@@ -20,6 +20,9 @@ if(empty($user)){ ?>
 	<div class="block-login box-shadow--2dp">
 		<center style="padding-top:15px;">
 			<a href="/public/logout.php" title="Выход"><b><?php echo $user['login']; ?></b></a>
+			<?php if($user['data']['access'] > 0){ ?>
+				<br/>Statistics | <a href="/pages/ipmanager.php">IPmanager</a> | Services
+			<?php } ?> 
 		</center>
 		<div class="block-body" style="margin-left: 15px; padding-top: 0px;">
 			<ul>

@@ -20,10 +20,19 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/auth.php');
 		<link rel="stylesheet" type="text/css" href="/css/style.css"/>
 		<link rel="stylesheet" type="text/css" href="/css/alertify.core.css" />
 		<link rel="stylesheet" type="text/css" href="/css/alertify.bootstrap.css" />
+		<link rel="stylesheet" href="//cdn.datatables.net/plug-ins/1.10.10/integration/bootstrap/3/dataTables.bootstrap.css">
+		<style>
+			.col-centered{ float: none; margin: 0 auto; }
+			td,th { text-align: center; vertical-align: middle; }
+			blockquote { background: #f9f9f9; border-left: 10px solid #ccc; margin: 1.5em 10px; padding: 0.5em 10px; }
+		</style>
 		<script src="/js/jquery.min.js"></script>
+		<script src="//cdn.datatables.net/1.10.10/js/jquery.dataTables.min.js"></script>
+		<script src="//cdn.datatables.net/plug-ins/1.10.10/integration/bootstrap/3/dataTables.bootstrap.js"></script>
 		<script src="/js/bootstrap.min.js"></script>
 		<script src="/js/alertify.js"></script>
 		<script src="/js/lepus.js"></script>
+		<script type="text/javascript" charset="utf-8"> $(document).ready(function() { $('#dnsDomainsList').dataTable({ "order": [[ 0, "desc" ]] }); }); </script>
 	</head>
 	<body>
 		<div class="wrapper">
@@ -31,19 +40,35 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/auth.php');
 			<div class="content-box">
 				<div class="content-info box-shadow--2dp">
 					<div class="content-text">
-						<div class="page-title">Lepus хостинг</div>
-						<p>
-							— <a href="/domains.html" target="_blank" rel="nofollow">Регистрация доменов</a>.<br/>
-							— Moneyback по первому требованию.<br/>
-							— Мощные <a href="/vps.html">администрируемые VPS</a> на SSD дисках.<br/>
-							— Бесплатный перенос ваших сайтов на наш хостинг.<br/>
-							— <a href="/shared.html">Виртуальный хостинг</a> и <a href="/vip.html" rel="nofollow">VIP хостинг</a> для ваших сайтов.<br/>
-							— Быстрые администрируемые <a href="/dedicated.html">выделенные серверы</a> по выгодной цене.<br/><br/>
-							Наша миссия - предоставление качественных услуг хостинга. 
-							Находим индивидуальный подход к каждому клиенту.<br/>
-							Оказываем профессиональные услуги по технической поддержке, администрированию и сопровождению проектов.<br/>
-							Самое ценное - это вы, наши клиенты. Мы болеем за вас, радуемся вашим победам и успехам! Добро пожаловать!<br/>
-						</p>
+						<div class="page-title">Управление IP адресами</div>
+						На этой странице вы можете выполнить следующие действия с IP адресами.<br/>
+						Просмотр, поиск свободных адресов, редактирование, добавление, удаление.<br/>
+						<hr/>
+						<div class="col-lg-9 col-centered">
+							<div class="form-inline">
+								<input class="form-control" id="dnsDomain" style="width: 25%;" type="text" name="count" value="" required="" placeholder="127.0.0.1">
+								<input class="form-control" id="dnsDomainMaster"  style="width: 28%;"  type="text" name="count" value="" required="" placeholder="00:0a:95:9d:68:16">
+								<input class="btn btn-sm btn-danger btn-block" data-dns-domain-add style="margin-top: 2px;" type="submit" value="Добавить IP адрес">
+							</div>
+						</div>
+						<hr/>
+						<table id="dnsDomainsList" class="table table-striped table-bordered" cellspacing="0" width="100%">
+							<thead>
+								<tr>
+									<th>ID</th>
+									<th>IP</th>
+									<th>Service</th>
+									<th>Owner</th>
+									<th>MAC</th>
+									<th>Domain</th>
+									<th>Действия</th>
+								</tr>
+							</thead>
+							<tbody>
+								<?php echo admin_lepus_getIPlist(); ?>
+							</tbody>
+							</table>
+						<hr/>
 					</div>
 				</div>
 			</div>

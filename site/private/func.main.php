@@ -725,3 +725,26 @@ function lepus_addCron($uid, $time, $url, $do, $id = 0){
 function telegram_send($msg){
 	file_get_contents("https://api.telegram.org/bot160840517:AAGEazjmMcxvwbjhQvzzftJcbFzVKIX2RLA/sendMessage?chat_id=160138276&text=".urlencode($msg));
 }
+
+function admin_lepus_getIPlist(){
+	global $db; $data = '';
+	$query = $db->prepare("SELECT * FROM `ipmanager`");
+	$query->execute();
+	while($row = $query->fetch()){
+		$tmpQuery = $db->prepare("SELECT * FROM `users` WHERE `id` =:id");
+		$tmpQuery->bindParam(':id', $row['owner'], PDO::PARAM_STR);
+		$tmpQuery->execute();
+		$tmpRow = $tmpQuery->fetch();
+		$row['owner'] = $tmpRow['login'];
+
+		$tmpQuery = $db->prepare("SELECT * FROM `servers` WHERE `id` =:id");
+		$tmpQuery->bindParam(':id', $row['sid'], PDO::PARAM_STR);
+		$tmpQuery->execute();
+		$tmpRow = $tmpQuery->fetch();
+		$row['sid'] = $tmpRow['domain'];
+		
+		$row['ip'] = long2ip($row['ip']);
+		$data .= "<tr><td>{$row['id']}</td><td>{$row['ip']}</td><td>{$row['sid']}</td><td>{$row['owner']}</td><td>{$row['mac']}</td><td>{$row['domain']}</td><td><a href=\"nourl\" data-dns-delete-id=\"5583\"><i class=\"glyphicon glyphicon-remove\"></i></a></td></tr>";
+	}
+	return $data;
+}

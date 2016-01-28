@@ -284,11 +284,44 @@ $(document).on("click", "[data-cron-task-id]", function(e) {
 	var this_cron = $(this).parents('tr');
 	idTask = $(this).data("cron-task-id");
     $.post("//"+document.domain+"/public/add_cron.php", {do: 'remove', id: idTask}, function(json){
-		console.log(json);
 		data = JSON.parse(json);
 		if(data.err == 'OK'){
 			alertify.success(data.mes);
 			table.row(this_cron).remove().draw();
+		}else{
+			alertify.error(data.mes);
+		}
+	});
+});
+
+$(document).on("click", "[data-admin-addip]", function(e) {
+	$(this).blur();
+	e.preventDefault();
+	ip = $('input[id=ipAddress]').val();
+	mac = $('input[id=ipMAC]').val();
+	host = $('input[id=ipHost]').val();
+	server = $('select[id=ipServer]').val();
+	user = $('select[id=ipUser]').val();
+
+	server_text = $('select[id=ipServer] option:selected').text();
+	user_text = $('select[id=ipUser] option:selected').text();
+	
+	var table = $('#IPmanagerList').DataTable();
+	$.post("//"+document.domain+"/public/admin/add_ip.php", {ip: ip, mac: mac, host: host, server: server, user: user}, function(json){
+		console.log(json);
+		data = JSON.parse(json);
+		if(data.err == 'OK'){
+			alertify.success('lolka!');
+			table.row.add({
+				0:     data.mes.a,
+				1:     ip,
+				2:     server_text,
+				3:     0,
+				4:     user_text,
+				5:     mac,
+				6:     host,
+				7:     data.mes.b,
+			}).draw( false );
 		}else{
 			alertify.error(data.mes);
 		}

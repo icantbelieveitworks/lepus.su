@@ -33,7 +33,7 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/auth.php');
 		<script src="/js/bootstrap.min.js"></script>
 		<script src="/js/alertify.js"></script>
 		<script src="/js/lepus.js"></script>
-		<script type="text/javascript" charset="utf-8"> $(document).ready(function() { $('#dnsDomainsList').dataTable({ "order": [[ 0, "desc" ]] }); }); </script>
+		<script type="text/javascript" charset="utf-8"> $(document).ready(function() { $('#IPmanagerList').dataTable({ "order": [[ 0, "desc" ]] }); }); </script>
 	</head>
 	<body>
 		<div class="wrapper">
@@ -47,31 +47,32 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/auth.php');
 						<hr/>
 						<div class="col-lg-12 col-centered">
 							<div class="form-inline">
-								<center><input class="form-control" id="dnsDomain" style="width: 19%;" type="text" name="count" value="" required="" placeholder="127.0.0.1">
-								<input class="form-control" id="dnsDomainMaster"  style="width: 20%;"  type="text" name="count" value="" required="" placeholder="00:0a:95:9d:68:16">
-								<input class="form-control" id="dnsDomainMaster"  style="width: 18%;"  type="text" name="count" value="" required="" placeholder="hostname">
-								<select id="tiketUser" data-placeholder="Сервер..." class="chosen-select" style="width: 20%;">
+								<center><input class="form-control" id="ipAddress" style="width: 19%;" type="text" name="count" value="" required="" placeholder="127.0.0.1">
+								<input class="form-control" id="ipMAC"  style="width: 20%;"  type="text" name="count" value="" required="" placeholder="00:0a:95:9d:68:16">
+								<input class="form-control" id="ipHost"  style="width: 18%;"  type="text" name="count" value="" required="" placeholder="hostname">
+								<select id="ipServer" data-placeholder="Сервер..." class="chosen-select" style="width: 20%;">
 									<option value=""></option>
 										<?php echo lepus_getHTMLSelect('servers', 'domain'); ?>
 								</select>
-								<select id="tiketUser" data-placeholder="Пользователь..." class="chosen-select" style="width: 20%;">
+								<select id="ipUser" data-placeholder="Пользователь..." class="chosen-select" style="width: 20%;">
 									<option value=""></option>
 										<?php echo lepus_getHTMLSelect('users', 'login'); ?>
 								</select></center>
-								<input class="btn btn-sm btn-danger btn-block" data-dns-domain-add style="margin-top: 2px;" type="submit" value="Добавить IP адрес">
+								<input class="btn btn-sm btn-danger btn-block" data-admin-addip style="margin-top: 2px;" type="submit" value="Добавить IP адрес">
 							</div>
 						</div>
 						<hr/>
-						<table id="dnsDomainsList" class="table table-striped table-bordered" cellspacing="0" width="100%">
+						<table id="IPmanagerList" class="table table-striped table-bordered" cellspacing="0" width="100%">
 							<thead>
 								<tr>
 									<th>ID</th>
 									<th>IP</th>
-									<th>Service</th>
+									<th>Server</th>
+									<th>SID</th>
 									<th>Owner</th>
 									<th>MAC</th>
 									<th>Domain</th>
-									<th>Действия</th>
+									<th></th>
 								</tr>
 							</thead>
 							<tbody>

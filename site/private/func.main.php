@@ -121,7 +121,12 @@ function error($message, $j = 0){
 			"only_numeric" => "Только цифры",
 			"wrong_action" => "Неправильное действие",
 			"not_valid" => "Неправильное значение у переменной",
-			"max_limit" => "Вы превысили лимит"
+			"max_limit" => "Вы превысили лимит",
+			"wrong_ip" => "Неправильный IP",
+			"wrong_mac" => "Неправильный MAC",
+			"wrong_host" => "Неправильный HOST",
+			"too_long_value" => "Слишком длинное значение",
+			"already_get_it" => "Такая запись уже есть"
 		];
 		if (array_key_exists($message, $err)) $j = 1;
 	}
@@ -744,7 +749,7 @@ function admin_lepus_getIPlist(){
 		$row['sid'] = $tmpRow['domain'];
 		
 		$row['ip'] = long2ip($row['ip']);
-		$data .= "<tr><td>{$row['id']}</td><td>{$row['ip']}</td><td>{$row['sid']}</td><td>{$row['owner']}</td><td>{$row['mac']}</td><td>{$row['domain']}</td><td><a href=\"nourl\" data-dns-delete-id=\"5583\"><i class=\"glyphicon glyphicon-remove\"></i></a></td></tr>";
+		$data .= "<tr><td>{$row['id']}</td><td>{$row['ip']}</td><td>{$row['sid']}</td><td>{$row['service']}</td><td>{$row['owner']}</td><td>{$row['mac']}</td><td>{$row['domain']}</td><td><a href=\"nourl\" data-adminIP-delete-id=\"{$row['id']}\"><i class=\"glyphicon glyphicon-remove\"></i></a></td></tr>";
 	}
 	return $data;
 }
@@ -759,3 +764,20 @@ function lepus_getHTMLSelect($table, $column){
 	return $data;
 }
 
+function lepus_admin_addIP($ip, $mac, $host, $server, $user){
+	global $db;
+	$query = $db->prepare("SELECT * FROM `ipmanager` WHERE `ip` = :ip OR `mac` = :mac");
+	$query->bindParam(':ip', $ip, PDO::PARAM_STR);
+	$query->bindParam(':mac', $mac, PDO::PARAM_STR);
+	$query->execute();
+	if($query->rowCount() > 0) return "already_get_it";
+	$query = $db->prepare("INSERT INTO `ipmanager` (`ip`, `sid`, `service`, `owner`, `mac`, `domain`) VALUES (:ip, :server, 0, :user, :mac, :host)");
+	$query->bindParam(':ip', $ip, PDO::PARAM_STR);
+	$query->bindParam(':server', $server, PDO::PARAM_STR);
+	$query->bindParam(':user', $user, PDO::PARAM_STR);
+	$query->bindParam(':mac', $mac, PDO::PARAM_STR);
+	$query->bindParam(':host', $host, PDO::PARAM_STR);
+	$query->execute();
+	$lastID = $db->lastInsertId();
+	return ['a' => $lastID, 'b' => "<a href=\"nourl\" data-adminIP-delete-id=\"$lastID\"><i class=\"glyphicon glyphicon-remove\"></i></a>"];
+}

@@ -308,10 +308,9 @@ $(document).on("click", "[data-admin-addip]", function(e) {
 	
 	var table = $('#IPmanagerList').DataTable();
 	$.post("//"+document.domain+"/public/admin/add_ip.php", {ip: ip, mac: mac, host: host, server: server, user: user}, function(json){
-		console.log(json);
 		data = JSON.parse(json);
 		if(data.err == 'OK'){
-			alertify.success('lolka!');
+			alertify.success('IP успешно добавлен');
 			table.row.add({
 				0:     data.mes.a,
 				1:     ip,
@@ -322,6 +321,24 @@ $(document).on("click", "[data-admin-addip]", function(e) {
 				6:     host,
 				7:     data.mes.b,
 			}).draw( false );
+		}else{
+			alertify.error(data.mes);
+		}
+	});
+});
+
+$(document).on("click", "[data-adminip-delete-id]", function(e) {
+	$(this).blur();
+	e.preventDefault();
+	ip = $(this).data("adminip-delete-id");
+	var this_ip = $(this).parents('tr');
+	var table = $('#IPmanagerList').DataTable();
+	if(!confirm("Вы подтверждаете удаление?")) return;
+	$.post("//"+document.domain+"/public/admin/remove_ip.php", {id: ip}, function(json){
+		data = JSON.parse(json);
+		if(data.err == 'OK'){
+			alertify.success('IP успешно удален');
+			table.row(this_ip).remove().draw();
 		}else{
 			alertify.error(data.mes);
 		}

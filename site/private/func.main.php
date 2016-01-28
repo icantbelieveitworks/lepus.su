@@ -749,7 +749,7 @@ function admin_lepus_getIPlist(){
 		$row['sid'] = $tmpRow['domain'];
 		
 		$row['ip'] = long2ip($row['ip']);
-		$data .= "<tr><td>{$row['id']}</td><td>{$row['ip']}</td><td>{$row['sid']}</td><td>{$row['service']}</td><td>{$row['owner']}</td><td>{$row['mac']}</td><td>{$row['domain']}</td><td><a href=\"nourl\" data-adminIP-delete-id=\"{$row['id']}\"><i class=\"glyphicon glyphicon-remove\"></i></a></td></tr>";
+		$data .= "<tr><td>{$row['id']}</td><td>{$row['ip']}</td><td>{$row['sid']}</td><td>{$row['service']}</td><td>{$row['owner']}</td><td>{$row['mac']}</td><td>{$row['domain']}</td><td><a href=\"nourl\" data-adminip-delete-id=\"{$row['id']}\"><i class=\"glyphicon glyphicon-remove\"></i></a></td></tr>";
 	}
 	return $data;
 }
@@ -779,5 +779,15 @@ function lepus_admin_addIP($ip, $mac, $host, $server, $user){
 	$query->bindParam(':host', $host, PDO::PARAM_STR);
 	$query->execute();
 	$lastID = $db->lastInsertId();
-	return ['a' => $lastID, 'b' => "<a href=\"nourl\" data-adminIP-delete-id=\"$lastID\"><i class=\"glyphicon glyphicon-remove\"></i></a>"];
+	return ['a' => $lastID, 'b' => "<a href=\"nourl\" data-adminip-delete-id=\"$lastID\"><i class=\"glyphicon glyphicon-remove\"></i></a>"];
 }
+
+function lepus_admin_removeIP($id){
+	global $db;
+	if(empty($id)) return 'empty_post_value';
+	$query = $db->prepare("DELETE FROM `ipmanager` WHERE `id` = :id");
+	$query->bindParam(':id', $id, PDO::PARAM_STR);
+	$query->execute();
+	return 'OK';
+}
+

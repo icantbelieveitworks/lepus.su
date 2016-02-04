@@ -344,3 +344,9 @@ $(document).on("click", "[data-adminip-delete-id]", function(e) {
 		}
 	});
 });
+
+$(document).on("click", "[data-adminip-edit-id]", function(e) {
+	$(this).blur();
+	e.preventDefault();
+	$('#adminEditIP').modal('show');
+});

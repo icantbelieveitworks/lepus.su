@@ -5,7 +5,7 @@ $_SESSION['sess'] = 'auth';
 echo $_SESSION['sess'];*/
 
 
-function error($message, $j = 0){
+/*function error($message, $j = 0){
 	if(!is_array($message)){
 		$err = [
 			"no_auth" => "Неудачная попытка входа.",
@@ -26,7 +26,21 @@ function error($message, $j = 0){
 	return $message;
 }
 
-var_dump(error('empty_message'));
+var_dump(error('empty_message'));*/
 
+function domain_check3rd($domain){
+	$arr = explode(".", $domain);
+	if(count($arr) > 2){
+		var_dump($arr);
+	}
+}
 
-?>
+$a = 'test.ru';
+$b = 'xxx.test.ru';
+
+//array_reverse
+//domain_check3rd($a);
+//domain_check3rd($b);
+
+$arr = array_reverse(explode(".", $b));
+var_dump($arr);

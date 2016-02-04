@@ -237,9 +237,20 @@ function lepus_get_logip($id, $i = 0){
 	return $data;
 }
 
+function lepus_domainLvl(){
+	global $db;
+	
+}
+
 function lepus_addDNSDomain($domain, $type, $master, $id){
-	global $pdns;
+	global $pdns; $lvl = ['org.ru', 'com.ua'];
 	$query = $pdns->prepare("SELECT * FROM `domains` WHERE `name` = :domain");
+	$arr = array_reverse(explode(".", $domain));
+	if(count($arr) > 2){
+		if(!in_array("$arr[1].$arr[0]", $lvl)) return "wrong_domain";
+		$domain = "$arr[2].$arr[1].$arr[0]"; 
+	}
+	$query->bindParam(':domain', $domain, PDO::PARAM_STR);
 	$query->bindParam(':domain', $domain, PDO::PARAM_STR);
 	$query->execute();
 	if($query->rowCount() != 0) return 'already_add';

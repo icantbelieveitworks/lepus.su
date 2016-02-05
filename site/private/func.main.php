@@ -802,3 +802,6 @@ function lepus_admin_removeIP($id){
 	return 'OK';
 }
 
+function is_login($j = TRUE){
+	global $user; if(empty($user)) $j = FALSE; return $j;
+}

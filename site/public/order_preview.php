@@ -7,5 +7,5 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/func.main.php');
 require_once($_SERVER['DOCUMENT_ROOT'].'/private/auth.php');
 
 if(empty($_POST['id'])) die('empty post');
-$tmpData = error(lepus_create_order($_POST['id'], $_POST['promo']));
-echo json_encode($tmpData);
+$tmpData = lepus_order_preview($_POST['id'], lepus_check_discount(@$_POST['promo']));
+echo "<center>{$tmpData["name"]} | <u><font color=\"green\">Cкидка {$tmpData["discont"]} RUR</font></u> | К оплате {$tmpData["price"]} RUR</center>";

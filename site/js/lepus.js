@@ -345,14 +345,31 @@ $(document).on("click", "[data-adminip-delete-id]", function(e) {
 	});
 });
 
-
 $(document).on("click", "[data-order-service]", function(e) {
 	$(this).blur();
 	e.preventDefault();
+	$("#order_hide").show();
 	var order_id = $("#idServiceOrder option:selected").val();
 	var promo = $("#promo_code").val();
-	$.post("//"+document.domain+"/public/order.php", {id: order_id, promo: promo}, function(data){
+	$.post("//"+document.domain+"/public/order_preview.php", {id: order_id, promo: promo}, function(data){
 		$("#modal_order_text" ).html(data);
 		$('#confirmOrder').modal('show');
+	});
+});
+
+$(document).on("click", "[data-order-finish]", function(e) {
+	$(this).hide();
+	var order_id = $("#idServiceOrder option:selected").val();
+	var promo = $("#promo_code").val();
+	//$("#modal_order_text" ).html("<center>Ваш заказ будет выполнен в ближайщее время.<br/> Вы можете посмотреть статус заказа и связаться с поддержкой <a href='https://lepus.dev/pages/tiket.php?id='>через этот тикет</a>.</center>");
+	//return;
+	$.post("//"+document.domain+"/public/order.php", {id: order_id, promo: promo}, function(json){
+		data = JSON.parse(json);
+		if(data.err == 'OK'){
+			alertify.success("Готово");
+			$("#modal_order_text" ).html("<center>Ваш заказ будет скоро готов.<br/> Вы можете посмотреть статус заказа и связаться с поддержкой <a href='https://lepus.dev/pages/tiket.php?id="+data.mes+"'>через этот тикет</a>.</center>");
+		}else{
+			alertify.error(data.mes);
+		}
 	});
 });

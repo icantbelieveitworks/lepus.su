@@ -224,14 +224,7 @@ for($i=0; $i < 8; $i++){
 									</tr>
 									<tr>
 										<th>Цена</th>
-										<th>50</th>
-										<th>100</th>
-										<th>200</th>
-										<th>300</th>
-										<th>400</th>
-										<th>500</th>
-										<th>600</th>
-										<th>700</th>
+										<?php echo lepus_getTariffPrices(1); ?>
 									</tr>
 									<tfoot>
 										<tr>

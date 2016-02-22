@@ -126,7 +126,9 @@ function error($message, $j = 0){
 			"wrong_mac" => "Неправильный MAC",
 			"wrong_host" => "Неправильный HOST",
 			"too_long_value" => "Слишком длинное значение",
-			"already_get_it" => "Такая запись уже есть"
+			"already_get_it" => "Такая запись уже есть",
+			"no_service" => "Нет такой услуги",
+			"no_money" => "Пополните баланс"
 		];
 		if (array_key_exists($message, $err)) $j = 1;
 	}
@@ -452,9 +454,9 @@ function lepus_get_supportList($uid, $access, $id = 0){
 	return $data;
 }
 
-function support_create($uid, $title, $msg, $access){
+function support_create($uid, $title, $access){
 	global $db;
-	if(empty(trim($title)) || empty(trim($msg)) || empty($uid)) return('empty_post_value');
+	if(empty(trim($title)) || empty($uid)) return('empty_post_value');
 	if($access < 2){
 		$tmpTime = time()-60*60*24;
 		$query = $db->prepare("SELECT * FROM `support` WHERE `uid` = :uid AND `open` > :time");
@@ -463,8 +465,7 @@ function support_create($uid, $title, $msg, $access){
 		$query->execute();
 		if($query->rowCount() > 10) return 'max_limit';
 	}
-	$title = filter_var($title, FILTER_SANITIZE_STRING);	
-	$msg = nl2br(htmlentities($msg, ENT_QUOTES, 'UTF-8'));
+	$title = filter_var($title, FILTER_SANITIZE_STRING);
 	$query = $db->prepare("INSERT INTO `support` (`uid`, `title`, `open`, `status`) VALUES (:uid, :title, :open, 1)");
 	$query->bindParam(':uid', $uid, PDO::PARAM_STR);
 	$query->bindParam(':title', $title, PDO::PARAM_STR);
@@ -816,6 +817,17 @@ function lepus_getTariffList(){
 	return $data;
 }
 
+function lepus_getTariffPrices($g){
+	global $db; $data = '';
+	$query = $db->prepare("SELECT * FROM `tariff` WHERE `gid` = :gid");
+	$query->bindParam(':gid', $g, PDO::PARAM_STR);
+	$query->execute();
+	while($row = $query->fetch()){
+		$data .= '<th>'.lepus_price($row["price"], $row["currency"]).'</th>';
+	}
+	return $data;
+}
+
 function lepus_price($val, $currency){
 	switch($currency){
 		case 'EUR': $val = round($val*90); break;
@@ -824,7 +836,7 @@ function lepus_price($val, $currency){
 	return $val;
 }
 
-function lepus_order_preview($sid, $promo){
+function lepus_order_preview($sid, $promo = 0){
 	global $db; $discont = 0;
 	$query = $db->prepare("SELECT * FROM `tariff` WHERE `id` = :id");
 	$query->bindParam(':id', $sid, PDO::PARAM_STR);
@@ -836,11 +848,11 @@ function lepus_order_preview($sid, $promo){
 		$discont = $price-($price*$promo/100);
 		$price = $price*$promo/100;
 	}
-	return "<center>{$row["name"]} | Стоимость $price рублей | <u><font color=\"green\">Cкидка $discont</font></u></center>";
+	return ['name' => $row["name"], 'price' => round($price), 'discont' => round($discont), 'handler' => $row['handler']];
 }
 
-function lepus_check_discount($promo, $user){
-	global $db; $discont = 0;
+function lepus_check_discount($promo){
+	global $db, $user; $discont = 0;
 	$query = $db->prepare("SELECT * FROM `discounts` WHERE `name` = :name");
 	$query->bindParam(':name', $promo, PDO::PARAM_STR);
 	$query->execute();
@@ -854,4 +866,41 @@ function lepus_check_discount($promo, $user){
 		break;
 	}
 	return $discont;
+}
+
+function lepus_create_order($sid, $promo = 0){
+	global $db, $user;
+	$info = lepus_order_preview($sid, lepus_check_discount($promo));
+	if(!is_array($info)) return $info; 
+	if($info['price'] > $user['data']['balance']) return 'no_money';
+	$user['data']['balance'] -= $info['price'];
+	save_user_data($user['id'], $user['data']);
+	$time1 = time(); $time2 = $time1+60*60*24*30;
+	$query = $db->prepare("INSERT INTO `services` (`sid`, `uid`, `time1`, `time2`) VALUES (:sid, :uid, :time1, :time2)");
+	$query->bindParam(':sid', $sid, PDO::PARAM_STR);
+	$query->bindParam(':uid', $user['id'], PDO::PARAM_STR);
+	$query->bindParam(':time1', $time1, PDO::PARAM_STR);
+	$query->bindParam(':time2', $time2, PDO::PARAM_STR);
+	$query->execute();
+	lepus_log_spend($user['id'], $db->lastInsertId(), $time1, $time2, $info['price'], "Заказ {$info['name']}");
+	switch($info['handler']){
+		case 'ISPmanagerV4': break;
+	}
+	$tmpData = support_create($user['id'], $info['name'], 2);
+	$_POST['msg'] = "Дорогой клиент, благодарим за оплату.\nКак только ваш заказ будет готов - мы свяжемся с вами в этом тикете.";
+	support_msg(6, $tmpData, 2, 1);
+	telegram_send("Заявка №[$tmpData]\nКлиент сделал новый заказ.\nhttps://lepus.dev/pages/tiket.php?id=$tmpData");
+	return $tmpData;
+}
+
+function lepus_log_spend($uid, $oid, $time1, $time2, $money, $info){
+	global $db;
+	$query = $db->prepare("INSERT INTO `log_spend` (`uid`, `oid`, `time1`, `time2`, `money`, `info`) VALUES (:uid, :oid, :time1, :time2, :money, :info)");
+	$query->bindParam(':uid', $uid, PDO::PARAM_STR);
+	$query->bindParam(':oid', $oid, PDO::PARAM_STR);
+	$query->bindParam(':time1', $time1, PDO::PARAM_STR);
+	$query->bindParam(':time2', $time2, PDO::PARAM_STR);
+	$query->bindParam(':money', $money, PDO::PARAM_STR);
+	$query->bindParam(':info', $info, PDO::PARAM_STR);
+	$query->execute();
 }

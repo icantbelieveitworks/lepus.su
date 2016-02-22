@@ -10,9 +10,9 @@ switch($_POST['do']){
 	default: echo "wrong do"; break;
 	case 'new':
 		if($user['data']['access'] > 1 && $_POST['user'] != 'no'){
-			$tmpData = error(support_create(intval($_POST['user']), $_POST['title'], $_POST['msg'], $user['data']['access']));
+			$tmpData = error(support_create(intval($_POST['user']), $_POST['title'], $user['data']['access']));
 		}else{
-			$tmpData = error(support_create($user['id'], $_POST['title'], $_POST['msg'], $user['data']['access']));
+			$tmpData = error(support_create($user['id'], $_POST['title'], $user['data']['access']));
 		}
 		if($tmpData['err'] == 'OK')
 			$tmpData = error(support_msg($user['id'], $tmpData['mes'], $user['data']['access'], 1));

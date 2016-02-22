@@ -87,7 +87,7 @@
 				<div id="modal_order_text"></div>
 			</div>
 			<div class="modal-footer">
-				<button type="button" class="btn btn-success" data-order-finish>Отправить</button>
+				<button id="order_hide" type="button" class="btn btn-success" data-order-finish>Отправить</button>
 				<button type="button" class="btn btn-default" data-dismiss="modal">Закрыть</button>
 			</div>
 		</div>

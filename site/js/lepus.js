@@ -344,3 +344,15 @@ $(document).on("click", "[data-adminip-delete-id]", function(e) {
 		}
 	});
 });
+
+
+$(document).on("click", "[data-order-service]", function(e) {
+	$(this).blur();
+	e.preventDefault();
+	var order_id = $("#idServiceOrder option:selected").val();
+	var promo = $("#promo_code").val();
+	$.post("//"+document.domain+"/public/order.php", {id: order_id, promo: promo}, function(data){
+		$("#modal_order_text" ).html(data);
+		$('#confirmOrder').modal('show');
+	});
+});

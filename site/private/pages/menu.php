@@ -1,7 +1,7 @@
 <nav class="navbar navbar-default" style="margin-bottom: 0px;">
 	<div class="container-fluid">
 		<div class="navbar-header">
-			<a class="navbar-brand" href="#">
+			<a class="navbar-brand" href="/">
 				<img src="/images/lepuslogo.png" style="max-width: 100px;">
 			</a>
 			<ul class="nav navbar-nav">

@@ -10,7 +10,7 @@ for($i=0; $i < 8; $i++){
 	if(!is_login())
 		$start_order .= "<td><a class=\"btn btn-danger btn-xs\" data-register-open rel=\"nofollow\">заказать</a></td>";
 	else
-		$start_order .= "<td><a class=\"btn btn-danger btn-xs\" rel=\"nofollow\">заказать</a></td>";
+		$start_order .= "<td><a class=\"btn btn-danger btn-xs\" rel=\"nofollow\" href=\"/pages/order.php\">заказать</a></td>";
 }
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">

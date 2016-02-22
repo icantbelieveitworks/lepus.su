@@ -805,3 +805,53 @@ function lepus_admin_removeIP($id){
 function is_login($j = TRUE){
 	global $user; if(empty($user)) $j = FALSE; return $j;
 }
+
+function lepus_getTariffList(){
+	global $db; $data = '';
+	$query = $db->prepare("SELECT * FROM `tariff`");
+	$query->execute();
+	while($row=$query->fetch()){
+		$data .= "<option value=\"{$row["id"]}\">{$row["name"]} - ".lepus_price($row["price"], $row["currency"])." рублей</option>";
+	}
+	return $data;
+}
+
+function lepus_price($val, $currency){
+	switch($currency){
+		case 'EUR': $val = round($val*90); break;
+		case 'USD': $val = round($val*80); break;
+	}
+	return $val;
+}
+
+function lepus_order_preview($sid, $promo){
+	global $db; $discont = 0;
+	$query = $db->prepare("SELECT * FROM `tariff` WHERE `id` = :id");
+	$query->bindParam(':id', $sid, PDO::PARAM_STR);
+	$query->execute();
+	if($query->rowCount() != 1) return 'no_service';
+	$row = $query->fetch();
+	$price = lepus_price($row["price"], $row["currency"]);
+	if(is_numeric($promo)){
+		$discont = $price-($price*$promo/100);
+		$price = $price*$promo/100;
+	}
+	return "<center>{$row["name"]} | Стоимость $price рублей | <u><font color=\"green\">Cкидка $discont</font></u></center>";
+}
+
+function lepus_check_discount($promo, $user){
+	global $db; $discont = 0;
+	$query = $db->prepare("SELECT * FROM `discounts` WHERE `name` = :name");
+	$query->bindParam(':name', $promo, PDO::PARAM_STR);
+	$query->execute();
+	if($query->rowCount() != 1) return 'no_promo';
+	$row = $query->fetch();
+	$data = json_decode($row['data'], true);
+	switch($data['handler']){
+		case 'only_new':
+			if(time() > $user['data']['regDate']+60*60*24*7) return 'old_promo'; // проверка на время + проверить есть активные услуги у пользователя
+			$discont = $data['percent'];
+		break;
+	}
+	return $discont;
+}

@@ -904,3 +904,16 @@ function lepus_log_spend($uid, $oid, $time1, $time2, $money, $info){
 	$query->bindParam(':info', $info, PDO::PARAM_STR);
 	$query->execute();
 }
+
+function lepus_getLogSpend($id, $i = 0){
+	global $db; $data = '';
+	$query = $db->prepare("SELECT * FROM `log_spend` WHERE `uid` = :uid");
+	$query->bindParam(':uid', $id, PDO::PARAM_STR);
+	$query->execute();
+	while($row=$query->fetch()){
+		$row['time1'] = date("Y-m-d", $row['time1']);
+		$row['time2'] = date("Y-m-d", $row['time2']);
+		$i++; $data .= "<tr><td>$i</td><td>{$row['time1']}</td><td>{$row['info']} [{$row['oid']}]</td><td>{$row['money']}</td><td>{$row['time2']}</td></tr>";
+	}
+	return $data;
+}

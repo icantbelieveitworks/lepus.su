@@ -34,7 +34,6 @@ if(empty($user)){ ?>
 				<li><a href="/pages/cp.php">Пополнить счет</a></li>
 				<li><a href="/pages/cron.php">Планировщик задач</a></li>
 				<hr>
-				<li><a href="http://dom.lepus.su" target="_blank">Домены</a></li>
 				<li><a href="/cp-vps.html">VPS хостинг</a></li>
 				<li><a href="/pages/dns.php">DNS хостинг</a></li>
 				<li><a href="/cp-adm.html">Администрирование</a></li>
@@ -42,7 +41,7 @@ if(empty($user)){ ?>
 				<li><a href="/cp-serv.html">Выделенные серверы</a></li>
 				<hr/>
 				<li><a href="/pages/support.php">Тех. поддержка</a></li>
-				<li><a href="/cp-buylogs.html">Логи оплаты услуг</a></li>
+				<li><a href="/pages/spend.php">Логи оплаты услуг</a></li>
 				<li><a href="/pages/income.php">Логи пополнения счета</a></li>
 				<hr/>
 				<li><b>Баланс</b>: <?php echo $user['data']['balance']; ?> рублей</li>

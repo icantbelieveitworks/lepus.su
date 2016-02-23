@@ -917,3 +917,14 @@ function lepus_getLogSpend($id, $i = 0){
 	}
 	return $data;
 }
+
+function lepus_getPageNavi(){
+	$pages = ['/' => 'Главная',	'/pages/hosting.php' => 'Хостинг', '/pages/vps.php' => 'VPS', '/pages/servers.php' => 'Серверы', 'http://dom.lepus.su' => 'Домены', '/pages/partners.php' => 'Партнеры', '/pages/contacts.php' => 'Контакты'];
+	foreach($pages as $key => $val){
+		if($_SERVER[REQUEST_URI] == $key)
+			$navi .= "<li class=\"active\"><a href=\"$key\">$val</a></li>";
+		else
+			$navi .= "<li><a href=\"$key\">$val</a></li>";
+	}
+	return $navi;
+}

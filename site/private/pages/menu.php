@@ -5,13 +5,7 @@
 				<img src="/images/lepuslogo.png" style="max-width: 100px;">
 			</a>
 			<ul class="nav navbar-nav">
-				<li class="active"><a href="/">Главная</a></li>
-				<li><a href="/pages/hosting.php">Хостинг</a></li>
-				<li><a href="/pages/vps.php">VPS</a></li>
-				<li><a href="/pages/servers.php">Серверы</a></li>
-				<li><a href="https://dom.lepus.su">Домены</a></li>
-				<li><a href="/pages/partners.php">Партнеры</a></li>
-				<li><a href="/pages/contacts.php">Контакты</a></li>
+				<?php echo lepus_getPageNavi(); ?>
 			</ul>
 		</div>
 	</div>

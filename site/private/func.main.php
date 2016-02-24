@@ -919,9 +919,9 @@ function lepus_getLogSpend($id, $i = 0){
 }
 
 function lepus_getPageNavi(){
-	$pages = ['/' => 'Главная',	'/pages/hosting.php' => 'Хостинг', '/pages/vps.php' => 'VPS', '/pages/servers.php' => 'Серверы', 'http://dom.lepus.su' => 'Домены', '/pages/partners.php' => 'Партнеры', '/pages/contacts.php' => 'Контакты'];
+	$navi = ''; $pages = ['/' => 'Главная',	'/pages/hosting.php' => 'Хостинг', '/pages/vps.php' => 'VPS', '/pages/servers.php' => 'Серверы', 'http://dom.lepus.su' => 'Домены', '/pages/partners.php' => 'Партнеры', '/pages/contacts.php' => 'Контакты'];
 	foreach($pages as $key => $val){
-		if($_SERVER[REQUEST_URI] == $key)
+		if($_SERVER["REQUEST_URI"] == $key)
 			$navi .= "<li class=\"active\"><a href=\"$key\">$val</a></li>";
 		else
 			$navi .= "<li><a href=\"$key\">$val</a></li>";
@@ -939,9 +939,31 @@ function lepus_getListServices($sid, $uid){
 		$tmpQuery = $db->prepare("SELECT * FROM `tariff` WHERE `id` =:sid");
 		$tmpQuery->bindParam(':sid', $row['sid'], PDO::PARAM_STR);
 		$tmpQuery->execute();
-		$tmpRow=$tmpQuery->fetch();
+		$tmpRow = $tmpQuery->fetch();
 		$row['time2'] = date("Y-m-d", $row['time2']);
-		$data .= "<tr><td>{$row['id']}</td><td>{$tmpRow['name']}</td><td>".lepus_price($tmpRow['price'], $tmpRow['currency'])."</td><td>{$row['time2']}</td><td>xxxx</td></tr>";
+		if($row['auto'] != 1)
+			$i = '<input class="btn btn-danger btn-xs" style="width: 30px;" data-autoextend-id='.$row['id'].' value="off">';
+		else
+			$i = '<input class="btn btn-success btn-xs" style="width: 30px;" data-autoextend-id='.$row['id'].' value="on">';		
+		$data .= "<tr><td>{$row['id']}</td><td>{$tmpRow['name']}</td><td>".lepus_price($tmpRow['price'], $tmpRow['currency'])."</td><td>{$row['time2']}</td><td>$i</td></tr>";
 	}
 	return $data;
+}
+
+function lepus_changeAutoExtend($id, $uid){
+	global $db;
+	$query = $db->prepare("SELECT * FROM `services` WHERE `id` = :id AND `uid` = :uid");
+	$query->bindParam(':id', $id, PDO::PARAM_STR);
+	$query->bindParam(':uid', $uid, PDO::PARAM_STR);
+	$query->execute();
+	if($query->rowCount() != 1) return 'no_access';
+	$row = $query->fetch();
+
+	if($row['auto'] == 1) $row['auto'] = 0;
+		else $row['auto'] = 1;
+	
+	$query = $db->prepare("UPDATE `services` SET `auto` = :i WHERE `id` = :id");
+	$query->bindParam(':id', $id, PDO::PARAM_STR);
+	$query->bindParam(':i', $row['auto'], PDO::PARAM_STR);
+	$query->execute();
 }

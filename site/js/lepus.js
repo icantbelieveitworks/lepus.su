@@ -373,3 +373,24 @@ $(document).on("click", "[data-order-finish]", function(e) {
 		}
 	});
 });
+
+$(document).on("click", "[data-autoextend-id]", function(e) {
+	var val = $(this);
+	$(val).blur();
+	e.preventDefault();
+	var id = $(val).data("autoextend-id");
+	$.post("//"+document.domain+"/public/autoextend.php", {id: id}, function(json){
+		data = JSON.parse(json);
+		if(data.err == 'OK'){
+			if($(val).val() === 'on'){
+				$(val).val('off');
+				$(val).attr('class', 'btn btn-danger btn-xs');
+			}else{
+				$(val).val('on');
+				$(val).attr('class', 'btn btn-success btn-xs');
+			}
+		}else{
+			alertify.error(data.mes);
+		}
+	});
+});

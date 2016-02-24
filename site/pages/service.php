@@ -60,7 +60,7 @@ switch(@$_GET['q']){
 													<th>Название</th>
 													<th>Стоимость</th>
 													<th>Дата</th>
-													<th></th>
+													<th>Продление</th>
 												</tr>
 											</thead>
 											<tbody>

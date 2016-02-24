@@ -928,3 +928,20 @@ function lepus_getPageNavi(){
 	}
 	return $navi;
 }
+
+function lepus_getListServices($sid, $uid){
+	global $db; $data = '';
+	$query = $db->prepare("SELECT * FROM `services` WHERE `uid` = :uid");
+	$query->bindParam(':uid', $uid, PDO::PARAM_STR);
+	$query->execute();
+	while($row=$query->fetch()){
+		if($row['sid'] != $sid && $sid != 'all') return;
+		$tmpQuery = $db->prepare("SELECT * FROM `tariff` WHERE `id` =:sid");
+		$tmpQuery->bindParam(':sid', $row['sid'], PDO::PARAM_STR);
+		$tmpQuery->execute();
+		$tmpRow=$tmpQuery->fetch();
+		$row['time2'] = date("Y-m-d", $row['time2']);
+		$data .= "<tr><td>{$row['id']}</td><td>{$tmpRow['name']}</td><td>".lepus_price($tmpRow['price'], $tmpRow['currency'])."</td><td>{$row['time2']}</td><td>xxxx</td></tr>";
+	}
+	return $data;
+}

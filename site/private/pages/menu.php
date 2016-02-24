@@ -22,7 +22,7 @@
 				<div class="carousel-caption"></div>
 		</div>
 		<div class="item">
-			<img src="/images/lepusbar1.png">
+			<img src="/images/lepusbar2.png">
 			<div class="carousel-caption"></div>
 		</div>
 		<div class="item">

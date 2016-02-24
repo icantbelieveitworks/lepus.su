@@ -34,11 +34,12 @@ if(empty($user)){ ?>
 				<li><a href="/pages/cp.php">Пополнить счет</a></li>
 				<li><a href="/pages/cron.php">Планировщик задач</a></li>
 				<hr>
-				<li><a href="/cp-vps.html">VPS хостинг</a></li>
+				<li><a href="/pages/service.php">Все услуги</a></li>
+				<li><a href="/pages/service.php?q=2">VPS хостинг</a></li>
 				<li><a href="/pages/dns.php">DNS хостинг</a></li>
-				<li><a href="/cp-adm.html">Администрирование</a></li>
-				<li><a href="/cp-hosting-isp.html">Виртуальный xостинг</a></li>
-				<li><a href="/cp-serv.html">Выделенные серверы</a></li>
+				<li><a href="/pages/service.php?q=4">Администрирование</a></li>
+				<li><a href="/pages/service.php?q=1">Виртуальный xостинг</a></li>
+				<li><a href="/pages/service.php?q=3">Выделенные серверы</a></li>
 				<hr/>
 				<li><a href="/pages/support.php">Тех. поддержка</a></li>
 				<li><a href="/pages/spend.php">Логи оплаты услуг</a></li>

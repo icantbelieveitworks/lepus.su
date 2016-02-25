@@ -642,6 +642,7 @@ function lepus_update_balance($pid, $uid, $amount, $system){
 	$tmp['data']['balance'] += $amount;
 	save_user_data($row['id'], $tmp['data']);
 	_mail($row['login'], "Пополнение счета", "Дорогой клиент,<br/>ваш баланс увеличен на $amount RUR.<br/>Благодарим за оплату.");
+	lepus_AutoExtend($row['id']);
 	return "OK$pid\n";
 }
 
@@ -968,10 +969,15 @@ function lepus_changeAutoExtend($id, $uid){
 	$query->execute();
 }
 
-function lepus_AutoExtend(){
+function lepus_AutoExtend($uid = 0){
 	global $db;
 	$time = time()+60*60*24*3;
-	$query = $db->prepare("SELECT * FROM `services` WHERE `time2` < :time");
+	if($uid != 0){
+		$query = $db->prepare("SELECT * FROM `services` WHERE `time2` < :time");
+	}else{
+		$query = $db->prepare("SELECT * FROM `services` WHERE `time2` < :time AND `uid` = :uid");
+		$query->bindParam(':uid', $uid, PDO::PARAM_STR);
+	}
 	$query->bindParam(':time', $time, PDO::PARAM_STR);
 	$query->execute();
 	while($row=$query->fetch()){

@@ -967,3 +967,39 @@ function lepus_changeAutoExtend($id, $uid){
 	$query->bindParam(':i', $row['auto'], PDO::PARAM_STR);
 	$query->execute();
 }
+
+function lepus_AutoExtend(){
+	global $db;
+	$time = time()+60*60*24*3;
+	$query = $db->prepare("SELECT * FROM `services` WHERE `time2` < :time");
+	$query->bindParam(':time', $time, PDO::PARAM_STR);
+	$query->execute();
+	while($row=$query->fetch()){
+		$tmpQuery = $db->prepare("SELECT * FROM `users` WHERE `id` = :uid");
+		$tmpQuery->bindParam(':uid', $row['uid'], PDO::PARAM_STR);
+		$tmpQuery->execute();
+		$tmpRow = $tmpQuery->fetch();
+		$user['id'] = $tmpRow['id'];
+		$user['login'] = $tmpRow['login'];
+		$user['data'] = json_decode($tmpRow['data'], true);
+		$tmpQuery = $db->prepare("SELECT * FROM `tariff` WHERE `id` = :sid");
+		$tmpQuery->bindParam(':sid', $row['sid'], PDO::PARAM_STR);
+		$tmpQuery->execute();
+		$tmpRow = $tmpQuery->fetch();
+		$price = lepus_price($tmpRow['price'], $tmpRow['currency']);
+		if($user['data']['balance'] < $price){
+			_mail($user['login'], "Автоматическое продление", "Дорогой клиент, мы не смогли продлить услугу {$tmpRow["name"]}<br/>Так как на вашем счете недостаточно средств.");
+		}else{
+			$row['time1'] = $row['time2'];
+			$row['time2'] += 60*60*24*30;
+			$user['data']['balance'] -= $price;
+			save_user_data($user['id'], $user['data']);
+			lepus_log_spend($user['id'], $row['id'], $row['time1'], $row['time2'], $price, "Продление {$tmpRow['name']}");
+			_mail($user['login'], "Автоматическое продление", "Дорогой клиент, услуга {$tmpRow["name"]} оплачена до ".date("Y-m-d", $row['time2'])."<br/>Расход: $price, остаток: {$user['data']['balance']} рублей");
+			$tmpQuery = $db->prepare("UPDATE `services` SET `time2` = :time2 WHERE `id` = :id");
+			$tmpQuery->bindParam(':id', $row['id'], PDO::PARAM_STR);
+			$tmpQuery->bindParam(':time2', $row['time2'], PDO::PARAM_STR);
+			$tmpQuery->execute();
+		}
+	}
+}

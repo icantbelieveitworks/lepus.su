@@ -361,8 +361,6 @@ $(document).on("click", "[data-order-finish]", function(e) {
 	$(this).hide();
 	var order_id = $("#idServiceOrder option:selected").val();
 	var promo = $("#promo_code").val();
-	//$("#modal_order_text" ).html("<center>Ваш заказ будет выполнен в ближайщее время.<br/> Вы можете посмотреть статус заказа и связаться с поддержкой <a href='https://lepus.dev/pages/tiket.php?id='>через этот тикет</a>.</center>");
-	//return;
 	$.post("//"+document.domain+"/public/order.php", {id: order_id, promo: promo}, function(json){
 		data = JSON.parse(json);
 		if(data.err == 'OK'){
@@ -409,6 +407,22 @@ $(document).on("click", "[data-change-tariff]", function(e) {
 		}
 		if(data.err == 'OK'){
 			$("#modal_tariff_text").html(data.mes.text);
+		}else{
+			$("#modal_tariff_text").html(data.mes);
+		}
+	});
+});
+
+$(document).on("click", "[data-change-tariff-finish]", function(e) {
+	$(this).hide();
+	id = $('input[id=service_id]').val();
+	order_id = $("#idServiceOrder option:selected").val();
+	$.post("//"+document.domain+"/public/change_tariff.php", {id: id, sid: order_id}, function(json){
+		data = JSON.parse(json);
+		if(data.err == 'OK'){
+			alertify.success("Готово");
+			$('#confirmChangeTariff').modal('hide');
+			setTimeout(function(){location.reload();}, 800);
 		}else{
 			$("#modal_tariff_text").html(data.mes);
 		}

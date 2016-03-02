@@ -606,12 +606,13 @@ function lepus_change_phone($num, $user){
 
 function lepus_update_balance($pid, $uid, $amount, $system){
 	global $db; $uid = intval($uid); $amount = intval($amount);
-	$query = $db->prepare("SELECT * FROM `log_income` WHERE `payment_id` =:pid AND `system` = :system");
-	$query->bindParam(':pid', $pid, PDO::PARAM_STR);
-	$query->bindParam(':system', $system, PDO::PARAM_STR);
-	$query->execute();
-	if($query->rowCount() == 1) return 'already';
-
+	if($system != 'lepus'){
+		$query = $db->prepare("SELECT * FROM `log_income` WHERE `payment_id` =:pid AND `system` = :system");
+		$query->bindParam(':pid', $pid, PDO::PARAM_STR);
+		$query->bindParam(':system', $system, PDO::PARAM_STR);
+		$query->execute();
+		if($query->rowCount() == 1) return 'already';
+	}
 	if($system == 'bitcoin'){
 		$select = $db->prepare("SELECT * FROM `users` WHERE `bitcoin` =:address");
 		$select->bindParam(':address', $uid, PDO::PARAM_STR);
@@ -620,7 +621,6 @@ function lepus_update_balance($pid, $uid, $amount, $system){
 		$row = $select->fetch();
 		$uid = $row['id'];
 	}
-	
 	$query = $db->prepare("SELECT * FROM `users` WHERE `id` = :uid");
 	$query->bindParam(':uid', $uid, PDO::PARAM_STR);
 	$query->execute();
@@ -637,7 +637,11 @@ function lepus_update_balance($pid, $uid, $amount, $system){
 	
 	$tmp['data']['balance'] += $amount;
 	save_user_data($row['id'], $tmp['data']);
-	_mail($row['login'], "Пополнение счета", "Дорогой клиент,<br/>ваш баланс увеличен на $amount RUR.<br/>Благодарим за оплату.");
+	if($system != 'lepus'){
+		_mail($row['login'], "Пополнение счета", "Дорогой клиент,<br/>ваш баланс увеличен на $amount RUR.<br/>Благодарим за оплату.");
+	}else{
+		_mail($row['login'], "Возврат денежных средств", "Дорогой клиент,<br/>ваш баланс увеличен на $amount RUR.<br/>$pid");
+	}
 	lepus_AutoExtend($row['id']);
 	return "OK$pid\n";
 }
@@ -648,9 +652,9 @@ function lepus_getLogIncome($uid, $i = 0){
 	$query->bindParam(':uid', $uid, PDO::PARAM_STR);
 	$query->execute();
 	while($row = $query->fetch()){
-		if(strlen($row['payment_id']) > 20){
+		if(strlen($row['payment_id']) > 28){
 			$tmpPID = $row['payment_id'];	
-			$row['payment_id'] = mb_substr($row['payment_id'], 0, 20,'utf-8')."...";
+			$row['payment_id'] = mb_substr($row['payment_id'], 0, 28,'utf-8')."...";
 		}
 		if($row['system'] == 'bitcoin'){
 			$row['payment_id'] = "<a href=\"https://blockchain.info/tx/$tmpPID\" target=\"_blank\">{$row['payment_id']}</a>";
@@ -889,7 +893,7 @@ function lepus_create_order($sid, $promo = 0){
 	$query->bindParam(':time1', $time1, PDO::PARAM_STR);
 	$query->bindParam(':time2', $time2, PDO::PARAM_STR);
 	$query->execute();
-	lepus_log_spend($user['id'], $db->lastInsertId(), $time1, $time2, $info['price'], "Заказ {$info['name']}");
+	lepus_log_spend($user['id'], $db->lastInsertId(), $time1, $time2, $info['price'], "{$info['name']} [заказ]");
 	switch($info['handler']){
 		case 'ISPmanagerV4': break;
 	}
@@ -1010,7 +1014,7 @@ function lepus_AutoExtend($uid = 0){
 			$row['time2'] += 60*60*24*30;
 			$user['data']['balance'] -= $price;
 			save_user_data($user['id'], $user['data']);
-			lepus_log_spend($user['id'], $row['id'], $row['time1'], $row['time2'], $price, "Продление {$tmpRow['name']}");
+			lepus_log_spend($user['id'], $row['id'], $row['time1'], $row['time2'], $price, "{$tmpRow['name']} [продление]");
 			_mail($user['login'], "Автоматическое продление", "Дорогой клиент, услуга {$tmpRow["name"]} оплачена до ".date("Y-m-d", $row['time2'])."<br/>Расход: $price, остаток: {$user['data']['balance']} рублей");
 			$tmpQuery = $db->prepare("UPDATE `services` SET `time2` = :time2 WHERE `id` = :id");
 			$tmpQuery->bindParam(':id', $row['id'], PDO::PARAM_STR);
@@ -1041,6 +1045,8 @@ function lepus_moneyback($id, $sid){
 	$time_moneyback = ($row['time2'] - time())/(60*60*24);
 	$day = $row['money']/30;
 	$moneyback = floor($day*$time_moneyback);
+	$money_use = $row['money'] - $moneyback;
+	$log_id = $row['id'];
 
 	$query = $db->prepare("SELECT * FROM `tariff` WHERE `id` = :sid");
 	$query->bindParam(':sid', $sid, PDO::PARAM_STR);
@@ -1048,21 +1054,45 @@ function lepus_moneyback($id, $sid){
 	$row = $query->fetch();
 	$pay = lepus_price($row["price"], $row["currency"]);
 	$total = $user['data']['balance'] + $moneyback - $pay;
-	return ['moneyback' => $moneyback, 'pay' => $pay, 'total' => $total];
+	return ['moneyback' => $moneyback, 'pay' => $pay, 'total' => $total, 'log_id' => $log_id, 'use' => $money_use, 'name' => $row['name']];
 }
 
 function lepus_changeTariff_preview($id, $sid){
 	global $db, $user; $data = null; $show = 1;
 	$info = lepus_getServiceAccess($id);
 	if(!is_array($info)) return $info;
-
 	$info = lepus_moneyback($id, $sid);
 	if(!is_array($info)) return $info;
-
 	$data .= "Возврат средств => {$info['moneyback']}, к оплате => {$user['data']['balance']} + {$info['moneyback']} - {$info['pay']}, остаток на счете => {$info['total']} рублей.";
 	if($info['total'] < 0){
 		$data .="<br/><font color='red'>Для смены тарифа, пожалуйста, пополните счет на ".abs($info['total'])." рублей.</font>";
 		$show = '0';
 	}	
 	return ['text' => "<center>$data</center>", 'show' => $show];
+}
+
+function lepus_changeTariff($id, $sid){
+	global $db, $user; $data = null;
+	$info = lepus_getServiceAccess($id);
+	if(!is_array($info)) return $info;
+	$info = lepus_moneyback($id, $sid);
+	if(!is_array($info)) return $info;
+	if($info['total'] < 0){
+		return "<center><font color='red'>Для смены тарифа, пожалуйста, пополните счет на ".abs($info['total'])." рублей.</font></center>";
+	}
+	$query = $db->prepare("UPDATE `log_spend` SET `time2` = unix_timestamp(now()), `money` = :money WHERE `id` = :id");
+	$query->bindParam(':id', $info['log_id'], PDO::PARAM_STR);
+	$query->bindParam(':money', $info['use'], PDO::PARAM_STR);
+	$query->execute();
+	lepus_update_balance("moneyback service #$id", $user['id'], $info['moneyback'], 'lepus');
+	$user['data']['balance'] = $info['total'];
+	save_user_data($user['id'], $user['data']);
+	$time2 = time()+60*60*24*30;
+	$query = $db->prepare("UPDATE `services` SET `time2` =:time, `sid` =:sid WHERE `id` =:id");
+	$query->bindParam(':time', $time2, PDO::PARAM_STR);
+	$query->bindParam(':sid', $sid, PDO::PARAM_STR);
+	$query->bindParam(':id', $id, PDO::PARAM_STR);
+	$query->execute();
+	lepus_log_spend($user['id'], $id, time(), $time2, $info['pay'], "{$info['name']} [изменение]");
+	return "OK";
 }

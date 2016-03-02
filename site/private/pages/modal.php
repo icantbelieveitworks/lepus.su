@@ -105,7 +105,7 @@
 				<div id="modal_tariff_text"></div>
 			</div>
 			<div class="modal-footer">
-				<button id="tarif_change_hide" type="button" class="btn btn-success" data-order-finish>Отправить</button>
+				<button id="tarif_change_hide" type="button" class="btn btn-success" data-change-tariff-finish>Отправить</button>
 				<button type="button" class="btn btn-default" data-dismiss="modal">Закрыть</button>
 			</div>
 		</div>

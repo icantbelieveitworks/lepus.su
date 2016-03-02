@@ -9,7 +9,7 @@ if(empty($user)){
 	$tmpData = error('no_auth_page');
 	die(lepus_error_page($tmpData['mes']));
 }
-$tmpData = error(lepus_getService($_GET['id'], $user['id']));
+$tmpData = error(lepus_getService($_GET['id']));
 if($tmpData['err'] != 'OK')	die(lepus_error_page($tmpData['mes']));
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">

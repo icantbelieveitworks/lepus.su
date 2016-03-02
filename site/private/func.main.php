@@ -956,18 +956,22 @@ function lepus_getListServices($sid, $uid){
 	return $data;
 }
 
-function lepus_changeAutoExtend($id, $uid){
-	global $db;
+function lepus_getServiceAccess($id){
+	global $db, $user; $row = 'no_access';
 	$query = $db->prepare("SELECT * FROM `services` WHERE `id` = :id AND `uid` = :uid");
 	$query->bindParam(':id', $id, PDO::PARAM_STR);
-	$query->bindParam(':uid', $uid, PDO::PARAM_STR);
+	$query->bindParam(':uid', $user['id'], PDO::PARAM_STR);
 	$query->execute();
-	if($query->rowCount() != 1) return 'no_access';
-	$row = $query->fetch();
+	if($query->rowCount() == 1) $row = $query->fetch();
+	return $row;
+}
 
+function lepus_changeAutoExtend($id){
+	global $db;
+	$row = lepus_getServiceAccess($id);
+	if(!is_array($row)) return $row;
 	if($row['auto'] == 1) $row['auto'] = 0;
 		else $row['auto'] = 1;
-	
 	$query = $db->prepare("UPDATE `services` SET `auto` = :i WHERE `id` = :id");
 	$query->bindParam(':id', $id, PDO::PARAM_STR);
 	$query->bindParam(':i', $row['auto'], PDO::PARAM_STR);
@@ -1015,20 +1019,19 @@ function lepus_AutoExtend($uid = 0){
 	}
 }
 
-function lepus_getService($id, $uid){
+function lepus_getService($id){
 	global $db;
-	$query = $db->prepare("SELECT * FROM `services` WHERE `id` = :id AND `uid` = :uid");
-	$query->bindParam(':id', $id, PDO::PARAM_STR);
-	$query->bindParam(':uid', $uid, PDO::PARAM_STR);
-	$query->execute();
-	if($query->rowCount() != 1) return 'no_access';
-	$row = $query->fetch();
-	
+	$row = lepus_getServiceAccess($id);
+	if(!is_array($row)) return $row;
 	$tmpQuery = $db->prepare("SELECT * FROM `tariff` WHERE `id` = :id");
 	$tmpQuery->bindParam(':id', $row['sid'], PDO::PARAM_STR);
 	$tmpQuery->execute();
 	$tmpRow = $tmpQuery->fetch();
-	
 	return ['id' => $row['id'], 'sid' => $row['sid'], 'name' => $tmpRow['name'], 'time' => date("Y-m-d", $row['time2'])];
 }
 
+function lepus_changeTariff_preview($id){
+	global $db, $user;
+	
+
+}

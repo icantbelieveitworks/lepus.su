@@ -47,6 +47,7 @@ if($tmpData['err'] != 'OK')	die(lepus_error_page($tmpData['mes']));
 							<div class="row">
 								<div class="col-lg-14">
 									<div class="col-lg-12">
+										<input type="hidden" id="service_id" value="<?php echo $tmpData['mes']['id'];?>">
 										<hr/>
 										<select class="form-control" id="idServiceOrder" name="type"><?php echo lepus_getTariffList($tmpData['mes']['sid']); ?></select>
 										<input class="btn btn-sm btn-danger btn-block" style="margin-top: 4px;" data-change-tariff type="submit" title="Поменять тариф можно не чаще одного раза за 30 дней" value="Поменять тариф">

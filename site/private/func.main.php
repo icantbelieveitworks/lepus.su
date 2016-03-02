@@ -128,7 +128,8 @@ function error($message, $j = 0){
 			"too_long_value" => "Слишком длинное значение",
 			"already_get_it" => "Такая запись уже есть",
 			"no_service" => "Нет такой услуги",
-			"no_money" => "Пополните баланс"
+			"no_money" => "Пополните баланс",
+			"no_moneyback" => "Нельзя сделать moneyback. Пожалуйста, обратитесь в техничекую поддержку."
 		];
 		if (array_key_exists($message, $err)) $j = 1;
 	}
@@ -1030,8 +1031,38 @@ function lepus_getService($id){
 	return ['id' => $row['id'], 'sid' => $row['sid'], 'name' => $tmpRow['name'], 'time' => date("Y-m-d", $row['time2'])];
 }
 
-function lepus_changeTariff_preview($id){
+function lepus_moneyback($id, $sid){
 	global $db, $user;
-	
+	$query = $db->prepare("SELECT * FROM `log_spend` WHERE `oid` = :id AND `time2` > unix_timestamp(now())");
+	$query->bindParam(':id', $id, PDO::PARAM_STR);
+	$query->execute();
+	if($query->rowCount() != 1) return 'no_moneyback';
+	$row = $query->fetch();
+	$time_moneyback = ($row['time2'] - time())/(60*60*24);
+	$day = $row['money']/30;
+	$moneyback = floor($day*$time_moneyback);
 
+	$query = $db->prepare("SELECT * FROM `tariff` WHERE `id` = :sid");
+	$query->bindParam(':sid', $sid, PDO::PARAM_STR);
+	$query->execute();
+	$row = $query->fetch();
+	$pay = lepus_price($row["price"], $row["currency"]);
+	$total = $user['data']['balance'] + $moneyback - $pay;
+	return ['moneyback' => $moneyback, 'pay' => $pay, 'total' => $total];
+}
+
+function lepus_changeTariff_preview($id, $sid){
+	global $db, $user; $data = null; $show = 1;
+	$info = lepus_getServiceAccess($id);
+	if(!is_array($info)) return $info;
+
+	$info = lepus_moneyback($id, $sid);
+	if(!is_array($info)) return $info;
+
+	$data .= "Возврат средств => {$info['moneyback']}, к оплате => {$user['data']['balance']} + {$info['moneyback']} - {$info['pay']}, остаток на счете => {$info['total']} рублей.";
+	if($info['total'] < 0){
+		$data .="<br/><font color='red'>Для смены тарифа, пожалуйста, пополните счет на ".abs($info['total'])." рублей.</font>";
+		$show = '0';
+	}	
+	return ['text' => "<center>$data</center>", 'show' => $show];
 }

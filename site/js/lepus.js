@@ -398,7 +398,19 @@ $(document).on("click", "[data-autoextend-id]", function(e) {
 $(document).on("click", "[data-change-tariff]", function(e) {
 	$(this).blur();
 	e.preventDefault();
+	id = $('input[id=service_id]').val();
+	order_id = $("#idServiceOrder option:selected").val();
+	$("#tarif_change_hide").show();
 	$('#confirmChangeTariff').modal('show');
-	
+	$.post("//"+document.domain+"/public/tariff_preview.php", {id: id, sid: order_id}, function(json){
+		data = JSON.parse(json);
+		if(data.mes.show == 0 || data.err != 'OK'){
+			$("#tarif_change_hide").hide();
+		}
+		if(data.err == 'OK'){
+			$("#modal_tariff_text").html(data.mes.text);
+		}else{
+			$("#modal_tariff_text").html(data.mes);
+		}
+	});
 });
-

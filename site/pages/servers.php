@@ -5,13 +5,12 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/init/memcache.php');
 require_once($_SERVER['DOCUMENT_ROOT'].'/private/init/session.php');
 require_once($_SERVER['DOCUMENT_ROOT'].'/private/func.main.php');
 require_once($_SERVER['DOCUMENT_ROOT'].'/private/auth.php');
-
 function lepus_orderLink(){
 	$j = "<a class=\"btn btn-danger btn-xs\" rel=\"nofollow\" href=\"/pages/order.php\">заказать</a>";
 	if(!is_login()) $j = "<a class=\"btn btn-danger btn-xs\" data-register-open rel=\"nofollow\">заказать</a>";
 	return $j;
 }
-
+$start_order = null;
 for($i=0; $i < 8; $i++){
 	if(!is_login())
 		$start_order .= "<td><a class=\"btn btn-danger btn-xs\" data-register-open rel=\"nofollow\">заказать</a></td>";

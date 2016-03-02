@@ -394,3 +394,11 @@ $(document).on("click", "[data-autoextend-id]", function(e) {
 		}
 	});
 });
+
+$(document).on("click", "[data-change-tariff]", function(e) {
+	$(this).blur();
+	e.preventDefault();
+	$('#confirmChangeTariff').modal('show');
+	
+});
+

@@ -218,17 +218,16 @@ function lepus_log_ip($id, $ip){
 	global $db; $info = get_browser(null, true);
 	if(preg_match('/[^0-9A-Za-z.]/', $info['platform'])) $info['platform'] = "unknown";
 	if(preg_match('/[^0-9A-Za-z.]/', $info['browser'])) $info['browser'] = "unknown";
-	$query = $db->prepare("INSERT INTO `log_ip` (`uid`, `ip`, `platform`, `browser`, `time`) VALUES (:id, :ip, :platform, :browser, :time)");
+	$query = $db->prepare("INSERT INTO `log_ip` (`uid`, `ip`, `platform`, `browser`, `time`) VALUES (:id, :ip, :platform, :browser, unix_timestamp(now()))");
 	$query->bindParam(':id', $id, PDO::PARAM_STR);
 	$query->bindParam(':ip', $ip, PDO::PARAM_STR);
 	$query->bindParam(':platform', $info['platform'], PDO::PARAM_STR);
 	$query->bindParam(':browser', $info['browser'], PDO::PARAM_STR);
-	$query->bindParam(':time', time(), PDO::PARAM_STR);
 	$query->execute();
 }
 
 function lepus_get_logip($id, $i = 0){
-	global $db;
+	global $db; $data = null;
 	$query = $db->prepare("SELECT * FROM `log_ip` WHERE `uid` = :id");
 	$query->bindParam(':id', $id, PDO::PARAM_STR);
 	$query->execute();
@@ -413,7 +412,7 @@ function lepus_get_tiketLabel($id, $uid, $tid, $access){
 }
 
 function lepus_get_supportList($uid, $access, $id = 0){
-	global $db;
+	global $db; $data = null;
 	if($access > 1){
 		if($id == 0){
 			$query = $db->prepare("SELECT * FROM `support`");
@@ -466,10 +465,9 @@ function support_create($uid, $title, $access){
 		if($query->rowCount() > 10) return 'max_limit';
 	}
 	$title = filter_var($title, FILTER_SANITIZE_STRING);
-	$query = $db->prepare("INSERT INTO `support` (`uid`, `title`, `open`, `status`) VALUES (:uid, :title, :open, 1)");
+	$query = $db->prepare("INSERT INTO `support` (`uid`, `title`, `open`, `status`) VALUES (:uid, :title, unix_timestamp(now()), 1)");
 	$query->bindParam(':uid', $uid, PDO::PARAM_STR);
 	$query->bindParam(':title', $title, PDO::PARAM_STR);
-	$query->bindParam(':open', time(), PDO::PARAM_STR);
 	$query->execute();
 	$id = $db->lastInsertId();
 
@@ -489,7 +487,7 @@ function lepus_get_supportAccess($tid){
 	return $query->fetch();
 }
 
-function lepus_get_supportMsg($tid, $uid, $access, $msgID = 0, $update = 0, $data = '', $j = 0){
+function lepus_get_supportMsg($tid, $uid, $access, $msgID = 0, $update = 0, $data = null, $j = 0){
 	global $db;
 	$row = lepus_get_supportAccess($tid);	
 	if($row['uid'] != $uid && $access < 2) return 'no_access';
@@ -561,16 +559,14 @@ function support_msg($uid, $tid, $access, $no_last = 0){
 		$query->execute();
 	}
 	if($no_last == 0){
-		$query = $db->prepare("UPDATE `support` SET `last` = :time WHERE `id` = :tid");
-		$query->bindParam(':time', time(), PDO::PARAM_STR);
+		$query = $db->prepare("UPDATE `support` SET `last` = unix_timestamp(now()) WHERE `id` = :tid");
 		$query->bindParam(':tid', $tid, PDO::PARAM_STR);
 		$query->execute();
 	}
-	$query = $db->prepare("INSERT INTO `support_msg` (`tid`, `msg`, `uid`, `time`) VALUES (:tid, :msg, :uid, :time)");
+	$query = $db->prepare("INSERT INTO `support_msg` (`tid`, `msg`, `uid`, `time`) VALUES (:tid, :msg, :uid, unix_timestamp(now()))");
 	$query->bindParam(':tid', $tid, PDO::PARAM_STR);
 	$query->bindParam(':msg', $msg, PDO::PARAM_STR);
 	$query->bindParam(':uid', $uid, PDO::PARAM_STR);
-	$query->bindParam(':time', time(), PDO::PARAM_STR);
 	$query->execute();
 	$lastID = $db->lastInsertId();
 	if($tiket['uid'] == $uid){
@@ -631,12 +627,11 @@ function lepus_update_balance($pid, $uid, $amount, $system){
 	$row = $query->fetch();
 	$tmp['data'] = json_decode($row['data'], true);
 	
-	$query = $db->prepare("INSERT INTO `log_income` (`payment_id`, `user_id`, `amount`, `system`, `time`) VALUES (:pid, :uid, :amount, :system, :time)");
+	$query = $db->prepare("INSERT INTO `log_income` (`payment_id`, `user_id`, `amount`, `system`, `time`) VALUES (:pid, :uid, :amount, :system, unix_timestamp(now()))");
 	$query->bindParam(':pid', $pid, PDO::PARAM_STR);
 	$query->bindParam(':uid', $uid, PDO::PARAM_STR);
 	$query->bindParam(':amount', $amount, PDO::PARAM_STR);
 	$query->bindParam(':system', $system, PDO::PARAM_STR);
-	$query->bindParam(':time', time(), PDO::PARAM_STR);
 	$query->execute();
 	
 	$tmp['data']['balance'] += $amount;
@@ -647,7 +642,7 @@ function lepus_update_balance($pid, $uid, $amount, $system){
 }
 
 function lepus_getLogIncome($uid, $i = 0){
-	global $db; $data = '';
+	global $db; $data = null;
 	$query = $db->prepare("SELECT * FROM `log_income` WHERE `user_id` = :uid");
 	$query->bindParam(':uid', $uid, PDO::PARAM_STR);
 	$query->execute();
@@ -678,7 +673,7 @@ function lepus_validCron($time, $url){
 }
 
 function lepus_getCronList($uid){
-	global $db; $data = '';
+	global $db; $data = null;
 	$query = $db->prepare("SELECT * FROM `cron` WHERE `uid` = :uid");
 	$query->bindParam(':uid', $uid, PDO::PARAM_STR);
 	$query->execute();
@@ -722,11 +717,10 @@ function lepus_addCron($uid, $time, $url, $do, $id = 0){
 			$query->bindParam(':uid', $uid, PDO::PARAM_STR);
 			$query->execute();
 			if($query->rowCount() > 100) return 'max_limit';
-			$query = $db->prepare("INSERT INTO `cron` (`uid`, `time`, `url`, `date`) VALUES (:uid, :time, :url, :date)");
+			$query = $db->prepare("INSERT INTO `cron` (`uid`, `time`, `url`, `date`) VALUES (:uid, :time, :url, unix_timestamp(now()))");
 			$query->bindParam(':uid', $uid, PDO::PARAM_STR);
 			$query->bindParam(':time', $time, PDO::PARAM_STR);
 			$query->bindParam(':url', $url, PDO::PARAM_STR);
-			$query->bindParam(':date', time(), PDO::PARAM_STR);
 			$query->execute();
 			$lastId = $db->lastInsertId();
 			$tmpURL = '';
@@ -745,7 +739,7 @@ function telegram_send($msg){
 }
 
 function admin_lepus_getIPlist(){
-	global $db; $data = '';
+	global $db; $data = null;
 	$query = $db->prepare("SELECT * FROM `ipmanager`");
 	$query->execute();
 	while($row = $query->fetch()){
@@ -768,7 +762,7 @@ function admin_lepus_getIPlist(){
 }
 
 function lepus_getHTMLSelect($table, $column){
-	global $db; $data = '';
+	global $db; $data = null;
 	$query = $db->prepare("SELECT * FROM `$table`");
 	$query->execute();
 	while($row=$query->fetch()){
@@ -808,9 +802,20 @@ function is_login($j = TRUE){
 	global $user; if(empty($user)) $j = FALSE; return $j;
 }
 
-function lepus_getTariffList(){
-	global $db; $data = '';
-	$query = $db->prepare("SELECT * FROM `tariff`");
+function lepus_getTariffList($id = null){
+	global $db; $data = null;
+	if($id === null){
+		$query = $db->prepare("SELECT * FROM `tariff`");
+	}else{
+		$query = $db->prepare("SELECT * FROM `tariff` WHERE `id` = :id");
+		$query->bindParam(':id', $id, PDO::PARAM_STR);
+		$query->execute();
+		$row = $query->fetch();
+		
+		$query = $db->prepare("SELECT * FROM `tariff` WHERE `gid` = :gid AND `id` != :id");
+		$query->bindParam(':gid', $row['gid'], PDO::PARAM_STR);
+		$query->bindParam(':id', $id, PDO::PARAM_STR);
+	}
 	$query->execute();
 	while($row=$query->fetch()){
 		$data .= "<option value=\"{$row["id"]}\">{$row["name"]} - ".lepus_price($row["price"], $row["currency"])." рублей</option>";
@@ -819,7 +824,7 @@ function lepus_getTariffList(){
 }
 
 function lepus_getTariffPrices($g){
-	global $db; $data = '';
+	global $db; $data = null;
 	$query = $db->prepare("SELECT * FROM `tariff` WHERE `gid` = :gid");
 	$query->bindParam(':gid', $g, PDO::PARAM_STR);
 	$query->execute();
@@ -907,7 +912,7 @@ function lepus_log_spend($uid, $oid, $time1, $time2, $money, $info){
 }
 
 function lepus_getLogSpend($id, $i = 0){
-	global $db; $data = '';
+	global $db; $data = null;
 	$query = $db->prepare("SELECT * FROM `log_spend` WHERE `uid` = :uid");
 	$query->bindParam(':uid', $id, PDO::PARAM_STR);
 	$query->execute();
@@ -931,7 +936,7 @@ function lepus_getPageNavi(){
 }
 
 function lepus_getListServices($sid, $uid){
-	global $db; $data = '';
+	global $db; $data = null;
 	$query = $db->prepare("SELECT * FROM `services` WHERE `uid` = :uid");
 	$query->bindParam(':uid', $uid, PDO::PARAM_STR);
 	$query->execute();
@@ -946,7 +951,7 @@ function lepus_getListServices($sid, $uid){
 			$i = '<input class="btn btn-danger btn-xs" style="width: 30px;" data-autoextend-id='.$row['id'].' value="off">';
 		else
 			$i = '<input class="btn btn-success btn-xs" style="width: 30px;" data-autoextend-id='.$row['id'].' value="on">';		
-		$data .= "<tr><td>{$row['id']}</td><td>{$tmpRow['name']}</td><td>".lepus_price($tmpRow['price'], $tmpRow['currency'])."</td><td>{$row['time2']}</td><td>$i</td></tr>";
+		$data .= "<tr><td><a href='/pages/view.php?id={$row['id']}'>{$row['id']}</a></td><td>{$tmpRow['name']}</td><td>".lepus_price($tmpRow['price'], $tmpRow['currency'])."</td><td>{$row['time2']}</td><td>$i</td></tr>";
 	}
 	return $data;
 }
@@ -1009,3 +1014,21 @@ function lepus_AutoExtend($uid = 0){
 		}
 	}
 }
+
+function lepus_getService($id, $uid){
+	global $db;
+	$query = $db->prepare("SELECT * FROM `services` WHERE `id` = :id AND `uid` = :uid");
+	$query->bindParam(':id', $id, PDO::PARAM_STR);
+	$query->bindParam(':uid', $uid, PDO::PARAM_STR);
+	$query->execute();
+	if($query->rowCount() != 1) return 'no_access';
+	$row = $query->fetch();
+	
+	$tmpQuery = $db->prepare("SELECT * FROM `tariff` WHERE `id` = :id");
+	$tmpQuery->bindParam(':id', $row['sid'], PDO::PARAM_STR);
+	$tmpQuery->execute();
+	$tmpRow = $tmpQuery->fetch();
+	
+	return ['id' => $row['id'], 'sid' => $row['sid'], 'name' => $tmpRow['name'], 'time' => date("Y-m-d", $row['time2'])];
+}
+

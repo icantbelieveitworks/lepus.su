@@ -31,6 +31,7 @@ if(empty($user)){ ?>
 				<?php } ?> 
 				<hr/>
 				<li><a href="/pages/cp.php">Настройки</a></li>
+				<li><a href="/pages/archive.php">Архив услуг</a></li>
 				<li><a href="/pages/cp.php">Пополнить счет</a></li>
 				<li><a href="/pages/cron.php">Планировщик задач</a></li>
 				<hr>
@@ -40,6 +41,7 @@ if(empty($user)){ ?>
 				<li><a href="/pages/service.php?q=4">Администрирование</a></li>
 				<li><a href="/pages/service.php?q=1">Виртуальный xостинг</a></li>
 				<li><a href="/pages/service.php?q=3">Выделенные серверы</a></li>
+				
 				<hr/>
 				<li><a href="/pages/support.php">Тех. поддержка</a></li>
 				<li><a href="/pages/spend.php">Логи оплаты услуг</a></li>

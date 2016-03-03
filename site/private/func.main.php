@@ -1077,9 +1077,8 @@ function lepus_changeTariff($id, $sid){
 	if(!is_array($info)) return $info;
 	$info = lepus_moneyback($id, $sid);
 	if(!is_array($info)) return $info;
-	if($info['total'] < 0){
+	if($info['total'] < 0)
 		return "<center><font color='red'>Для смены тарифа, пожалуйста, пополните счет на ".abs($info['total'])." рублей.</font></center>";
-	}
 	$query = $db->prepare("UPDATE `log_spend` SET `time2` = unix_timestamp(now()), `money` = :money WHERE `id` = :id");
 	$query->bindParam(':id', $info['log_id'], PDO::PARAM_STR);
 	$query->bindParam(':money', $info['use'], PDO::PARAM_STR);
@@ -1095,4 +1094,44 @@ function lepus_changeTariff($id, $sid){
 	$query->execute();
 	lepus_log_spend($user['id'], $id, time(), $time2, $info['pay'], "{$info['name']} [изменение]");
 	return "OK";
+}
+
+function lepus_getArchiveList($id = null){
+	global $db, $user; $data = null; $i = 0;
+	if(empty($id)){
+		$query = $db->prepare("SELECT * FROM `archive` WHERE `uid` =:uid");
+	}else{
+		$query = $db->prepare("SELECT * FROM `archive` WHERE `oid` =:id AND `uid` =:uid");
+		$query->bindParam(':id', $id, PDO::PARAM_STR);
+	}	
+	$query->bindParam(':uid', $user['id'], PDO::PARAM_STR);
+	$query->execute();
+	if(empty($id)){
+		while($row=$query->fetch()){
+			$row['time1'] = date("Y-m-d", $row['time1']);
+			$row['time2'] = date("Y-m-d", $row['time2']);
+
+			$tmpQuery = $db->prepare("SELECT * FROM `tariff` WHERE `id` =:id");
+			$tmpQuery->bindParam(':id', $row['sid'], PDO::PARAM_STR);
+			$tmpQuery->execute();
+			$tmpRow=$tmpQuery->fetch();
+			$name = $tmpRow['name'];
+
+			$tmpQuery = $db->prepare("SELECT SUM(money) FROM `log_spend` WHERE `oid` = :oid");
+			$tmpQuery->bindParam(':oid', $row['oid'], PDO::PARAM_STR);
+			$tmpQuery->execute();
+			$tmpRow=$tmpQuery->fetch();
+			$all = $tmpRow['SUM(money)'];
+			
+			$i++; $data .= "<tr><td>$i</td><td>$name [{$row['oid']}]</td><td>{$row['time1']}</td><td>{$row['time2']}</td><td>$all RUR</td><td><a href='#' data-archive-show={$row['oid']}><i class='glyphicon glyphicon-paperclip'></i></a></td></tr>";
+		}
+	}else{
+		if($query->rowCount() != 1) return 'no_access';
+		$row = $query->fetch();
+		$arr = json_decode($row['data'], true);
+		foreach($arr as $key => $value){
+			$data .= "$key: $value<br/>";
+		}
+	}
+	return $data;
 }

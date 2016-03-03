@@ -428,3 +428,14 @@ $(document).on("click", "[data-change-tariff-finish]", function(e) {
 		}
 	});
 });
+
+$(document).on("click", "[data-archive-show]", function(e) {
+	$(this).blur();
+	e.preventDefault();
+	id = $(this).data("archive-show");
+	$('#modalArchive').modal('show');
+	$.post("//"+document.domain+"/public/archive.php", {id: id}, function(json){
+		data = JSON.parse(json);
+		$("#modal_archive_text").html(data.mes);
+	});
+});

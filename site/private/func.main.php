@@ -1099,12 +1099,21 @@ function lepus_changeTariff($id, $sid){
 function lepus_getArchiveList($id = null){
 	global $db, $user; $data = null; $i = 0;
 	if(empty($id)){
-		$query = $db->prepare("SELECT * FROM `archive` WHERE `uid` =:uid");
+		if($user['data']['access'] < 2){
+			$query = $db->prepare("SELECT * FROM `archive` WHERE `uid` =:uid");
+			$query->bindParam(':uid', $user['id'], PDO::PARAM_STR);
+		}else{
+			$query = $db->prepare("SELECT * FROM `archive`");
+		}
 	}else{
-		$query = $db->prepare("SELECT * FROM `archive` WHERE `oid` =:id AND `uid` =:uid");
+		if($user['data']['access'] < 2){
+			$query = $db->prepare("SELECT * FROM `archive` WHERE `oid` =:id AND `uid` =:uid");
+			$query->bindParam(':uid', $user['id'], PDO::PARAM_STR);
+		}else{
+			$query = $db->prepare("SELECT * FROM `archive` WHERE `oid` =:id");
+		}
 		$query->bindParam(':id', $id, PDO::PARAM_STR);
-	}	
-	$query->bindParam(':uid', $user['id'], PDO::PARAM_STR);
+	}
 	$query->execute();
 	if(empty($id)){
 		while($row=$query->fetch()){
@@ -1142,7 +1151,7 @@ function lepus_moveToArchive($id){
 	$query->bindParam(':id', $id, PDO::PARAM_STR);
 	$query->execute();
 	if($query->rowCount() != 1) return 'no_info';
-	$row = $query->->fetch();
+	$row = $query->fetch();
 	$query = $db->prepare("INSERT INTO `archive` (`oid`, `sid`, `uid`, `time1`, `time2`, `data`) VALUES (:oid, :sid, :uid, :time1, :time2, :data)");
 	$query->bindParam(':oid', $row['id'], PDO::PARAM_STR);
 	$query->bindParam(':sid', $row['sid'], PDO::PARAM_STR);

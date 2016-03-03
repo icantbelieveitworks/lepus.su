@@ -1135,3 +1135,24 @@ function lepus_getArchiveList($id = null){
 	}
 	return $data;
 }
+
+function lepus_moveToArchive($id){
+	global $db;
+	$query = $db->prepare("SELECT * FROM `services` WHERE `id` = :id");
+	$query->bindParam(':id', $id, PDO::PARAM_STR);
+	$query->execute();
+	if($query->rowCount() != 1) return 'no_info';
+	$row = $query->->fetch();
+	$query = $db->prepare("INSERT INTO `archive` (`oid`, `sid`, `uid`, `time1`, `time2`, `data`) VALUES (:oid, :sid, :uid, :time1, :time2, :data)");
+	$query->bindParam(':oid', $row['id'], PDO::PARAM_STR);
+	$query->bindParam(':sid', $row['sid'], PDO::PARAM_STR);
+	$query->bindParam(':uid', $row['uid'], PDO::PARAM_STR);
+	$query->bindParam(':time1', $row['time1'], PDO::PARAM_STR);
+	$query->bindParam(':time2', $row['time2'], PDO::PARAM_STR);
+	$query->bindParam(':data', $row['data'], PDO::PARAM_STR);
+	$query->execute();
+	$query = $db->prepare("DELETE FROM `services` WHERE `id` = :id");
+	$query->bindParam(':id', $id, PDO::PARAM_STR);
+	$query->execute();
+	return 'OK';
+}

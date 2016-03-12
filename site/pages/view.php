@@ -49,6 +49,10 @@ if($tmpData['err'] != 'OK')	die(lepus_error_page($tmpData['mes']));
 									<div class="col-lg-12">
 										<input type="hidden" id="service_id" value="<?php echo $tmpData['mes']['id'];?>">
 										<hr/>
+										Услуга оплачена до: <?php echo $tmpData['mes']['time'];?>.<br/>
+										Стоимость: тариф + доп услуги = <?php echo $tmpData['mes']['price'];?> рублей.<br>
+										<?php if(!empty($tmpData['mes']['extra'])) echo "Дополнительные услуги: {$tmpData['mes']['extra']}."; ?>
+										<hr/>
 										<select class="form-control" id="idServiceOrder" name="type"><?php echo lepus_getTariffList($tmpData['mes']['sid']); ?></select>
 										<input class="btn btn-sm btn-danger btn-block" style="margin-top: 4px;" data-change-tariff type="submit" title="Поменять тариф можно не чаще одного раза за 30 дней" value="Поменять тариф">
 									</div>

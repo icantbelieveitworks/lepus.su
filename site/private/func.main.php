@@ -955,8 +955,10 @@ function lepus_getListServices($sid, $uid){
 		if($row['auto'] != 1)
 			$i = '<input class="btn btn-danger btn-xs" style="width: 30px;" data-autoextend-id='.$row['id'].' value="off">';
 		else
-			$i = '<input class="btn btn-success btn-xs" style="width: 30px;" data-autoextend-id='.$row['id'].' value="on">';		
-		$data .= "<tr><td><a href='/pages/view.php?id={$row['id']}'>{$row['id']}</a></td><td>{$tmpRow['name']}</td><td>".lepus_price($tmpRow['price'], $tmpRow['currency'])."</td><td>{$row['time2']}</td><td>$i</td></tr>";
+			$i = '<input class="btn btn-success btn-xs" style="width: 30px;" data-autoextend-id='.$row['id'].' value="on">';
+		$arr = json_decode($row['data'], true);
+		$price = lepus_price($tmpRow['price'], $tmpRow['currency'])+lepus_price($arr['extra'], $arr['extra_currency']);
+		$data .= "<tr><td><a href='/pages/view.php?id={$row['id']}'>{$row['id']}</a></td><td>{$tmpRow['name']}</td><td>$price</td><td>{$row['time2']}</td><td>$i</td></tr>";
 	}
 	return $data;
 }
@@ -986,7 +988,7 @@ function lepus_changeAutoExtend($id){
 function lepus_AutoExtend($uid = 0){
 	global $db;
 	$time = time()+60*60*24*3;
-	if($uid != 0){
+	if($uid == 0){
 		$query = $db->prepare("SELECT * FROM `services` WHERE `time2` < :time");
 	}else{
 		$query = $db->prepare("SELECT * FROM `services` WHERE `time2` < :time AND `uid` = :uid");
@@ -1008,7 +1010,15 @@ function lepus_AutoExtend($uid = 0){
 		$tmpRow = $tmpQuery->fetch();
 		$price = lepus_price($tmpRow['price'], $tmpRow['currency']);
 		if($user['data']['balance'] < $price){
-			_mail($user['login'], "Автоматическое продление", "Дорогой клиент, мы не смогли продлить услугу {$tmpRow["name"]}<br/>Так как на вашем счете недостаточно средств.");
+			if($uid == 0 && time()+60*60*24*7 < $row['time2']){
+				lepus_moveToArchive($row['id']);
+				_mail($user['login'], "Перенос в архив", "Дорогой клиент, через семь дней, неоплаченные услуги удаляются и отправляются в архив.<br/>
+				Вы  не продлили услугу {$tmpRow["name"]} => данные удалены, услуга перенесена в архив.<br/>
+				Если вы хотите восстановить услугу - напишите в техническую поддержку. И возможно мы поможем восстановить ваши данные.");
+				// create task => delete
+			}else{
+				_mail($user['login'], "Автоматическое продление", "Дорогой клиент, мы не смогли продлить услугу {$tmpRow["name"]}<br/>Так как на вашем счете недостаточно средств.");
+			}
 		}else{
 			$row['time1'] = $row['time2'];
 			$row['time2'] += 60*60*24*30;
@@ -1032,7 +1042,9 @@ function lepus_getService($id){
 	$tmpQuery->bindParam(':id', $row['sid'], PDO::PARAM_STR);
 	$tmpQuery->execute();
 	$tmpRow = $tmpQuery->fetch();
-	return ['id' => $row['id'], 'sid' => $row['sid'], 'name' => $tmpRow['name'], 'time' => date("Y-m-d", $row['time2'])];
+	$arr = lepus_getExtra($id);
+	$price = lepus_price($tmpRow['price'], $tmpRow['currency'])+lepus_price($arr['extra'], $arr['extra_currency']);
+	return ['id' => $row['id'], 'sid' => $row['sid'], 'name' => $tmpRow['name'], 'time' => date("Y-m-d", $row['time2']), 'price' => $price, 'extra' => $arr['extra_text']];
 }
 
 function lepus_moneyback($id, $sid){
@@ -1047,12 +1059,12 @@ function lepus_moneyback($id, $sid){
 	$moneyback = floor($day*$time_moneyback);
 	$money_use = $row['money'] - $moneyback;
 	$log_id = $row['id'];
-
 	$query = $db->prepare("SELECT * FROM `tariff` WHERE `id` = :sid");
 	$query->bindParam(':sid', $sid, PDO::PARAM_STR);
 	$query->execute();
 	$row = $query->fetch();
-	$pay = lepus_price($row["price"], $row["currency"]);
+	$arr = lepus_getExtra($id);
+	$pay = lepus_price($row["price"], $row["currency"])+lepus_price($arr['extra'], $arr['extra_currency']);
 	$total = $user['data']['balance'] + $moneyback - $pay;
 	return ['moneyback' => $moneyback, 'pay' => $pay, 'total' => $total, 'log_id' => $log_id, 'use' => $money_use, 'name' => $row['name']];
 }
@@ -1119,19 +1131,16 @@ function lepus_getArchiveList($id = null){
 		while($row=$query->fetch()){
 			$row['time1'] = date("Y-m-d", $row['time1']);
 			$row['time2'] = date("Y-m-d", $row['time2']);
-
 			$tmpQuery = $db->prepare("SELECT * FROM `tariff` WHERE `id` =:id");
 			$tmpQuery->bindParam(':id', $row['sid'], PDO::PARAM_STR);
 			$tmpQuery->execute();
 			$tmpRow=$tmpQuery->fetch();
 			$name = $tmpRow['name'];
-
 			$tmpQuery = $db->prepare("SELECT SUM(money) FROM `log_spend` WHERE `oid` = :oid");
 			$tmpQuery->bindParam(':oid', $row['oid'], PDO::PARAM_STR);
 			$tmpQuery->execute();
 			$tmpRow=$tmpQuery->fetch();
 			$all = $tmpRow['SUM(money)'];
-			
 			$i++; $data .= "<tr><td>$i</td><td>$name [{$row['oid']}]</td><td>{$row['time1']}</td><td>{$row['time2']}</td><td>$all RUR</td><td><a href='#' data-archive-show={$row['oid']}><i class='glyphicon glyphicon-paperclip'></i></a></td></tr>";
 		}
 	}else{
@@ -1164,4 +1173,24 @@ function lepus_moveToArchive($id){
 	$query->bindParam(':id', $id, PDO::PARAM_STR);
 	$query->execute();
 	return 'OK';
+}
+
+function lepus_doTask(){
+	global $db;
+	$query = $db->prepare("SELECT * FROM `task` WHERE `status` = '0'");
+	$query->execute();
+	while($row = $query->fetch()){
+		switch($row['handler']){
+			default: return 'no_handler'; break;
+		}
+	}
+}
+
+function lepus_getExtra($id){
+	global $db;
+	$query = $db->prepare("SELECT * FROM `services` WHERE `id` = :id");
+	$query->bindParam(':id', $id, PDO::PARAM_STR);
+	$query->execute();
+	$row = $query->fetch();
+	return json_decode($row['data'], true);
 }

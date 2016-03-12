@@ -247,11 +247,17 @@ $(document).on("click", "[data-tiket-send-msg], [data-tiket-send-close], [data-t
 $(document).on("click", "[data-make-payment]", function(e) {
 	$(this).blur();
 	e.preventDefault();
+	amount = $('input[id=pay_sum]').val();
 	pay_system = $('select[id=psystem]').val();
 	if(pay_system=='bitcoin'){
 		$('#bitcoinModal').modal('show');
+		return;
 	}
-	alertify.error(pay_system);
+	$('#modalPay').modal('show');
+	$.post("//"+document.domain+"/public/pay_preview.php", {system: pay_system, amount: amount}, function(json){
+		data = JSON.parse(json);
+		$("#modal_pay_text").html(data.mes);
+	});
 });
 
 $(document).on("click", "[data-cron-add]", function(e) {

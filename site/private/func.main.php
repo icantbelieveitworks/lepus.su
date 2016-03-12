@@ -1194,3 +1194,74 @@ function lepus_getExtra($id){
 	$row = $query->fetch();
 	return json_decode($row['data'], true);
 }
+
+function lepus_getPayLink($system, $val, $uid){
+	$val = intval($val);
+	$pay_desc = base64_encode('Пополнение счета');
+	$mrh_login = "xxxx";
+	$mrh_pass1 = "xxxx";
+	$mrh_pass2 = "xxxx";
+	if(empty($val) || empty($system)) return 'empty_post_value';
+	if($val > 50000) return 'Максимальная сумма 50000 рублей.';
+	if($system != 'paypal' && $system != 'paymaster' && $system != 'robokassa' && $system != 'webmoney') $system = 'paypal';
+	$i = "<center>Вы хотите пополнить счет на сумму <font color=green>$val</font> рублей через $system?</center>";
+	switch($system){
+		case 'paypal':
+			$i .= "<center>
+				<form method=\"post\" action= \"http://www.paypal.com/cgi-bin/webscr\" id=\"gotopay\"> 
+				<input type=\"hidden\" name=\"cmd\" value=\"_xclick\"> 
+				<input type=\"hidden\" name=\"business\" value=\"poiuty@lepus.su\"> 
+				<input type=\"hidden\" name=\"item_name\" value=\"Account replenishment\"> 
+				<input type=\"hidden\" name=\"custom\" value=\"$uid\">
+				<input type=\"hidden\" name=\"amount\" value=\"$val \"> 
+				<input type=\"hidden\" name=\"return\" value=\"http://lepus.su\"> 
+				<input type=\"hidden\" name=\"cancel_return\" value=\"https://lepus.su\">
+				<input type=\"hidden\" name=\"currency_code\" value=\"RUB\"> 
+				<input type=submit value=\"Перейти на страницу оплаты\" class=\"btn btn-danger\" style=\"width: 100%; margin-top: 2px;\"> 
+				</form>
+				<script>//document.getElementById(\"gotopay\").submit()</script>
+				</center>";
+				if($val < 100) $i = "Минимальная сумма пополнения счета через PayPal - 100 рублей.";
+		break;
+		case 'robokassa':
+			$crc  = md5("$mrh_login:$val:0:$mrh_pass1:shp_uid=$uid");
+			$i .= "<center>Вы хотите пополнить счет на сумму <font color=green>$val</font> рублей?<form action='https://merchant.roboxchange.com/Index.aspx' method=POST id=\"gotopay\">".
+				"<input type=hidden name=MrchLogin value=$mrh_login>".
+				"<input type=hidden name=OutSum value=$val>".
+				"<input type=hidden name=InvId value=0>".
+				"<input type=hidden name=Desc value='Пополнение счета'>".
+				"<input type=hidden name=SignatureValue value=$crc>".
+				"<input type=hidden name=shp_uid value='$uid'>".
+				"<input type=hidden name=IncCurrLabel value=WMR>".
+				"<input type=hidden name=Culture value=ru>".
+				"<input type=submit value='Подтверждаю, перейти на страницу оплаты' class='btn btn-danger'>".
+				"</form>
+				<script>//document.getElementById(\"gotopay\").submit()</script>
+				</center>";
+		break;
+		case 'paymaster':
+			$i .= "<center>".
+				"<form action='https://paymaster.ru/Payment/Init' method=POST id=\"gotopay\">".
+				"<input type=hidden name=LMI_MERCHANT_ID value=720f46c1-c6fa-4047-977c-f76396f2b3ce>".
+				"<input type=hidden name=LMI_PAYMENT_AMOUNT value=$val>".
+				"<input type=hidden name=LMI_CURRENCY value=RUR>".
+				"<input type=hidden name=LMI_PAYMENT_DESC_BASE64 value='$pay_desc'>".
+				"<input type=hidden name=LEPUS_USER value='$uid'>".
+				"<input type=submit value='Подтверждаю, перейти на страницу оплаты' class='btn btn-danger'>".
+				"</form>
+				<script>//document.getElementById(\"gotopay\").submit()</script>
+				</center>";
+		break;
+		case 'webmoney':
+			$i .= "<center>".
+				"<form action='https://merchant.webmoney.ru/lmi/payment.asp' method=POST>".
+				"<input type=hidden name=LMI_PAYMENT_AMOUNT value=$val>".
+				"<input type=hidden name=LMI_PAYMENT_DESC_BASE64 value='$pay_desc'>".
+				"<input type=hidden name=LMI_PAYEE_PURSE value=R000000000000>".
+				"<input type=hidden name=LEPUS_USER value='$uid'>".
+				"<input type=submit value='Подтверждаю, перейти на страницу оплаты' class='btn btn-danger'>".
+				"</form></center>";
+		break;
+	}
+	return $i;
+}

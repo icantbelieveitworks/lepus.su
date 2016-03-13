@@ -246,7 +246,10 @@ function lepus_domainLvl(){
 }
 
 function lepus_addDNSDomain($domain, $type, $master, $id){
-	global $pdns; $lvl = ['org.ru', 'com.ua'];
+	global $pdns;
+	$lvl = ['kiev.ua', 'com.ua', 'pp.ua', 'ru.com', 'com.kz', 'org.kz', 'co.am', 'com.am', 'net.am', 'msk.ru', 'org.ru'
+			'org.am', 'co.in', 'net.in', 'org.in', 'gen.in', 'firm.in', 'ind.in', 'za.com', 'uy.com', 'br.com', 'msk.su',
+			'spb.su', 'spb.ru', 'com.ru', 'ru.net', 'co.ua', 'od.ua', 'in.ua', 'net.ua', 'kh.ua', 'kharkov.ua', 'co.uk', 'vn.ua'];
 	$query = $pdns->prepare("SELECT * FROM `domains` WHERE `name` = :domain");
 	$arr = array_reverse(explode(".", $domain));
 	if(count($arr) > 2){

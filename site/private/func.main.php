@@ -129,7 +129,8 @@ function error($message, $j = 0){
 			"already_get_it" => "Такая запись уже есть",
 			"no_service" => "Нет такой услуги",
 			"no_money" => "Пополните баланс",
-			"no_moneyback" => "Нельзя сделать moneyback. Пожалуйста, обратитесь в техничекую поддержку."
+			"no_moneyback" => "Нельзя сделать moneyback. Пожалуйста, обратитесь в техничекую поддержку.",
+			"already_tariff" => "Вы уже используете этот тариф."
 		];
 		if (array_key_exists($message, $err)) $j = 1;
 	}
@@ -810,14 +811,14 @@ function is_login($j = TRUE){
 function lepus_getTariffList($id = null){
 	global $db; $data = null;
 	if($id === null){
-		$query = $db->prepare("SELECT * FROM `tariff`");
+		$query = $db->prepare("SELECT * FROM `tariff` WHERE `status` = 1");
 	}else{
 		$query = $db->prepare("SELECT * FROM `tariff` WHERE `id` = :id");
 		$query->bindParam(':id', $id, PDO::PARAM_STR);
 		$query->execute();
 		$row = $query->fetch();
 		
-		$query = $db->prepare("SELECT * FROM `tariff` WHERE `gid` = :gid AND `id` != :id");
+		$query = $db->prepare("SELECT * FROM `tariff` WHERE `gid` = :gid AND `id` != :id AND `status` = 1");
 		$query->bindParam(':gid', $row['gid'], PDO::PARAM_STR);
 		$query->bindParam(':id', $id, PDO::PARAM_STR);
 	}
@@ -946,11 +947,11 @@ function lepus_getListServices($sid, $uid){
 	$query->bindParam(':uid', $uid, PDO::PARAM_STR);
 	$query->execute();
 	while($row=$query->fetch()){
-		if($row['sid'] != $sid && $sid != 'all') return;
 		$tmpQuery = $db->prepare("SELECT * FROM `tariff` WHERE `id` =:sid");
 		$tmpQuery->bindParam(':sid', $row['sid'], PDO::PARAM_STR);
 		$tmpQuery->execute();
 		$tmpRow = $tmpQuery->fetch();
+		if($tmpRow['gid'] != $sid && $sid != 'all') continue;
 		$row['time2'] = date("Y-m-d", $row['time2']);
 		if($row['auto'] != 1)
 			$i = '<input class="btn btn-danger btn-xs" style="width: 30px;" data-autoextend-id='.$row['id'].' value="off">';
@@ -1054,6 +1055,19 @@ function lepus_moneyback($id, $sid){
 	$query->execute();
 	if($query->rowCount() != 1) return 'no_moneyback';
 	$row = $query->fetch();
+
+	$tmpQuery = $db->prepare("SELECT * FROM `services` WHERE `id` = :id");
+	$tmpQuery->bindParam(':id', $id, PDO::PARAM_STR);
+	$tmpQuery->execute();
+	$tmpRow = $tmpQuery->fetch();
+	$old_tariff_id = $tmpRow['sid'];
+
+	$tmpQuery = $db->prepare("SELECT * FROM `tariff` WHERE `id` = :id");
+	$tmpQuery->bindParam(':id', $old_tariff_id, PDO::PARAM_STR);
+	$tmpQuery->execute();
+	$tmpRow = $tmpQuery->fetch();
+	if($sid == $old_tariff_id) return 'already_tariff';
+	
 	$time_moneyback = ($row['time2'] - time())/(60*60*24);
 	$day = $row['money']/30;
 	$moneyback = floor($day*$time_moneyback);
@@ -1065,8 +1079,8 @@ function lepus_moneyback($id, $sid){
 	$row = $query->fetch();
 	$arr = lepus_getExtra($id);
 	$pay = lepus_price($row["price"], $row["currency"])+lepus_price($arr['extra'], $arr['extra_currency']);
-	$total = $user['data']['balance'] + $moneyback - $pay;
-	return ['moneyback' => $moneyback, 'pay' => $pay, 'total' => $total, 'log_id' => $log_id, 'use' => $money_use, 'name' => $row['name']];
+	$total = $user['data']['balance'] + $moneyback - $pay;	
+	return ['moneyback' => $moneyback, 'pay' => $pay, 'total' => $total, 'log_id' => $log_id, 'use' => $money_use, 'name' => $row['name'], 'status' => $row['status'], 'status2' => $tmpRow['status']];
 }
 
 function lepus_changeTariff_preview($id, $sid){
@@ -1075,11 +1089,16 @@ function lepus_changeTariff_preview($id, $sid){
 	if(!is_array($info)) return $info;
 	$info = lepus_moneyback($id, $sid);
 	if(!is_array($info)) return $info;
-	$data .= "Возврат средств => {$info['moneyback']}, к оплате => {$user['data']['balance']} + {$info['moneyback']} - {$info['pay']}, остаток на счете => {$info['total']} рублей.";
-	if($info['total'] < 0){
-		$data .="<br/><font color='red'>Для смены тарифа, пожалуйста, пополните счет на ".abs($info['total'])." рублей.</font>";
-		$show = '0';
-	}	
+	if($info['status'] == 1 && $info['status2']){
+		$data .= "Возврат средств => {$info['moneyback']}, к оплате => {$user['data']['balance']} + {$info['moneyback']} - {$info['pay']}, остаток на счете => {$info['total']} рублей.";
+		if($info['total'] < 0){
+			$data .="<br/><font color='red'>Для смены тарифа, пожалуйста, пополните счет на ".abs($info['total'])." рублей.</font>";
+			$show = '0';
+		}
+	}else{
+			$data .="<br/><font color='red'>Вы используете устаревший тариф.<br/>Чтобы перейти на новый => пожалуйста, обратитесь в техподдержку.</font>";
+			$show = '0';
+	}
 	return ['text' => "<center>$data</center>", 'show' => $show];
 }
 
@@ -1264,4 +1283,8 @@ function lepus_getPayLink($system, $val, $uid){
 		break;
 	}
 	return $i;
+}
+
+function send_kvm($id, $command, $host, $key){
+	return file_get_contents("http://$host/index.php?id=$id&command=$command&key=$key");
 }

@@ -6,7 +6,7 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/init/session.php');
 require_once($_SERVER['DOCUMENT_ROOT'].'/private/func.main.php');
 require_once($_SERVER['DOCUMENT_ROOT'].'/private/class/easybitcoin.php');
 
-$bitcoin = new Bitcoin('bitcoinrpc','EKuoanfcrzWPRWUJThRgS1CK51SvsGHBAA8pqkN5DzMn');
+$bitcoin = new Bitcoin($conf['bitcoin_login'], $conf['bitcoin_passwd']);
 $query = $db->prepare("SELECT * FROM `users` WHERE `bitcoin` IS NULL");
 $query->execute();
 while($row = $query->fetch()){

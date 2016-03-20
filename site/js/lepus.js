@@ -371,7 +371,7 @@ $(document).on("click", "[data-order-finish]", function(e) {
 		data = JSON.parse(json);
 		if(data.err == 'OK'){
 			alertify.success("Готово");
-			$("#modal_order_text" ).html("<center>Ваш заказ будет скоро готов.<br/> Вы можете посмотреть статус заказа и связаться с поддержкой <a href='https://lepus.dev/pages/tiket.php?id="+data.mes+"'>через этот тикет</a>.</center>");
+			$("#modal_order_text" ).html("<center>Ваш заказ будет скоро готов.<br/> Вы можете посмотреть статус заказа и связаться с поддержкой <a href='https://"+document.domain+"/pages/tiket.php?id="+data.mes+"'>через этот тикет</a>.</center>");
 		}else{
 			alertify.error(data.mes);
 		}

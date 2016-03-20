@@ -32,7 +32,7 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/auth.php');
 				<div class="content-info box-shadow--2dp">
 					<div class="content-text">
 						<div class="page-title">Документы</div>
-							<img src="https://lepus.su/images/other/doc2.png"><br/><br/>
+							<img src="/images/other/doc2.png"><br/><br/>
 							<i>Юридический адрес: 117321, Россия, Москва, Профсоюзная, 152, 3, 53.</i>
 						</div>
 				</div>

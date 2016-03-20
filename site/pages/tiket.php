@@ -13,7 +13,7 @@ $_GET['id'] = intval($_GET['id']);
 $tmpData = lepus_get_supportMsg($_GET['id'], $user['id'], $user['data']['access']);
 if(!is_array($tmpData)) die('no accsess');
 if($tmpData["title"] === NULL){
-	header('refresh: 3; url=https://lepus.dev/pages/support.php');
+	header("refresh: 3; url=https://".$_SERVER['SERVER_NAME']."/pages/support.php");
 	die;
 }
 $tmpTitle = '';

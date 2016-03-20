@@ -55,12 +55,13 @@ if(empty($user)){
 									<div class="col-lg-4">
 										<div class="form-inline">
 											<input class="form-control" style="width: 98px;" id="pay_sum" type="text" name="count" value="" maxlength="5" required="" placeholder="Сумма">
-												<select id="psystem" class="form-control" name="type">
-													<option value="paymaster" selected="">Paymaster</option>
-													<option value="paypal">PayPal</option>
+												<select id="psystem" style="width: 120px;" class="form-control" name="type">
+													<option value="paypal" selected="">PayPal</option>
+													<option value="robokassa">Robokassa</option>
+													<!--<option value="paymaster" >Paymaster</option>
 													<option value="robokassa">Robokassa</option>
 													<option value="webmoney">Webmoney</option>
-													<option value="bitcoin">Bitcoin</option>
+													<option value="bitcoin">Bitcoin</option>-->
 												</select>
 											<input data-make-payment class="btn btn-sm btn-danger btn-block" style="margin-top: 2px;" type="submit" value="Пополнить счет">
 										</div>

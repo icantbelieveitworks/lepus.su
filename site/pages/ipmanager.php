@@ -5,6 +5,7 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/init/memcache.php');
 require_once($_SERVER['DOCUMENT_ROOT'].'/private/init/session.php');
 require_once($_SERVER['DOCUMENT_ROOT'].'/private/func.main.php');
 require_once($_SERVER['DOCUMENT_ROOT'].'/private/auth.php');
+if($user['data']['access'] < 2) die('no_access');
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
@@ -45,22 +46,20 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/auth.php');
 						На этой странице вы можете выполнить следующие действия с IP адресами.<br/>
 						Просмотр, поиск свободных адресов, редактирование, добавление, удаление.<br/>
 						<hr/>
-						<div class="col-lg-12 col-centered">
-							<div class="form-inline">
-								<center><input class="form-control" id="ipAddress" style="width: 19%;" type="text" name="count" value="" required="" placeholder="127.0.0.1">
-								<input class="form-control" id="ipMAC"  style="width: 20%;"  type="text" name="count" value="" required="" placeholder="00:0a:95:9d:68:16">
-								<input class="form-control" id="ipHost"  style="width: 18%;"  type="text" name="count" value="" required="" placeholder="hostname">
-								<select id="ipServer" data-placeholder="Сервер..." class="chosen-select" style="width: 20%;">
-									<option value=""></option>
-										<?php echo lepus_getHTMLSelect('servers', 'domain'); ?>
-								</select>
-								<select id="ipUser" data-placeholder="Пользователь..." class="chosen-select" style="width: 20%;">
-									<option value=""></option>
-										<?php echo lepus_getHTMLSelect('users', 'login'); ?>
-								</select></center>
-								<input class="btn btn-sm btn-danger btn-block" data-admin-addip style="margin-top: 2px;" type="submit" value="Добавить IP адрес">
-							</div>
-						</div>
+						<div class="form-inline">
+							<center><input class="form-control" id="ipAddress" style="width: 18%;" type="text" name="count" value="" required="" placeholder="127.0.0.1">
+							<input class="form-control" id="ipMAC"  style="width: 19%;"  type="text" name="count" value="" required="" placeholder="00:0a:95:9d:68:16">
+							<input class="form-control" id="ipHost"  style="width: 14%;"  type="text" name="count" value="" required="" placeholder="hostname">
+							<select id="ipServer" data-placeholder="Сервер..." class="chosen-select" style="width: 17%;">
+								<option value=""></option>
+									<?php echo lepus_getHTMLSelect('servers', 'domain'); ?>
+							</select>
+							<select id="ipUser" data-placeholder="Пользователь..." class="chosen-select" style="width: 30%;">
+								<option value=""></option>
+									<?php echo lepus_getHTMLSelect('users', 'login'); ?>
+							</select></center>
+							<input class="btn btn-sm btn-danger btn-block" data-admin-addip style="margin-top: 2px;" type="submit" value="Добавить IP адрес">
+						</div>		
 						<hr/>
 						<table id="IPmanagerList" class="table table-striped table-bordered" cellspacing="0" width="100%">
 							<thead>

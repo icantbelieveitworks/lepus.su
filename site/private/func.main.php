@@ -20,7 +20,7 @@ function _exit(){
     );
 	session_unset();
 	session_destroy();
-	header("Location: https://lepus.dev");
+	header("Location: https://".$_SERVER['SERVER_NAME']);
 }
 
 function is_lepus_user($login){
@@ -49,7 +49,7 @@ function lost_passwd($login){
 	$is_user = is_lepus_user($login);
 	if($is_user['0'] != 1) return 'no_user';
 	$arr = [$_POST['email'], hash('sha512' ,$_SERVER['HTTP_USER_AGENT'].$_SERVER['REMOTE_ADDR'].$is_user['1']['passwd'].$is_user['1']['login']), time()+60*60*24];
-	_mail($_POST['email'], "Забыли пароль?", "Дорогой клиент,<br/>после того как вы перейдете <a href=\"http://lepus.dev/public/lost_passwd.php?hash=".urlencode(lepus_crypt(json_encode($arr)))."\">по этой ссылке</a> - вы получите второе письмо с паролем от вашего аккаунта.<br/>");
+	_mail($_POST['email'], "Забыли пароль?", "Дорогой клиент,<br/>после того как вы перейдете <a href=\"http://".$_SERVER['SERVER_NAME']."/public/lost_passwd.php?hash=".urlencode(lepus_crypt(json_encode($arr)))."\">по этой ссылке</a> - вы получите второе письмо с паролем от вашего аккаунта.<br/>");
 	return 'Мы отправили письмо с инструкцией на ваш email';
 }
 
@@ -235,7 +235,7 @@ function lepus_get_logip($id, $i = 0){
 	$query->execute();
 	if($query->rowCount() == 0) return "no_data";
 	while($row = $query->fetch()){
-		$i++; $data .= "<tr><td>$i</td><td>".long2ip($row['ip'])."</td><td><img src=\"/images/flags16/".mb_strtolower(geoip_country_code_by_name('136.243.79.123')).".png\" style=\"margin-bottom:-3px;\"> ".geoip_country_name_by_name('136.243.79.123')."</td><td>".$row['platform']."</td><td>".$row['browser']."</td><td>".date('Y-m-d H:i', $row['time'])."</td></tr>";
+		$i++; $data .= "<tr><td>$i</td><td>".long2ip($row['ip'])."</td><td><img src=\"/images/flags16/".mb_strtolower(geoip_country_code_by_name(long2ip($row['ip']))).".png\" style=\"margin-bottom:-3px;\"> ".geoip_country_name_by_name(long2ip($row['ip']))."</td><td>".$row['platform']."</td><td>".$row['browser']."</td><td>".date('Y-m-d H:i', $row['time'])."</td></tr>";
 	}
 	return $data;
 }
@@ -280,7 +280,7 @@ function lepus_addDNSDomain($domain, $type, $master, $id){
 }
 
 function lepus_get_dnsDomains($id, $i = 0){
-	global $pdns;
+	global $pdns; $data = null;
 	$query = $pdns->prepare("SELECT * FROM `domains` WHERE `account` = :uid");
 	$query->bindParam(':uid', $id, PDO::PARAM_STR);
 	$query->execute();
@@ -480,7 +480,7 @@ function support_create($uid, $title, $access){
 	$query->bindParam(':id', $uid, PDO::PARAM_STR);
 	$query->execute();
 	$row = $query->fetch();
-	_mail($row['login'], "[Lepus Support] Заявка №[$id]", "Благодарим за общение в службу технической поддержки.<br/>Наши специалисты постараются как можно скорее ответить вам.<br/>Ваш тикет доступен в личном кабинете  <a href=\"https://lepus.dev/pages/tiket.php?id=$id\">по ссылке</a>.<br/><br/>Это сообщение отправлено автоматически. Пожалуйста, не отвечайте на него.<br/>------------------------<br/>Lepus Support<br/><a href=\"http://lepus.su\">https://lepus.su</a>");
+	_mail($row['login'], "[Lepus Support] Заявка №[$id]", "Благодарим за общение в службу технической поддержки.<br/>Наши специалисты постараются как можно скорее ответить вам.<br/>Ваш тикет доступен в личном кабинете  <a href=\"https://".$_SERVER['SERVER_NAME']."/pages/tiket.php?id=$id\">по ссылке</a>.<br/><br/>Это сообщение отправлено автоматически. Пожалуйста, не отвечайте на него.<br/>------------------------<br/>Lepus Support<br/><a href=\"http://lepus.su\">https://lepus.su</a>");
 	return $id;
 }
 
@@ -575,13 +575,13 @@ function support_msg($uid, $tid, $access, $no_last = 0){
 	$query->execute();
 	$lastID = $db->lastInsertId();
 	if($tiket['uid'] == $uid){
-			telegram_send("Заявка №[$tid]\nНовый ответ от клиента.\nhttps://lepus.dev/pages/tiket.php?id=$tid");
+			telegram_send("Заявка №[$tid]\nНовый ответ от клиента.\nhttps://".$_SERVER['SERVER_NAME']."/pages/tiket.php?id=$tid");
 	}else{
 		$query = $db->prepare("SELECT * FROM `users` WHERE `id` = :id");
 		$query->bindParam(':id', $tiket['uid'], PDO::PARAM_STR);
 		$query->execute();
 		$row = $query->fetch();
-		_mail($row['login'], "[Lepus Support] Заявка №[$tid]", "Новое сообщение от службы технической поддержки.<br/>Ваш тикет доступен в личном кабинете  <a href=\"https://lepus.dev/pages/tiket.php?id=$tid\">по ссылке</a>.<br/><br/>Это сообщение отправлено автоматически. Пожалуйста, не отвечайте на него.<br/>------------------------<br/>Lepus Support<br/><a href=\"http://lepus.su\">https://lepus.su</a>");
+		_mail($row['login'], "[Lepus Support] Заявка №[$tid]", "Новое сообщение от службы технической поддержки.<br/>Ваш тикет доступен в личном кабинете  <a href=\"https://".$_SERVER['SERVER_NAME']."/pages/tiket.php?id=$tid\">по ссылке</a>.<br/><br/>Это сообщение отправлено автоматически. Пожалуйста, не отвечайте на него.<br/>------------------------<br/>Lepus Support<br/><a href=\"http://lepus.su\">https://lepus.su</a>");
 	}
 	return ['tid' => $tid, 'msgID' => $lastID];
 }
@@ -596,7 +596,7 @@ function parse_bb_code($text){
 }
 
 function lepus_error_page($mes){
-	return "<html><head><title>Lepus info page</title><meta http-equiv=\"refresh\" content=\"5;url=https://lepus.dev\"><style>.boxInfo{width: 80%;max-width: 600px;margin: 2em auto;padding: 1em;box-shadow: 0 0 10px 5px rgba(221, 221, 221, 1);word-wrap: break-word;}</style><head><body><div class=\"boxInfo\">$mes<br/>Через 5 секунд вы будете перенаправлены на главную страницу сайта.</div></body></html>";
+	return "<html><head><title>Lepus info page</title><meta http-equiv=\"refresh\" content=\"5;url=https://".$_SERVER['SERVER_NAME']."\"><style>.boxInfo{width: 80%;max-width: 600px;margin: 2em auto;padding: 1em;box-shadow: 0 0 10px 5px rgba(221, 221, 221, 1);word-wrap: break-word;}</style><head><body><div class=\"boxInfo\">$mes<br/>Через 5 секунд вы будете перенаправлены на главную страницу сайта.</div></body></html>";
 }
 
 function lepus_change_phone($num, $user){
@@ -834,7 +834,7 @@ function lepus_getTariffList($id = null){
 
 function lepus_getTariffPrices($g){
 	global $db; $data = null;
-	$query = $db->prepare("SELECT * FROM `tariff` WHERE `gid` = :gid");
+	$query = $db->prepare("SELECT * FROM `tariff` WHERE `gid` = :gid AND `status` = 1");
 	$query->bindParam(':gid', $g, PDO::PARAM_STR);
 	$query->execute();
 	while($row = $query->fetch()){
@@ -897,14 +897,16 @@ function lepus_create_order($sid, $promo = 0){
 	$query->bindParam(':time1', $time1, PDO::PARAM_STR);
 	$query->bindParam(':time2', $time2, PDO::PARAM_STR);
 	$query->execute();
-	lepus_log_spend($user['id'], $db->lastInsertId(), $time1, $time2, $info['price'], "{$info['name']} [заказ]");
+	$order_id = $db->lastInsertId();
+	lepus_log_spend($user['id'], $order_id, $time1, $time2, $info['price'], "{$info['name']} [заказ]");
 	switch($info['handler']){
 		case 'ISPmanagerV4': break;
 	}
 	$tmpData = support_create($user['id'], $info['name'], 2);
 	$_POST['msg'] = "Дорогой клиент, благодарим за оплату.\nКак только ваш заказ будет готов - мы свяжемся с вами в этом тикете.";
-	support_msg(6, $tmpData, 2, 1);
-	telegram_send("Заявка №[$tmpData]\nКлиент сделал новый заказ.\nhttps://lepus.dev/pages/tiket.php?id=$tmpData");
+	support_msg(5, $tmpData, 2, 1);
+	telegram_send("Заявка №[$tmpData]\nКлиент сделал новый заказ.\nhttps://".$_SERVER['SERVER_NAME']."/pages/tiket.php?id=$tmpData");
+	lepus_addTask($user['id'], $info['handler'], ['tiket' => $tmpData, 'tariff' => $sid, 'order' => $order_id]);
 	return $tmpData;
 }
 
@@ -1014,15 +1016,15 @@ function lepus_AutoExtend($uid = 0){
 		$tmpRow = $tmpQuery->fetch();
 		$price = lepus_price($tmpRow['price'], $tmpRow['currency']);
 		if($user['data']['balance'] < $price){
-			if($uid == 0 && time()+60*60*24*7 < $row['time2']){
-				lepus_moveToArchive($row['id']);
-				_mail($user['login'], "Перенос в архив", "Дорогой клиент, через семь дней, неоплаченные услуги удаляются и отправляются в архив.<br/>
-				Вы  не продлили услугу {$tmpRow["name"]} => данные удалены, услуга перенесена в архив.<br/>
-				Если вы хотите восстановить услугу - напишите в техническую поддержку. И возможно мы поможем восстановить ваши данные.");
+			//if($uid == 0 && time()+60*60*24*7 < $row['time2']){
+			//	lepus_moveToArchive($row['id']);
+			//	_mail($user['login'], "Перенос в архив", "Дорогой клиент, через семь дней, неоплаченные услуги удаляются и отправляются в архив.<br/>
+			//	Вы  не продлили услугу {$tmpRow["name"]} => данные удалены, услуга перенесена в архив.<br/>
+			//	Если вы хотите восстановить услугу - напишите в техническую поддержку. И возможно мы поможем восстановить ваши данные.");
 				// create task => delete
-			}else{
+			//}else{
 				_mail($user['login'], "Автоматическое продление", "Дорогой клиент, мы не смогли продлить услугу {$tmpRow["name"]}<br/>Так как на вашем счете недостаточно средств.");
-			}
+			//}
 		}else{
 			$row['time1'] = $row['time2'];
 			$row['time2'] += 60*60*24*30;
@@ -1218,11 +1220,9 @@ function lepus_getExtra($id){
 }
 
 function lepus_getPayLink($system, $val, $uid){
+	global $conf;
 	$val = intval($val);
 	$pay_desc = base64_encode('Пополнение счета');
-	$mrh_login = "xxxx";
-	$mrh_pass1 = "xxxx";
-	$mrh_pass2 = "xxxx";
 	if(empty($val) || empty($system)) return 'empty_post_value';
 	if($val > 50000) return 'Максимальная сумма 50000 рублей.';
 	if($system != 'paypal' && $system != 'paymaster' && $system != 'robokassa' && $system != 'webmoney') $system = 'paypal';
@@ -1246,9 +1246,9 @@ function lepus_getPayLink($system, $val, $uid){
 				if($val < 100) $i = "Минимальная сумма пополнения счета через PayPal - 100 рублей.";
 		break;
 		case 'robokassa':
-			$crc  = md5("$mrh_login:$val:0:$mrh_pass1:shp_uid=$uid");
+			$crc  = md5("{$conf['robokassa_login']}:$val:0:{$conf['robokassa_pass1']}:shp_uid=$uid");
 			$i .= "<center>Вы хотите пополнить счет на сумму <font color=green>$val</font> рублей?<form action='https://merchant.roboxchange.com/Index.aspx' method=POST id=\"gotopay\">".
-				"<input type=hidden name=MrchLogin value=$mrh_login>".
+				"<input type=hidden name=MrchLogin value={$conf['robokassa_login']}>".
 				"<input type=hidden name=OutSum value=$val>".
 				"<input type=hidden name=InvId value=0>".
 				"<input type=hidden name=Desc value='Пополнение счета'>".
@@ -1290,4 +1290,14 @@ function lepus_getPayLink($system, $val, $uid){
 
 function send_kvm($id, $command, $host, $key){
 	return file_get_contents("http://$host/index.php?id=$id&command=$command&key=$key");
+}
+
+function lepus_addTask($uid, $handler, $data){
+	global $db;
+	$data = json_encode($data); 
+	$query = $db->prepare("INSERT INTO `task` (`uid`, `handler`, `data`) VALUES (:uid, :handler, :data)");
+	$query->bindParam(':uid', $uid, PDO::PARAM_STR);
+	$query->bindParam(':handler', $handler, PDO::PARAM_STR);
+	$query->bindParam(':data', $data, PDO::PARAM_STR);
+	$query->execute();
 }

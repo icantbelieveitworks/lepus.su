@@ -5,7 +5,7 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/init/memcache.php');
 require_once($_SERVER['DOCUMENT_ROOT'].'/private/init/session.php');
 require_once($_SERVER['DOCUMENT_ROOT'].'/private/func.main.php');
 	
-$paypalemail = "xxx@gmail.com"; 
+$paypalemail = "poiuty@lepus.su"; 
 $currency    = "RUB";
 $postdata=""; 
 foreach ($_POST as $key=>$value) $postdata.=$key."=".urlencode($value)."&"; 
@@ -16,7 +16,7 @@ curl_setopt ($curl, CURLOPT_POST, 1);
 curl_setopt ($curl, CURLOPT_POSTFIELDS, $postdata); 
 curl_setopt ($curl, CURLOPT_SSL_VERIFYPEER, 0); 
 curl_setopt ($curl, CURLOPT_RETURNTRANSFER, 1); 
-curl_setopt ($curl, CURLOPT_SSL_VERIFYHOST, 1); 
+curl_setopt ($curl, CURLOPT_SSL_VERIFYHOST, 2); 
 $response = curl_exec ($curl); 
 curl_close ($curl); 
 if ($response != "VERIFIED") die("You should not do that ..."); 

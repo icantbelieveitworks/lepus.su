@@ -26,7 +26,7 @@
 			<div class="carousel-caption"></div>
 		</div>
 		<div class="item">
-			<img src="/images/lepusbar1.png">
+			<img src="/images/lepusbar3.png">
 			<div class="carousel-caption"></div>
 		</div>
 		<a class="left carousel-control" href="#carousel-example-generic" role="button" data-slide="prev">

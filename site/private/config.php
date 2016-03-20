@@ -1,11 +1,18 @@
 <?php
 $conf['memcache']	= ['unix:///tmp/memcached.socket', 0];
 $conf['mysql_host']	= 'localhost';
-$conf['mysql_base']	= 'lepus';
-$conf['mysql_user']	= 'lepus';
-$conf['mysql_pass']	= 'r7fWMYu3yG4YHp6b';
+$conf['mysql_base']	= 'hosting';
+$conf['mysql_user']	= 'hosting';
+$conf['mysql_pass']	= 'xxxx';
 
 $conf['pdns_host'] = 'localhost';
-$conf['pdns_base'] = 'pdns';
-$conf['pdns_user'] = 'pdns';
-$conf['pdns_pass'] = 'aMt8vxmdVjjGGr5e';
+$conf['pdns_base'] = 'dns';
+$conf['pdns_user'] = 'dns';
+$conf['pdns_pass'] = 'xxxx';
+
+$conf['robokassa_login'] = 'market';
+$conf['robokassa_pass1'] = 'xxxx';
+$conf['robokassa_pass2'] = 'xxxx';
+
+$conf['bitcoin_login'] = 'bitcoinrpc';
+$conf['bitcoin_passwd'] = 'xxxx';

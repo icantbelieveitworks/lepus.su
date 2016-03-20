@@ -33,7 +33,7 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/auth.php');
 					<div class="content-text">
 						<div class="page-title">Оформление заказа</div>
 						На этой странице вы можете оформить стандартный заказ.<br/>
-						Если вам нужны дополнительные опции, тогда <a href="https://lepus.dev/pages/support.php">создайте тикет</a> с пометкой "оформление услуги".<br/>
+						Если вам нужны дополнительные опции, тогда <a href="/pages/support.php">создайте тикет</a> с пометкой "оформление услуги".<br/>
 						Папример, выделенный сервер в дата центре OVH (SBG) + два дополнительных SSD диска 300GB.
 						<hr/>
 						<select class="form-control" id="idServiceOrder" name="type">

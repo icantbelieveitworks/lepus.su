@@ -104,7 +104,7 @@ $tmpData = lepus_get_dnsAccess($_GET['id'], $user['id']);
 		<script>
 			$(document).on('click', '.edit', function(){
 				$('.edit').editable('/public/change_dnsRecords.php', {
-					loadurl  : '//lepus.dev/public/change_dnsRecords.php?load',
+					loadurl  : '//'+document.domain+'/public/change_dnsRecords.php?load',
 					indicator : 'Сохранение...',
 					event     : "dblclick",
 					style: "inherit",

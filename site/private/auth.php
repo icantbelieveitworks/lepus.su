@@ -12,7 +12,7 @@ if(!empty($_SESSION['sess'])){
 	}else{
 		session_unset();
 		session_destroy();
-		header('refresh: 3; url=http://lepus.dev');
+		header('refresh: 3; url=http://'.$_SERVER['SERVER_NAME']);
 		die($x['err']);
 	}
 }

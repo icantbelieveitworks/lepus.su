@@ -6,7 +6,7 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/init/session.php');
 require_once($_SERVER['DOCUMENT_ROOT'].'/private/func.main.php');
 require_once($_SERVER['DOCUMENT_ROOT'].'/private/class/easybitcoin.php');
 
-$bitcoin = new Bitcoin('bitcoinrpc','EKuoanfcrzWPRWUJThRgS1CK51SvsGHBAA8pqkN5DzMn'); $rate = 30000;
+$bitcoin = new Bitcoin($conf['bitcoin_login'], $conf['bitcoin_passwd']); $rate = 30000;
 $a = $bitcoin->listtransactions("*", 100000);
 for($i=0; count($a) > $i; $i++){
 	if($a["$i"]["category"] != "receive" || $a["$i"]["confirmations"] < 6 || $a["$i"]["amount"] < 0.001) continue;

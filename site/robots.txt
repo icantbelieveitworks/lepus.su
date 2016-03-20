@@ -1,18 +1,16 @@
 User-agent: Yandex
 Allow: /$
-Allow: /vps.html
-Allow: /dedicated.html
-Allow: /shared.html
-Allow: /sitemap.xml
+Allow: /pages/hosting.php
+Allow: /pages/vps.php
+Allow: /pages/servers.php
+Allow: /pages/contacts.php
 Disallow: /
 Host: lepus.su
 
 User-agent: *
 Allow: /$
-Allow: /vps.html
-Allow: /dedicated.html
-Allow: /shared.html
-Allow: /sitemap.xml
+Allow: /pages/hosting.php
+Allow: /pages/vps.php
+Allow: /pages/servers.php
+Allow: /pages/contacts.php
 Disallow: /
-Sitemap: http://lepus.su/sitemap.xml
-

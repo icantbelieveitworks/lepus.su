@@ -23,7 +23,7 @@ if(empty($user)){ ?>
 		</center>
 		<div class="block-body" style="margin-left: 15px; padding-top: 0px;">
 			<ul>
-				<?php if($user['data']['access'] > 0){ ?>
+				<?php if($user['data']['access'] > 1){ ?>
 				<hr/>
 				<li><a href="/pages/cp.php">Услуги</a></li>
 				<li><a href="/pages/cp.php">Статистика</a></li>
@@ -34,6 +34,7 @@ if(empty($user)){ ?>
 				<li><a href="/pages/archive.php">Архив услуг</a></li>
 				<li><a href="/pages/cp.php">Пополнить счет</a></li>
 				<li><a href="/pages/cron.php">Планировщик задач</a></li>
+				<li><a href="https://github.com/poiuty/lepus.su/issues" target="_blank">Пожелания и ошибки</a></li>
 				<hr>
 				<li><a href="/pages/service.php">Все услуги</a></li>
 				<li><a href="/pages/service.php?q=2">VPS хостинг</a></li>

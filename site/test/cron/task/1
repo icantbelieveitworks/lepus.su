@@ -1,4 +1,0 @@
-* * * * * lepus /usr/bin/curl --silent 'http://lolka.ru' >/dev/null 2>&1
-* * * * * lepus /usr/bin/curl --silent 'http://google.ru' >/dev/null 2>&1
-*/2 * * * * lepus /usr/bin/curl --silent 'http://test.ru' >/dev/null 2>&1
-*/2 * * * * lepus /usr/bin/curl --silent 'http://test2.ru/index.php?id=13123' >/dev/null 2>&1

@@ -1288,7 +1288,7 @@ function lepus_addTask($uid, $handler, $data){
 }
 
 function lepus_doTask(){
-	global $db; $info = null;
+	global $db; $err = null;
 	$query = $db->prepare("SELECT * FROM `task` WHERE `status` = '1'");
 	$query->execute();
 	if($query->rowCount() > 0) return;
@@ -1296,48 +1296,64 @@ function lepus_doTask(){
 	$query->execute();
 	$row = $query->fetch();
 	$data = json_decode($row['data'], true);
+	$update = $db->prepare("UPDATE `task` SET `status` = 1 WHERE `id` = :id");
+	$update->bindParam(':id', $row['id'], PDO::PARAM_STR);
+	$update->execute();
 	if($data['do'] == 'create'){
-		if(empty($data['tiket']) || empty($data['tariff']) || empty($data['order'])) $info = 'wrong data params';
+		if(empty($data['tiket']) || empty($data['tariff']) || empty($data['order'])) $err = 'wrong data params';
 		if($row['handler'] == 'ISPmanagerV4' || $row['handler'] == 'OpenVZ' || $row['handler'] == 'KVM'){
 			$server = lepus_searchFree($row['handler'], $data['tariff']);
-			if(!is_array($server)) $info = 'no_free_server';
+			if(!is_array($server)) $err = 'no_free_server';
 		}
 	}
-	if(empty($info)){
+	if(empty($err)){
 		switch($row['handler']){
 			default: $info = 'no_handler'; break;
 			case 'ISPmanagerV4':
 				$presets = [1 => 'basic', 2 => 'standart', 3 => 'pro', 4 => 'super', 5 => 'vip1', 6 => 'vip2', 7 => 'vip3', 8 => 'vip4'];
-				$disks = [1 => 1000, 2 => 2500, 3 => 4000, 4 => 6000, 5 => 10000, 6 => 12500, 7 => 15000, 8 => 20000];
-				if($data['do'] == 'create'){
-					$preset = $presets[$data['tariff']];
-					$login = mb_strtolower(genRandStr(7));
-					$passwd = genRandStr(9);
-					$info = send_python($server['ip'], $server['port'], md5('createUser'.$server['access']), 'createUser', "{$data['email']}/{$preset}/{$server['ip']}/{$login}/{$passwd}");
-					$xml = simplexml_load_string($info);
-					if(empty($xml->error["code"])){
-						$_POST['msg'] = "Дорогой клиент, виртуальный хостинг готов.\nLogin: $login\nPassword:$passwd\nПожалуйста, поменяйте пароль.";
-						support_msg(5, $data['tiket'], 2, 1);
-						$select = $db->prepare("SELECT * FROM `services` WHERE `id` = :id");
-						$select->bindParam(':id', $data['order'], PDO::PARAM_STR);
-						$select->execute();
-						$j = $select->fetch();
-						$arr = json_decode($j['data'], true);
-						$arr['user'] = $login;
-						$json = json_encode($arr);
-						$query = $db->prepare("UPDATE `services` SET `data` = :data WHERE `id` = :id");
-						$query->bindParam(':data', $json, PDO::PARAM_STR);
-						$query->bindParam(':id', $data['order'], PDO::PARAM_STR);
-						$query->execute();
-					}
+				$commands = ['create' => 'createUser', 'stop' => 'blockUser', 'start' => 'unblockUser', 'change' => 'changeService'];
+				$disks = [1 => 1000, 2 => 2500, 3 => 4000, 4 => 6000, 5 => 10000, 6 => 12500, 7 => 15000, 8 => 20000];		
+				if(!empty($data['tariff'])) $preset = $presets[$data['tariff']];
+				switch($commands[$data['do']]){
+					default: $info = 'no_action'; break;
+					case 'createUser':
+						$login = mb_strtolower(genRandStr(7));
+						$passwd = genRandStr(9);
+						$info = lepus_sendToPythonAPI($server['ip'], $server['port'], $server['access'], $commands[$data['do']], "{$data['email']}/{$preset}/{$server['ip']}/{$login}/{$passwd}", $row['id']);
+						$xml = simplexml_load_string($info);
+						if(empty($xml->error['code']) && !empty($info)){
+							lepus_editServiceData($data['order'], 'edit', 'user', $login);
+							$_POST['msg'] = "Дорогой клиент, виртуальный хостинг готов.\nLogin: $login\nPassword:$passwd\nПожалуйста, поменяйте пароль.";
+							support_msg(5, $data['tiket'], 2, 1);
+						}
+					break;
+
+					case 'blockUser':
+					case 'unblockUser':
+						// ...
+					break;
 				}
 			break;
 		}
 	}
-	$query = $db->prepare("UPDATE `task` SET `info` = :info, `status` = 2 WHERE `id` = :id");
-	$query->bindParam(':info', $info, PDO::PARAM_STR);
-	$query->bindParam(':id', $row['id'], PDO::PARAM_STR);
-	$query->execute();	
+}
+
+function lepus_editServiceData($id, $do, $key, $val){
+	global $db;
+	$query = $db->prepare("SELECT * FROM `services` WHERE `id` = :id");
+	$query->bindParam(':id', $id, PDO::PARAM_STR);
+	$query->execute();
+	$row = $query->fetch();
+	$arr = json_decode($row['data'], true);
+	if($do == 'remove')
+		unset($arr[$key]);
+	else	
+		$arr[$key] = $val;
+	$json = json_encode($arr);
+	$query = $db->prepare("UPDATE `services` SET `data` = :data WHERE `id` = :id");
+	$query->bindParam(':data', $json, PDO::PARAM_STR);
+	$query->bindParam(':id', $id, PDO::PARAM_STR);
+	$query->execute();
 }
 
 function lepus_searchFree($handler, $tariff){
@@ -1373,6 +1389,12 @@ function send_kvm($id, $command, $host, $key){
 	return file_get_contents("http://$host/index.php?id=$id&command=$command&key=$key");
 }
 
-function send_python($host, $port, $access, $action, $data){
-	return file_get_contents("http://$host:$port/$access/$action/$data");
+function lepus_sendToPythonAPI($host, $port, $access, $action, $data, $id){
+	global $db;
+	$info = file_get_contents("http://$host:$port/".md5($action.$access)."/$action/$data");
+	$query = $db->prepare("UPDATE `task` SET `info` = :info, `status` = 2 WHERE `id` = :id");
+	$query->bindParam(':info', $info, PDO::PARAM_STR);
+	$query->bindParam(':id', $id, PDO::PARAM_STR);
+	$query->execute();	
+	return $info;
 }

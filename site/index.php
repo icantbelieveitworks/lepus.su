@@ -33,12 +33,12 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/auth.php');
 					<div class="content-text">
 						<div class="page-title">Lepus хостинг</div>
 						<p>
-							— <a href="/domains.html" target="_blank" rel="nofollow">Регистрация доменов</a>.<br/>
+							— <a href="http://dom.lepus.su/" target="_blank" rel="nofollow">Регистрация доменов</a>.<br/>
 							— Moneyback по первому требованию.<br/>
-							— Мощные <a href="/vps.html">администрируемые VPS</a> на SSD дисках.<br/>
+							— Мощные <a href="/pages/vps.php">администрируемые VPS</a> на SSD дисках.<br/>
 							— Бесплатный перенос ваших сайтов на наш хостинг.<br/>
-							— <a href="/shared.html">Виртуальный хостинг</a> и <a href="/vip.html" rel="nofollow">VIP хостинг</a> для ваших сайтов.<br/>
-							— Быстрые администрируемые <a href="/dedicated.html">выделенные серверы</a> по выгодной цене.<br/><br/>
+							— <a href="/pages/hosting.php">Виртуальный хостинг</a> и <a href="/pages/hosting.php" rel="nofollow">VIP хостинг</a> для ваших сайтов.<br/>
+							— Быстрые администрируемые <a href="/pages/servers.php">выделенные серверы</a> по выгодной цене.<br/><br/>
 							Наша миссия - предоставление качественных услуг хостинга. 
 							Находим индивидуальный подход к каждому клиенту.<br/>
 							Оказываем профессиональные услуги по технической поддержке, администрированию и сопровождению проектов.<br/>

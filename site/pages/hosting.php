@@ -146,17 +146,6 @@ for($i=0; $i < 8; $i++){
 										<td>+</td>
 									</tr>
 									<tr>
-										<td>FTP-доступ</td>
-										<td>+</td>
-										<td>+</td>
-										<td>+</td>
-										<td>+</td>
-										<td>+</td>
-										<td>+</td>
-										<td>+</td>
-										<td>+</td>
-									</tr>
-									<tr>
 										<td>ionCube</td>
 										<td>+</td>
 										<td>+</td>
@@ -199,17 +188,6 @@ for($i=0; $i < 8; $i++){
 										<th><img src="https://lepus.su/images/flags/germany-flag.png" title="Germany"></th>
 										<th><img src="https://lepus.su/images/flags/germany-flag.png" title="Germany"></th>
 										<th><img src="https://lepus.su/images/flags/germany-flag.png" title="Germany"></th>
-									</tr>
-									<tr>
-										<td><font color="green"><i>Тест. период</i></font></td>
-										<td><font color="green">+</font></td>
-										<td><font color="green">+</font></td>
-										<td><font color="green">+</font></td>
-										<td><font color="green">+</font></td>
-										<td><font color="green">+</font></td>
-										<td><font color="green">+</font></td>
-										<td><font color="green">+</font></td>
-										<td><font color="green">+</font></td>
 									</tr>
 									<tr>
 										<th>Цена</th>

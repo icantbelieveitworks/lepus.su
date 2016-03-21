@@ -936,7 +936,7 @@ function lepus_getLogSpend($id, $i = 0){
 }
 
 function lepus_getPageNavi(){
-	$navi = ''; $pages = ['/' => 'Главная',	'/pages/hosting.php' => 'Хостинг', '/pages/vps.php' => 'VPS', '/pages/servers.php' => 'Серверы', 'http://dom.lepus.su' => 'Домены', '/pages/partners.php' => 'Партнеры', '/pages/contacts.php' => 'Контакты'];
+	$navi = ''; $pages = ['/' => 'Главная',	'/pages/hosting.php' => 'Хостинг', '/pages/vps.php' => 'VPS', '/pages/servers.php' => 'Серверы', 'http://dom.lepus.su' => 'Домены', '/pages/contacts.php' => 'Контакты'];
 	foreach($pages as $key => $val){
 		if($_SERVER["REQUEST_URI"] == $key)
 			$navi .= "<li class=\"active\"><a href=\"$key\">$val</a></li>";
@@ -1041,7 +1041,7 @@ function lepus_AutoExtend($uid = 0){
 }
 
 function lepus_getService($id){
-	global $db;
+	global $db; $top = null; $bottom = null;
 	$row = lepus_getServiceAccess($id);
 	if(!is_array($row)) return $row;
 	$tmpQuery = $db->prepare("SELECT * FROM `tariff` WHERE `id` = :id");
@@ -1050,7 +1050,20 @@ function lepus_getService($id){
 	$tmpRow = $tmpQuery->fetch();
 	$arr = lepus_getExtra($id);
 	$price = lepus_price($tmpRow['price'], $tmpRow['currency'])+lepus_price($arr['extra'], $arr['extra_currency']);
-	return ['id' => $row['id'], 'sid' => $row['sid'], 'name' => $tmpRow['name'], 'time' => date("Y-m-d", $row['time2']), 'price' => $price, 'extra' => $arr['extra_text']];
+	switch($tmpRow['handler']){
+		case 'ISPmanagerV4':
+			if($row['server'] != 0){
+				$select = $db->prepare("SELECT * FROM `servers` WHERE `id` =:id");
+				$select->bindParam(':id', $row['server'], PDO::PARAM_STR);
+				$select->execute();
+				$tmp = $select->fetch();
+				$data = json_decode($row['data'], true);
+				$top = "<br/><a href=\"https://{$tmp['domain']}\" target=\"_blank\">Панель управления</a> виртуальным хостингом.<br/>Пользователь {$data['user']} [<a href=\"https://{$tmp['domain']}/ispmgr?func=recovery\" target=\"_blank\">восстановить пароль</a>].";
+				$bottom = 'test2';
+			}
+		break;
+	}
+	return ['id' => $row['id'], 'sid' => $row['sid'], 'name' => $tmpRow['name'], 'time' => date("Y-m-d", $row['time2']), 'price' => $price, 'extra' => $arr['extra_text'], 'top' => $top, 'bottom' => $bottom];
 }
 
 function lepus_moneyback($id, $sid){
@@ -1109,10 +1122,7 @@ function lepus_changeTariff_preview($id, $sid){
 
 function lepus_changeTariff($id, $sid){
 	global $db, $user; $data = null; $toTask = null;
-	$data = lepus_getServiceAccess($id);
-
-//$query = $db->prepare("SELECT * FROM `services` WHERE `id` = :id AND `uid` = :uid");
-	
+	$data = lepus_getServiceAccess($id);	
 	if(!is_array($data)) return $data;
 	$info = lepus_moneyback($id, $sid);
 	if(!is_array($info)) return $info;
@@ -1132,12 +1142,10 @@ function lepus_changeTariff($id, $sid){
 	$query->bindParam(':id', $id, PDO::PARAM_STR);
 	$query->execute();
 	lepus_log_spend($user['id'], $id, time(), $time2, $info['pay'], "{$info['name']} [изменение]");
-
 	$query = $db->prepare("SELECT * FROM `tariff` WHERE `id` = :id");
 	$query->bindParam(':id', $data['sid'], PDO::PARAM_STR);
 	$query->execute();
 	$row = $query->fetch();
-
 	$arr = json_decode($data['data'], true);
 	switch($row['handler']){
 		case 'ISPmanagerV4':

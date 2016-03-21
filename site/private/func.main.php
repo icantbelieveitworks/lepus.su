@@ -1297,15 +1297,14 @@ function lepus_doTask(){
 	$row = $query->fetch();
 	$data = json_decode($row['data'], true);
 	$update = $db->prepare("UPDATE `task` SET `status` = 1 WHERE `id` = :id");
-	$update = $db->prepare("UPDATE `task` SET `status` = 1 WHERE `id` = :id");
 	$update->bindParam(':id', $row['id'], PDO::PARAM_STR);
 	$update->execute();
 	if($data['do'] == 'create'){
 		if(empty($data['tiket']) || empty($data['tariff']) || empty($data['order'])) $err = 'wrong data params';
-		if($row['handler'] == 'ISPmanagerV4' || $row['handler'] == 'OpenVZ' || $row['handler'] == 'KVM'){
-			$server = lepus_searchFree($row['handler'], $data['tariff']);
-			if(!is_array($server)) $err = 'no_free_server';
-		}
+	}
+	if($row['handler'] == 'ISPmanagerV4' || $row['handler'] == 'OpenVZ' || $row['handler'] == 'KVM'){
+		$server = lepus_searchFree($row['handler'], $data['tariff'], $data['order']);
+		if(!is_array($server)) $err = 'no_free_server';
 	}
 	if(empty($err)){
 		switch($row['handler']){
@@ -1332,11 +1331,11 @@ function lepus_doTask(){
 						}
 					break;
 					case 'changeService': // params: login, preset, email, disk
-						lepus_sendToPythonAPI(0, 0, 0, $commands[$data['do']], "{$data['user']}/{$preset}/{$data['email']}/{$disk}", $row['id'], $data['order']);
+						lepus_sendToPythonAPI($server['ip'], $server['port'], $server['access'], $commands[$data['do']], "{$data['user']}/{$preset}/{$data['email']}/{$disk}", $row['id']);
 					break;
 					case 'blockUser': // params: user
 					case 'unblockUser':
-						lepus_sendToPythonAPI(0, 0, 0, $commands[$data['do']], $data['user'], $row['id'], $data['order']);
+						lepus_sendToPythonAPI($server['ip'], $server['port'], $server['access'], $commands[$data['do']], $data['user'], $row['id']);
 					break;					
 				}
 			break;
@@ -1362,30 +1361,42 @@ function lepus_editServiceData($id, $do, $key, $val){
 	$query->execute();
 }
 
-function lepus_searchFree($handler, $tariff){
+function lepus_searchFree($handler, $tariff, $id){
 	global $db; $server = null;
-	$query = $db->prepare("SELECT * FROM `tariff` WHERE `handler` = :handler");
-	$query->bindParam(':handler', $handler, PDO::PARAM_STR);
+	$query = $db->prepare("SELECT * FROM `services` WHERE `id` = :id");
+	$query->bindParam(':id', $order, PDO::PARAM_STR);
 	$query->execute();
-	while($row = $query->fetch()){
-		if($tariff == $row['id']) $need = $row['point'];
-		$data[$row['id']] = $row['point'];
-	}	
-	$query = $db->prepare("SELECT * FROM `servers` WHERE `handler` = :handler AND `status` = '1'");
-	$query->bindParam(':handler', $handler, PDO::PARAM_STR);
-	$query->execute();
-	while($row = $query->fetch()){
-		$points = 0;
-		$tmp = $db->prepare("SELECT * FROM `services` WHERE `server` = :server");
-		$tmp->bindParam(':server', $row['id'], PDO::PARAM_STR);
-		$tmp->execute();
-		while($tmpRow = $tmp->fetch()){
-			$points += $data[$tmpRow['sid']];
-		}
-		if($points+$need < $row['points']){
-			$j = $points+$need;
-			$server = ['id' => $row['id'], 'ip' => long2ip($row['ip']), 'port' => $row['port'], 'access' => $row['access'], 'points' => $j];
-			continue;
+	$row = $query->fetch();
+	if($row['server'] != 0){
+		$query = $db->prepare("SELECT * FROM `servers` WHERE `id` = :id");
+		$query->bindParam(':id', $row['server'], PDO::PARAM_STR);
+		$query->execute();
+		$row = $query->fetch();
+		$server = ['id' => $row['id'], 'ip' => long2ip($row['ip']), 'port' => $row['port'], 'access' => $row['access']];
+	}else{
+		$query = $db->prepare("SELECT * FROM `tariff` WHERE `handler` = :handler");
+		$query->bindParam(':handler', $handler, PDO::PARAM_STR);
+		$query->execute();
+		while($row = $query->fetch()){
+			if($tariff == $row['id']) $need = $row['point'];
+			$data[$row['id']] = $row['point'];
+		}	
+		$query = $db->prepare("SELECT * FROM `servers` WHERE `handler` = :handler AND `status` = '1'");
+		$query->bindParam(':handler', $handler, PDO::PARAM_STR);
+		$query->execute();
+		while($row = $query->fetch()){
+			$points = 0;
+			$tmp = $db->prepare("SELECT * FROM `services` WHERE `server` = :server");
+			$tmp->bindParam(':server', $row['id'], PDO::PARAM_STR);
+			$tmp->execute();
+			while($tmpRow = $tmp->fetch()){
+				$points += $data[$tmpRow['sid']];
+			}
+			if($points+$need < $row['points']){
+				$j = $points+$need;
+				$server = ['id' => $row['id'], 'ip' => long2ip($row['ip']), 'port' => $row['port'], 'access' => $row['access'], 'points' => $j];
+				continue;
+			}
 		}
 	}
 	return $server;
@@ -1395,21 +1406,8 @@ function send_kvm($id, $command, $host, $key){
 	return file_get_contents("http://$host/index.php?id=$id&command=$command&key=$key");
 }
 
-function lepus_sendToPythonAPI($host, $port, $access, $action, $data, $id, $order = 0){
+function lepus_sendToPythonAPI($host, $port, $access, $action, $data, $id){
 	global $db;
-	if(!empty($order)){
-		$query = $db->prepare("SELECT * FROM `services` WHERE `id` = :id");
-		$query->bindParam(':id', $order, PDO::PARAM_STR);
-		$query->execute();
-		$row = $query->fetch();
-		$query = $db->prepare("SELECT * FROM `servers` WHERE `id` = :id");
-		$query->bindParam(':id', $row['server'], PDO::PARAM_STR);
-		$query->execute();
-		$row = $query->fetch();
-		$host = long2ip($row['ip']);
-		$port = $row['port'];
-		$access = $row['access'];
-	}
 	$info = file_get_contents("http://$host:$port/".md5($action.$access)."/$action/$data");
 	$query = $db->prepare("UPDATE `task` SET `info` = :info, `status` = 2 WHERE `id` = :id");
 	$query->bindParam(':info', $info, PDO::PARAM_STR);

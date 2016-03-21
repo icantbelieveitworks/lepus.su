@@ -1108,9 +1108,12 @@ function lepus_changeTariff_preview($id, $sid){
 }
 
 function lepus_changeTariff($id, $sid){
-	global $db, $user; $data = null;
-	$info = lepus_getServiceAccess($id);
-	if(!is_array($info)) return $info;
+	global $db, $user; $data = null; $toTask = null;
+	$data = lepus_getServiceAccess($id);
+
+//$query = $db->prepare("SELECT * FROM `services` WHERE `id` = :id AND `uid` = :uid");
+	
+	if(!is_array($data)) return $data;
 	$info = lepus_moneyback($id, $sid);
 	if(!is_array($info)) return $info;
 	if($info['total'] < 0)
@@ -1129,6 +1132,20 @@ function lepus_changeTariff($id, $sid){
 	$query->bindParam(':id', $id, PDO::PARAM_STR);
 	$query->execute();
 	lepus_log_spend($user['id'], $id, time(), $time2, $info['pay'], "{$info['name']} [изменение]");
+
+	$query = $db->prepare("SELECT * FROM `tariff` WHERE `id` = :id");
+	$query->bindParam(':id', $data['sid'], PDO::PARAM_STR);
+	$query->execute();
+	$row = $query->fetch();
+
+	$arr = json_decode($data['data'], true);
+	switch($row['handler']){
+		case 'ISPmanagerV4':
+			$toTask = ['do' => 'change', 'tariff' => $sid, 'user' => $arr['user'], 'email' => $user['login'], 'order' => $data['id']];
+		break;
+	}
+	if(!empty($toTask))
+		lepus_addTask($user['id'], $row['handler'], $toTask);
 	return "OK";
 }
 
@@ -1362,7 +1379,7 @@ function lepus_editServiceData($id, $do, $key, $val){
 }
 
 function lepus_searchFree($handler, $tariff, $id){
-	global $db; $server = null;
+	global $db; $server = null; $need = null;
 	$query = $db->prepare("SELECT * FROM `services` WHERE `id` = :id");
 	$query->bindParam(':id', $order, PDO::PARAM_STR);
 	$query->execute();

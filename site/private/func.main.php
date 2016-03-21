@@ -1297,6 +1297,7 @@ function lepus_doTask(){
 	$row = $query->fetch();
 	$data = json_decode($row['data'], true);
 	$update = $db->prepare("UPDATE `task` SET `status` = 1 WHERE `id` = :id");
+	$update = $db->prepare("UPDATE `task` SET `status` = 1 WHERE `id` = :id");
 	$update->bindParam(':id', $row['id'], PDO::PARAM_STR);
 	$update->execute();
 	if($data['do'] == 'create'){
@@ -1313,10 +1314,13 @@ function lepus_doTask(){
 				$presets = [1 => 'basic', 2 => 'standart', 3 => 'pro', 4 => 'super', 5 => 'vip1', 6 => 'vip2', 7 => 'vip3', 8 => 'vip4'];
 				$commands = ['create' => 'createUser', 'stop' => 'blockUser', 'start' => 'unblockUser', 'change' => 'changeService'];
 				$disks = [1 => 1000, 2 => 2500, 3 => 4000, 4 => 6000, 5 => 10000, 6 => 12500, 7 => 15000, 8 => 20000];		
-				if(!empty($data['tariff'])) $preset = $presets[$data['tariff']];
+				if(!empty($data['tariff'])){
+					$preset = $presets[$data['tariff']];
+					$disk = $disks[$data['tariff']];
+				}
 				switch($commands[$data['do']]){
 					default: $info = 'no_action'; break;
-					case 'createUser':
+					case 'createUser': // params: email, preset, ip, login, password
 						$login = mb_strtolower(genRandStr(7));
 						$passwd = genRandStr(9);
 						$info = lepus_sendToPythonAPI($server['ip'], $server['port'], $server['access'], $commands[$data['do']], "{$data['email']}/{$preset}/{$server['ip']}/{$login}/{$passwd}", $row['id']);
@@ -1327,11 +1331,13 @@ function lepus_doTask(){
 							support_msg(5, $data['tiket'], 2, 1);
 						}
 					break;
-
-					case 'blockUser':
-					case 'unblockUser':
-						// ...
+					case 'changeService': // params: login, preset, email, disk
+						lepus_sendToPythonAPI(0, 0, 0, $commands[$data['do']], "{$data['user']}/{$preset}/{$data['email']}/{$disk}", $row['id'], $data['order']);
 					break;
+					case 'blockUser': // params: user
+					case 'unblockUser':
+						lepus_sendToPythonAPI(0, 0, 0, $commands[$data['do']], $data['user'], $row['id'], $data['order']);
+					break;					
 				}
 			break;
 		}
@@ -1389,8 +1395,21 @@ function send_kvm($id, $command, $host, $key){
 	return file_get_contents("http://$host/index.php?id=$id&command=$command&key=$key");
 }
 
-function lepus_sendToPythonAPI($host, $port, $access, $action, $data, $id){
+function lepus_sendToPythonAPI($host, $port, $access, $action, $data, $id, $order = 0){
 	global $db;
+	if(!empty($order)){
+		$query = $db->prepare("SELECT * FROM `services` WHERE `id` = :id");
+		$query->bindParam(':id', $order, PDO::PARAM_STR);
+		$query->execute();
+		$row = $query->fetch();
+		$query = $db->prepare("SELECT * FROM `servers` WHERE `id` = :id");
+		$query->bindParam(':id', $row['server'], PDO::PARAM_STR);
+		$query->execute();
+		$row = $query->fetch();
+		$host = long2ip($row['ip']);
+		$port = $row['port'];
+		$access = $row['access'];
+	}
 	$info = file_get_contents("http://$host:$port/".md5($action.$access)."/$action/$data");
 	$query = $db->prepare("UPDATE `task` SET `info` = :info, `status` = 2 WHERE `id` = :id");
 	$query->bindParam(':info', $info, PDO::PARAM_STR);

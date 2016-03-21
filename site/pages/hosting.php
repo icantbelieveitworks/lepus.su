@@ -146,17 +146,6 @@ for($i=0; $i < 8; $i++){
 										<td>+</td>
 									</tr>
 									<tr>
-										<td>MySQL</td>
-										<td>+</td>
-										<td>+</td>
-										<td>+</td>
-										<td>+</td>
-										<td>+</td>
-										<td>+</td>
-										<td>+</td>
-										<td>+</td>
-									</tr>
-									<tr>
 										<td>FTP-доступ</td>
 										<td>+</td>
 										<td>+</td>

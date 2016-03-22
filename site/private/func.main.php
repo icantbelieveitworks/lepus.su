@@ -782,9 +782,8 @@ function lepus_getHTMLSelect($table, $column){
 
 function lepus_admin_addIP($ip, $mac, $host, $server, $user){
 	global $db;
-	$query = $db->prepare("SELECT * FROM `ipmanager` WHERE `ip` = :ip OR `mac` = :mac");
+	$query = $db->prepare("SELECT * FROM `ipmanager` WHERE `ip` = :ip");
 	$query->bindParam(':ip', $ip, PDO::PARAM_STR);
-	$query->bindParam(':mac', $mac, PDO::PARAM_STR);
 	$query->execute();
 	if($query->rowCount() > 0) return "already_get_it";
 	$query = $db->prepare("INSERT INTO `ipmanager` (`ip`, `sid`, `service`, `owner`, `mac`, `domain`) VALUES (:ip, :server, 0, :user, :mac, :host)");
@@ -1059,7 +1058,12 @@ function lepus_getService($id){
 				$tmp = $select->fetch();
 				$data = json_decode($row['data'], true);
 				$top = "<br/><a href=\"https://{$tmp['domain']}\" target=\"_blank\">Панель управления</a> виртуальным хостингом.<br/>Пользователь {$data['user']} [<a href=\"https://{$tmp['domain']}/ispmgr?func=recovery\" target=\"_blank\">восстановить пароль</a>].";
-				$bottom = 'test2';
+				$bottom = null;
+			}
+		break;
+		case 'OpenVZ':
+			if($row['server'] != 0){
+				$bottom = "<hr/><table id=\"IPList\" class=\"table table-striped table-bordered\" cellspacing=\"0\" width=\"100%\"><thead><tr><th>ID</th><th>IP</th><th>Domain</th><th>MAC</th></tr></thead>".lepus_getListIP($id)."<tbody></tbody></table>";
 			}
 		break;
 	}
@@ -1437,6 +1441,18 @@ function lepus_sendToPythonAPI($host, $port, $access, $action, $data, $id){
 	$query = $db->prepare("UPDATE `task` SET `info` = :info, `status` = 2 WHERE `id` = :id");
 	$query->bindParam(':info', $info, PDO::PARAM_STR);
 	$query->bindParam(':id', $id, PDO::PARAM_STR);
-	$query->execute();	
+	$query->execute();
 	return $info;
+}
+
+function lepus_getListIP($id){
+	global $db; $data = null; $i = 0;
+	$query = $db->prepare("SELECT * FROM `ipmanager` WHERE `service` = :id");
+	$query->bindParam(':id', $id, PDO::PARAM_STR);
+	$query->execute();
+	while($row = $query->fetch()){
+		$row['ip'] = long2ip($row['ip']);
+		$i++; $data .= "<tr><td>$i</td> <td>{$row['ip']}</td> <td>{$row['domain']}</td> <td>{$row['mac']}</td> </tr>";
+	}
+	return $data;
 }

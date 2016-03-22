@@ -35,7 +35,7 @@ if($tmpData['err'] != 'OK')	die(lepus_error_page($tmpData['mes']));
 
 		<script src="/js/alertify.js"></script>
 		<script src="/js/lepus.js"></script>
-	<script type="text/javascript" charset="utf-8"> $(document).ready(function() { $('#incomeTable').dataTable({ "order": [[ 0, "desc" ]] }); }); </script>
+	<script type="text/javascript" charset="utf-8"> $(document).ready(function() { $('#IPList').dataTable({ "order": [[ 0, "desc" ]] }); }); </script>
 	</head>
 	<body>
 		<div class="wrapper">
@@ -56,6 +56,7 @@ if($tmpData['err'] != 'OK')	die(lepus_error_page($tmpData['mes']));
 										<hr/>
 										<select class="form-control" id="idServiceOrder" name="type"><?php echo lepus_getTariffList($tmpData['mes']['sid']); ?></select>
 										<input class="btn btn-sm btn-danger btn-block" style="margin-top: 4px;" data-change-tariff type="submit" title="Поменять тариф можно не чаще одного раза за 30 дней" value="Поменять тариф">
+										<?php if(!empty($tmpData['mes']['bottom'])) echo $tmpData['mes']['bottom']; ?>
 									</div>
 								</div>
 							</div>

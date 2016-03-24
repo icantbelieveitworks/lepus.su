@@ -445,3 +445,17 @@ $(document).on("click", "[data-archive-show]", function(e) {
 		$("#modal_archive_text").html(data.mes);
 	});
 });
+
+$(document).on("click", "[data-vm-restart]", function(e) {
+	$(this).blur();
+	e.preventDefault();
+	id = $(this).data("vm-restart");
+	$.post("//"+document.domain+"/public/add_task.php", {id: id, command: 'restart'}, function(json){
+		data = JSON.parse(json);
+		if(data.err == 'OK'){
+			alertify.success(data.mes);
+		}else{
+			alertify.error(data.mes);
+		}
+	});
+});

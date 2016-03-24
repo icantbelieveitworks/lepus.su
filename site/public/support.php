@@ -29,6 +29,6 @@ switch($_POST['do']){
 	break;
 	case 'update_msg':
 		$tmpData = error(lepus_get_supportMsg($_POST['tid'], $user['id'], $user['data']['access'], 0, $_POST['count']));
-		echo json_encode($tmpData);			
+		echo json_encode($tmpData);
 	break;
 }

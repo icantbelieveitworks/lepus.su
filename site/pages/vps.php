@@ -59,21 +59,21 @@ for($i=0; $i < 8; $i++){
 							<tbody>
 								<tr>
 									<td>CPU (MHz)</td>
-									<td>1000</td>
-									<td>2000</td>
-									<td>3000</td>
 									<td>3400</td>
 									<td>3400</td>
 									<td>2x3400</td>
 									<td>2x3400</td>
-									<td>4x3400</td>
+									<td>2200</td>
+									<td>2200</td>
+									<td>2x2200</td>
+									<td>2x2200</td>
 								</tr>
 								<tr>
 									<td>Диск (Gb)</td>
-									<td>5</td>
-									<td>10</td>
-									<td>15</td>
-									<td>20</td>
+									<td>30</td>
+									<td>40</td>
+									<td>50</td>
+									<td>60</td>
 									<td>30</td>
 									<td>40</td>
 									<td>50</td>
@@ -81,14 +81,14 @@ for($i=0; $i < 8; $i++){
 								</tr>
 								<tr>
 									<td>RAM (Mb)</td>
-									<td>1024</td>
 									<td>2048</td>
 									<td>3072</td>
 									<td>4096</td>
-									<td>6144</td>
-									<td>8192</td>
-									<td>10240</td>
-									<td>16384</td>
+									<td>5120</td>
+									<td>2048</td>
+									<td>3072</td>
+									<td>4096</td>
+									<td>5120</td>
 								</tr>
 								<tr>
 									<th>Цена</th>

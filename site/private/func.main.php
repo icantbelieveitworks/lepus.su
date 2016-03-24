@@ -130,7 +130,9 @@ function error($message, $j = 0){
 			"no_service" => "Нет такой услуги",
 			"no_money" => "Пополните баланс",
 			"no_moneyback" => "Нельзя сделать moneyback. Пожалуйста, обратитесь в техничекую поддержку.",
-			"already_tariff" => "Вы уже используете этот тариф."
+			"already_tariff" => "Вы уже используете этот тариф.",
+			"error_task" => "Ошибка! Не могу добавить задание!",
+			"task_already" => "Ошибка! Такое задание уже добавлено!"
 		];
 		if (array_key_exists($message, $err)) $j = 1;
 	}
@@ -1063,7 +1065,8 @@ function lepus_getService($id){
 		break;
 		case 'OpenVZ':
 			if($row['server'] != 0){
-				$bottom = "<hr/><table id=\"IPList\" class=\"table table-striped table-bordered\" cellspacing=\"0\" width=\"100%\"><thead><tr><th>ID</th><th>IP</th><th>Domain</th><th>MAC</th></tr></thead>".lepus_getListIP($id)."<tbody></tbody></table>";
+				$bottom = "<input class=\"btn btn-sm btn-danger btn-block\" style=\"margin-top: 4px;\" data-vm-restart={$id} type=\"submit\" value=\"Перезагрузить\">
+						   <hr/><table id=\"IPList\" class=\"table table-striped table-bordered\" cellspacing=\"0\" width=\"100%\"><thead><tr><th>ID</th><th>IP</th><th>Domain</th><th>MAC</th></tr></thead>".lepus_getListIP($id)."<tbody></tbody></table>";
 			}
 		break;
 	}
@@ -1308,7 +1311,15 @@ function lepus_getPayLink($system, $val, $uid){
 
 function lepus_addTask($uid, $handler, $data){
 	global $db;
-	$data = json_encode($data); 
+	$data = json_encode($data);
+	if($uid != 0){
+		$query = $db->prepare("SELECT * FROM `task` WHERE `uid` = :uid AND `handler` = :handler AND `data` = :data AND `status` IN (0,1)");
+		$query->bindParam(':uid', $uid, PDO::PARAM_STR);
+		$query->bindParam(':handler', $handler, PDO::PARAM_STR);
+		$query->bindParam(':data', $data, PDO::PARAM_STR);
+		$query->execute();
+		if($query->rowCount() != 0) return 'task_already';
+	}
 	$query = $db->prepare("INSERT INTO `task` (`uid`, `handler`, `data`) VALUES (:uid, :handler, :data)");
 	$query->bindParam(':uid', $uid, PDO::PARAM_STR);
 	$query->bindParam(':handler', $handler, PDO::PARAM_STR);
@@ -1351,6 +1362,7 @@ function lepus_doTask(){
 					case 'createUser': // params: email, preset, ip, login, password
 						$login = mb_strtolower(genRandStr(7));
 						$passwd = genRandStr(9);
+						$passwd = genRandStr(9);
 						$info = lepus_sendToPythonAPI($server['ip'], $server['port'], $server['access'], $commands[$data['do']], "{$data['email']}/{$preset}/{$server['ip']}/{$login}/{$passwd}", $row['id']);
 						$xml = simplexml_load_string($info);
 						if(empty($xml->error['code']) && !empty($info)){
@@ -1367,6 +1379,15 @@ function lepus_doTask(){
 						lepus_sendToPythonAPI($server['ip'], $server['port'], $server['access'], $commands[$data['do']], $data['user'], $row['id']);
 					break;					
 				}
+			break;
+			case 'OpenVZ':
+				$commands = ['stop' => 'blockUser', 'start' => 'unblockUser', 'restart' => 'restartServer'];
+				default: $info = 'no_action'; break;
+				case 'startServer':
+				case 'stopServer':
+				case 'restartServer':
+					lepus_sendToPythonAPI($server['ip'], $server['port'], $server['access'], $commands[$data['do']], $data['order']+100, $row['id']);
+				break;
 			break;
 		}
 	}
@@ -1393,7 +1414,7 @@ function lepus_editServiceData($id, $do, $key, $val){
 function lepus_searchFree($handler, $tariff, $id){
 	global $db; $server = null; $need = null;
 	$query = $db->prepare("SELECT * FROM `services` WHERE `id` = :id");
-	$query->bindParam(':id', $order, PDO::PARAM_STR);
+	$query->bindParam(':id', $id, PDO::PARAM_STR);
 	$query->execute();
 	$row = $query->fetch();
 	if($row['server'] != 0){
@@ -1455,4 +1476,24 @@ function lepus_getListIP($id){
 		$i++; $data .= "<tr><td>$i</td> <td>{$row['ip']}</td> <td>{$row['domain']}</td> <td>{$row['mac']}</td> </tr>";
 	}
 	return $data;
+}
+
+function lepus_userAddTask($id, $command){
+	global $db, $user; $i = 'error_task';
+	$info = lepus_getServiceAccess($id);
+	if(!is_array($info)) return $info;
+	$query = $db->prepare("SELECT * FROM `tariff` WHERE `id` = :id");
+	$query->bindParam(':id', $info['sid'], PDO::PARAM_STR);
+	$query->execute();
+	$row = $query->fetch();
+	switch($row['handler']){
+		case 'OpenVZ':
+			if($command == 'restart'){
+				$j = lepus_addTask($user['id'], $row['handler'], ['do' => $command, 'order' => $id]);
+				if(!empty($j)) return $j;
+				$i = 'Мы скоро перезагрузим VM';
+			}
+		break;
+	}
+	return $i;
 }

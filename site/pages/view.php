@@ -55,7 +55,7 @@ if($tmpData['err'] != 'OK')	die(lepus_error_page($tmpData['mes']));
 										<?php if(!empty($tmpData['mes']['top'])) echo $tmpData['mes']['top']."<br/>"; ?>
 										<hr/>
 										<select class="form-control" id="idServiceOrder" name="type"><?php echo lepus_getTariffList($tmpData['mes']['sid']); ?></select>
-										<input class="btn btn-sm btn-danger btn-block" style="margin-top: 4px;" data-change-tariff type="submit" title="Поменять тариф можно не чаще одного раза за 30 дней" value="Поменять тариф">
+										<input class="btn btn-sm btn-danger btn-block" style="margin-top: 4px;" data-change-tariff type="submit" value="Поменять тариф">
 										<?php if(!empty($tmpData['mes']['bottom'])) echo $tmpData['mes']['bottom']; ?>
 									</div>
 								</div>

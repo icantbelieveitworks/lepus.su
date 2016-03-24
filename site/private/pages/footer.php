@@ -18,9 +18,3 @@
 		</div>
 	</div>
 </div>
-<!--<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/github-fork-ribbon-css/0.1.1/gh-fork-ribbon.min.css" />
-<div class="github-fork-ribbon-wrapper right">
-	<div class="github-fork-ribbon">
-		<a href="https://github.com/poiuty/lepus.su">Fork me on GitHub</a>
-	</div>
-</div>-->

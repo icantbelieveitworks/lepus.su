@@ -725,7 +725,7 @@ function lepus_addCron($uid, $time, $url, $do, $id = 0){
 		case 'add':
 			if(empty($time) || empty($url)) return 'empty_post_value';
 			if(lepus_validCron($time, $url) != 'valid') return 'not_valid';
-			$query = $db->prepare("SELECT * FROM `cron` WHERE `uid` = : uid");
+			$query = $db->prepare("SELECT * FROM `cron` WHERE `uid` = :uid");
 			$query->bindParam(':uid', $uid, PDO::PARAM_STR);
 			$query->execute();
 			if($query->rowCount() > 100) return 'max_limit';
@@ -1500,4 +1500,19 @@ function lepus_userAddTask($id, $command){
 		break;
 	}
 	return $i;
+}
+
+function lepus_admin_getMoneyLog($time = 'day'){
+	global $db; $data = array();
+	if($time != 'day'){
+		$query = $db->prepare("SELECT date(from_unixtime(time)) as stat_day, sum(amount) from `log_income` WHERE `time` >= UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 1 YEAR)) GROUP BY month(from_unixtime(time)),year(from_unixtime(time)) ORDER by stat_day");
+	}else{
+		$query = $db->prepare("SELECT date(from_unixtime(time)) as stat_day, sum(amount) from `log_income` WHERE `time` >= UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 1 MONTH)) GROUP BY date(from_unixtime(time)) ORDER by stat_day");
+	}
+	$query->execute();
+	while($row = $query->fetch()){
+		$row['stat_day'] = strtotime($row['stat_day']) * 1000;
+		$data[] = [$row['stat_day'], intval($row['sum(amount)'])];
+	}
+	return $data;
 }

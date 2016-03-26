@@ -25,8 +25,7 @@ if(empty($user)){ ?>
 			<ul>
 				<?php if($user['data']['access'] > 1){ ?>
 				<hr/>
-				<li><a href="/pages/cp.php">Услуги</a></li>
-				<li><a href="/pages/cp.php">Статистика</a></li>
+				<li><a href="/pages/adm-income.php">Доход</a></li>
 				<li><a href="/pages/ipmanager.php">Управление IP</a></li>
 				<?php } ?> 
 				<hr/>

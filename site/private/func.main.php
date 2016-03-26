@@ -868,7 +868,7 @@ function lepus_order_preview($sid, $promo = 0){
 	return ['name' => $row["name"], 'price' => round($price), 'discont' => round($discont), 'handler' => $row['handler']];
 }
 
-function lepus_check_discount($promo){
+function lepus_check_discount($promo, $sid){
 	global $db, $user; $discont = 0;
 	$query = $db->prepare("SELECT * FROM `discounts` WHERE `name` = :name");
 	$query->bindParam(':name', $promo, PDO::PARAM_STR);
@@ -876,9 +876,15 @@ function lepus_check_discount($promo){
 	if($query->rowCount() != 1) return 'no_promo';
 	$row = $query->fetch();
 	$data = json_decode($row['data'], true);
+	$allow = explode(",", $data['tariff']);
+	if(!in_array($sid, $allow)) return 'no_promo';
 	switch($data['handler']){
 		case 'only_new':
-			if(time() > $user['data']['regDate']+60*60*24*7) return 'old_promo'; // проверка на время + проверить есть активные услуги у пользователя
+			if(time() > $user['data']['regDate']+60*60*24*7) return 'old_promo';
+			$select = $db->prepare("SELECT * FROM `services` WHERE `uid` = :id");
+			$select->bindParam(':id', $user['id'], PDO::PARAM_STR);
+			$query->execute();
+			if($query->rowCount() != 0) return 'no_promo';
 			$discont = $data['percent'];
 		break;
 	}
@@ -887,7 +893,7 @@ function lepus_check_discount($promo){
 
 function lepus_create_order($sid, $promo = 0){
 	global $db, $user;
-	$info = lepus_order_preview($sid, lepus_check_discount($promo));
+	$info = lepus_order_preview($sid, lepus_check_discount($promo, $sid));
 	if(!is_array($info)) return $info; 
 	if($info['price'] > $user['data']['balance']) return 'no_money';
 	$user['data']['balance'] -= $info['price'];
@@ -1504,11 +1510,10 @@ function lepus_userAddTask($id, $command){
 
 function lepus_admin_getMoneyLog($time = 'day'){
 	global $db; $data = array();
-	if($time != 'day'){
+	if($time != 'day')
 		$query = $db->prepare("SELECT date(from_unixtime(time)) as stat_day, sum(amount) from `log_income` WHERE `time` >= UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 1 YEAR)) GROUP BY month(from_unixtime(time)),year(from_unixtime(time)) ORDER by stat_day");
-	}else{
+	else
 		$query = $db->prepare("SELECT date(from_unixtime(time)) as stat_day, sum(amount) from `log_income` WHERE `time` >= UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL 1 MONTH)) GROUP BY date(from_unixtime(time)) ORDER by stat_day");
-	}
 	$query->execute();
 	while($row = $query->fetch()){
 		$row['stat_day'] = strtotime($row['stat_day']) * 1000;

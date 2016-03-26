@@ -1064,6 +1064,7 @@ function lepus_getService($id){
 				$bottom = null;
 			}
 		break;
+		case 'KVM':
 		case 'OpenVZ':
 			if($row['server'] != 0){
 				$bottom = "<input class=\"btn btn-sm btn-danger btn-block\" style=\"margin-top: 4px;\" data-vm-restart={$id} type=\"submit\" value=\"Перезагрузить\">
@@ -1381,8 +1382,9 @@ function lepus_doTask(){
 					break;					
 				}
 			break;
+			case 'KVM':
 			case 'OpenVZ':
-				$commands = ['stop' => 'blockUser', 'start' => 'unblockUser', 'restart' => 'restartServer'];
+				$commands = ['stop' => 'stopServer', 'start' => 'startServer', 'restart' => 'restartServer'];
 				default: $info = 'no_action'; break;
 				case 'startServer':
 				case 'stopServer':
@@ -1488,6 +1490,7 @@ function lepus_userAddTask($id, $command){
 	$query->execute();
 	$row = $query->fetch();
 	switch($row['handler']){
+		case 'KVM':
 		case 'OpenVZ':
 			if($command == 'restart'){
 				$j = lepus_addTask($user['id'], $row['handler'], ['do' => $command, 'order' => $id]);

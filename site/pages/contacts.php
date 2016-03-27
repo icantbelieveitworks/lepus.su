@@ -31,9 +31,10 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/auth.php');
 			<div class="content-box">
 				<div class="content-info box-shadow--2dp">
 					<div class="content-text">
-						<div class="page-title">Документы</div>
-							<img src="/images/other/doc2.png"><br/><br/>
-							<i>Юридический адрес: 117321, Россия, Москва, Профсоюзная, 152, 3, 53.</i>
+						<div class="page-title">Контакты</div>
+							Дорогие клиенты, для связи вы можете использовать <a href="https://telegram.org/" target="_blank">telegram</a>: @poiuty или email: support@lepus.su<br/>
+							Техническая поддержка осуществляется исключительно <a href="https://lepus.su/pages/support.php">через систему тикетов</a> [необходимо авторизоваться на сайте].
+							<hr/>
 						</div>
 				</div>
 			</div>

@@ -132,7 +132,10 @@ function error($message, $j = 0){
 			"no_moneyback" => "Нельзя сделать moneyback. Пожалуйста, обратитесь в техничекую поддержку.",
 			"already_tariff" => "Вы уже используете этот тариф.",
 			"error_task" => "Ошибка! Не могу добавить задание!",
-			"task_already" => "Ошибка! Такое задание уже добавлено!"
+			"task_already" => "Ошибка! Такое задание уже добавлено!",
+			"no_gid_change_tariff" => "По этой услуге нельзя сделать манибек/ поменять тариф",
+			"wrong_tariff" => "Ошибка! Неправильный тариф",
+			"different_handler" => "Ошибка! Другой тип услуги"
 		];
 		if (array_key_exists($message, $err)) $j = 1;
 	}
@@ -845,6 +848,15 @@ function lepus_getTariffPrices($g){
 	return $data;
 }
 
+function lepus_getTariffPrice($id){
+	global $db;
+	$query = $db->prepare("SELECT * FROM `tariff` WHERE `id` = :id");
+	$query->bindParam(':id', $id, PDO::PARAM_STR);
+	$query->execute();
+	$row = $query->fetch();
+	return lepus_price($row["price"], $row["currency"]);
+}
+
 function lepus_price($val, $currency){
 	switch($currency){
 		case 'EUR': $val = round($val*90); break;
@@ -944,7 +956,7 @@ function lepus_getLogSpend($id, $i = 0){
 }
 
 function lepus_getPageNavi(){
-	$navi = ''; $pages = ['/' => 'Главная',	'/pages/hosting.php' => 'Хостинг', '/pages/vps.php' => 'VPS', '/pages/servers.php' => 'Серверы', 'http://dom.lepus.su' => 'Домены', '/pages/contacts.php' => 'Контакты'];
+	$navi = ''; $pages = ['/' => 'Главная',	'/pages/hosting.php' => 'Хостинг', '/pages/vps.php' => 'VPS', '/pages/servers.php' => 'Серверы', 'http://dom.lepus.su' => 'Домены', '/pages/doc.php' => 'Документы', '/pages/contacts.php' => 'Контакты'];
 	foreach($pages as $key => $val){
 		if($_SERVER["REQUEST_URI"] == $key)
 			$navi .= "<li class=\"active\"><a href=\"$key\">$val</a></li>";
@@ -1088,19 +1100,17 @@ function lepus_moneyback($id, $sid){
 	$query->execute();
 	if($query->rowCount() != 1) return 'no_moneyback';
 	$row = $query->fetch();
-
 	$tmpQuery = $db->prepare("SELECT * FROM `services` WHERE `id` = :id");
 	$tmpQuery->bindParam(':id', $id, PDO::PARAM_STR);
 	$tmpQuery->execute();
 	$tmpRow = $tmpQuery->fetch();
 	$old_tariff_id = $tmpRow['sid'];
-
 	$tmpQuery = $db->prepare("SELECT * FROM `tariff` WHERE `id` = :id");
 	$tmpQuery->bindParam(':id', $old_tariff_id, PDO::PARAM_STR);
 	$tmpQuery->execute();
 	$tmpRow = $tmpQuery->fetch();
 	if($sid == $old_tariff_id) return 'already_tariff';
-	
+	if($tmpRow['gid'] == '3' || $tmpRow['gid'] == '4') return 'no_gid_change_tariff';	
 	$time_moneyback = ($row['time2'] - time())/(60*60*24);
 	$day = $row['money']/30;
 	$moneyback = floor($day*$time_moneyback);
@@ -1109,7 +1119,9 @@ function lepus_moneyback($id, $sid){
 	$query = $db->prepare("SELECT * FROM `tariff` WHERE `id` = :sid");
 	$query->bindParam(':sid', $sid, PDO::PARAM_STR);
 	$query->execute();
+	if($query->rowCount() != 1) return 'wrong_tariff';
 	$row = $query->fetch();
+	if($tmpRow['handler'] != $tmpRow['handler']) return 'different_handler';
 	$arr = lepus_getExtra($id);
 	$pay = lepus_price($row["price"], $row["currency"])+lepus_price($arr['extra'], $arr['extra_currency']);
 	$total = $user['data']['balance'] + $moneyback - $pay;	
@@ -1121,7 +1133,7 @@ function lepus_changeTariff_preview($id, $sid){
 	$info = lepus_getServiceAccess($id);
 	if(!is_array($info)) return $info;
 	$info = lepus_moneyback($id, $sid);
-	if(!is_array($info)) return $info;
+	if(!is_array($info)) return $info;	
 	if($info['status'] == 1 && $info['status2']){
 		$data .= "Возврат средств => {$info['moneyback']}, к оплате => {$user['data']['balance']} + {$info['moneyback']} - {$info['pay']}, остаток на счете => {$info['total']} рублей.";
 		if($info['total'] < 0){

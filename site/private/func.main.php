@@ -922,8 +922,8 @@ function lepus_create_order($sid, $promo = 0){
 	switch($info['handler']){
 		case 'ISPmanagerV4': break;
 	}
-	$tmpData = support_create($user['id'], $info['name'], 2);
 	$_POST['msg'] = "Дорогой клиент, благодарим за оплату.\nКак только ваш заказ будет готов - мы свяжемся с вами в этом тикете.";
+	$tmpData = support_create($user['id'], $info['name'], 2);
 	support_msg(5, $tmpData, 2, 1);
 	telegram_send("Заявка №[$tmpData]\nКлиент сделал новый заказ.\nhttps://".$_SERVER['SERVER_NAME']."/pages/tiket.php?id=$tmpData");
 	lepus_addTask($user['id'], $info['handler'], ['do' => 'create', 'tiket' => $tmpData, 'tariff' => $sid, 'email' => $user['login'], 'order' => $order_id]);
@@ -1043,7 +1043,7 @@ function lepus_AutoExtend($uid = 0){
 			//	Если вы хотите восстановить услугу - напишите в техническую поддержку. И возможно мы поможем восстановить ваши данные.");
 				// create task => delete
 			//}else{
-				_mail($user['login'], "Автоматическое продление", "Дорогой клиент, мы не смогли продлить услугу {$tmpRow["name"]}<br/>Так как на вашем счете недостаточно средств.");
+				_mail($user['login'], "Автоматическое продление #{$row['id']}", "Дорогой клиент, мы не смогли продлить услугу {$tmpRow['name']} #{$row['id']}<br/>Так как на вашем счете недостаточно средств.");
 			//}
 		}else{
 			$row['time1'] = $row['time2'];
@@ -1266,7 +1266,7 @@ function lepus_getPayLink($system, $val, $uid){
 	$pay_desc = base64_encode('Пополнение счета');
 	if(empty($val) || empty($system)) return 'empty_post_value';
 	if($val > 50000) return 'Максимальная сумма 50000 рублей.';
-	if($system != 'paypal' && $system != 'paymaster' && $system != 'robokassa' && $system != 'webmoney') $system = 'paypal';
+	if($system != 'paypal' && $system != 'paymaster' && $system != 'robokassa' && $system != 'webmoney' && $system != 'unitpay') $system = 'paypal';
 	$i = "<center>Вы хотите пополнить счет на сумму <font color=green>$val</font> рублей через $system?</center>";
 	switch($system){
 		case 'paypal':
@@ -1324,6 +1324,15 @@ function lepus_getPayLink($system, $val, $uid){
 				"<input type=hidden name=LEPUS_USER value='$uid'>".
 				"<input type=submit value='Подтверждаю, перейти на страницу оплаты' class='btn btn-danger'>".
 				"</form></center>";
+		break;
+		case 'unitpay':
+			$i .= "<center>".
+				"<form action='https://unitpay.ru/pay/{$conf['unitpay_public']}'>
+				<input type=hidden name=account value=$uid>
+				<input type=hidden name=sum value=$val>
+				<input type=hidden name=desc value='[Lepus Hosting] пополнение счета'>
+				<input type=submit value='Подтверждаю, перейти на страницу оплаты' class='btn btn-danger'>
+				</form></center>";
 		break;
 	}
 	return $i;

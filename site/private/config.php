@@ -14,5 +14,10 @@ $conf['robokassa_login'] = 'market';
 $conf['robokassa_pass1'] = 'xxxx';
 $conf['robokassa_pass2'] = 'xxxx';
 
+$conf['unitpay_id'] = 1;
+$conf['unitpay_currency'] = 'RUB';
+$conf['unitpay_public'] = '1-xxxx';
+$conf['unitpay_secret'] = 'xxxx';
+
 $conf['bitcoin_login'] = 'bitcoinrpc';
 $conf['bitcoin_passwd'] = 'xxxx';

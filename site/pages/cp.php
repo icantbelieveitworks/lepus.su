@@ -58,7 +58,8 @@ if(empty($user)){
 												<select id="psystem" style="width: 120px;" class="form-control" name="type">
 													<option value="paypal" selected="">PayPal</option>
 													<option value="robokassa">Robokassa</option>
-													<!--<option value="paymaster" >Paymaster</option>
+													<option value="unitpay">UnitPay</option>
+													<!--<option value="paymaster">Paymaster</option>
 													<option value="robokassa">Robokassa</option>
 													<option value="webmoney">Webmoney</option>
 													<option value="bitcoin">Bitcoin</option>-->

@@ -6,7 +6,7 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/init/session.php');
 require_once($_SERVER['DOCUMENT_ROOT'].'/private/func.main.php');
 require_once($_SERVER['DOCUMENT_ROOT'].'/private/auth.php');
 $start_order = null;
-for($i=0; $i < 8; $i++){
+for($i=0; $i < 4; $i++){
 	if(!is_login())
 		$start_order .= "<td><a class=\"btn btn-danger btn-xs\" data-register-open rel=\"nofollow\">заказать</a></td>";
 	else
@@ -41,16 +41,12 @@ for($i=0; $i < 8; $i++){
 			<div class="content-box">
 				<div class="content-info box-shadow--2dp">
 					<div class="content-text">
-						<div class="page-title">OpenVZ/ KVM VPS</div>
+						<div class="page-title">KVM VPS на SSD дисках</div>
 						<table class="table table-striped table-bordered">
 							<thead>
 								<tr>
 									<th>Тарифы</th>
-									<th>OVZ1</th>
-									<th><font color="IndianRed">OVZ2</font></th>
-									<th>OVZ3</th>
-									<th>OVZ4</th>
-									<th>KVM1</th>
+									<th><font color="IndianRed">KVM1</font></th>
 									<th>KVM2</th>
 									<th>KVM3</th>
 									<th>KVM4</th>
@@ -59,10 +55,6 @@ for($i=0; $i < 8; $i++){
 							<tbody>
 								<tr>
 									<td>CPU (MHz)</td>
-									<td>3400</td>
-									<td>3400</td>
-									<td>2x3400</td>
-									<td>2x3400</td>
 									<td>2200</td>
 									<td>2200</td>
 									<td>2x2200</td>
@@ -74,17 +66,9 @@ for($i=0; $i < 8; $i++){
 									<td>40</td>
 									<td>50</td>
 									<td>60</td>
-									<td>30</td>
-									<td>40</td>
-									<td>50</td>
-									<td>60</td>
 								</tr>
 								<tr>
 									<td>RAM (Mb)</td>
-									<td>2048</td>
-									<td>3072</td>
-									<td>4096</td>
-									<td>5120</td>
 									<td>2048</td>
 									<td>3072</td>
 									<td>4096</td>
@@ -102,6 +86,7 @@ for($i=0; $i < 8; $i++){
 								</tfoot>
 							</tbody>
 						</table>
+						Подключение к сети 100Mb/s. Защита от udp/ tcp DDOS атак на уровне дата центра. Низкий ping ping.lepus.su<br/>
 						В качестве панели управления, мы предлагаем использовать <a href="http://www.isplicense.ru/?from=2043" target="_blank">ISPmanager</a> [~250 руб/ месяц] или <a href="http://vestacp.com/" target="_blank">VestaCP</a> [бесплатная].
 						<hr/>
 					</div>

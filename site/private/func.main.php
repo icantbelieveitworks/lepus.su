@@ -55,12 +55,13 @@ function lost_passwd($login){
 
 function login($login, $passwd){
 	global $db;
+	if(IsTorExitPoint()) return 'deny_tor';
 	if(empty($login) || empty($passwd)) return 'empty_post_value';
 	if(!filter_var($login, FILTER_VALIDATE_EMAIL)) return 'bad_email';
 	$is_user = is_lepus_user($login);
 	if($is_user['0'] != 1) return 'no_user';
 	$row = $is_user['1'];
-	if (password_verify($passwd, $row['passwd'])){
+	if(password_verify($passwd, $row['passwd'])){
 		$new_passwd = rehash($passwd, $row['passwd']);
 		$_SESSION['id'] = $row['id'];
 		$_SESSION['sess'] = hash('sha512' ,$login.$passwd.$_SERVER['REMOTE_ADDR'].$_SERVER['HTTP_USER_AGENT']);
@@ -135,7 +136,8 @@ function error($message, $j = 0){
 			"task_already" => "Ошибка! Такое задание уже добавлено!",
 			"no_gid_change_tariff" => "По этой услуге нельзя сделать манибек/ поменять тариф",
 			"wrong_tariff" => "Ошибка! Неправильный тариф",
-			"different_handler" => "Ошибка! Другой тип услуги"
+			"different_handler" => "Ошибка! Другой тип услуги",
+			"deny_tor" => "Tor deny"
 		];
 		if (array_key_exists($message, $err)) $j = 1;
 	}
@@ -1541,4 +1543,16 @@ function lepus_admin_getMoneyLog($time = 'day'){
 		$data[] = [$row['stat_day'], intval($row['sum(amount)'])];
 	}
 	return $data;
+}
+
+function IsTorExitPoint(){
+	if(gethostbyname(ReverseIPOctets($_SERVER['REMOTE_ADDR']).".".$_SERVER['SERVER_PORT'].".".ReverseIPOctets($_SERVER['SERVER_ADDR']).'.ip-port.exitlist.torproject.org') == '127.0.0.2')
+		return true;
+	else
+		return false;
+}
+
+function ReverseIPOctets($inputip){
+		$ipoc = explode(".",$inputip);
+		return $ipoc[3].".".$ipoc[2].".".$ipoc[1].".".$ipoc[0];
 }

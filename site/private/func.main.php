@@ -54,7 +54,7 @@ function lost_passwd($login){
 }
 
 function login($login, $passwd){
-	global $db;
+	global $db; $login = mb_strtolower($login);
 	if(IsTorExitPoint()) return 'deny_tor';
 	if(empty($login) || empty($passwd)) return 'empty_post_value';
 	if(!filter_var($login, FILTER_VALIDATE_EMAIL)) return 'bad_email';
@@ -206,7 +206,7 @@ function lepus_crypt($input, $do = 'encode', $key = 'Jml*Zwde4a#%ix$m'){
 }
 
 function lepus_new_account($login){
-	global $db;
+	global $db; $login =  mb_strtolower($login);
 	if(empty($login)) return 'empty_post_value';
 	if(!filter_var($login, FILTER_VALIDATE_EMAIL)) return 'bad_email';
 	$is_user = is_lepus_user($login);
@@ -357,7 +357,7 @@ function lepus_get_dnsRecord($type, $id){
 }
 
 function lepus_get_dnsRecords($id, $i = 0){
-	global $pdns;
+	global $pdns; $data = null;
 	$query = $pdns->prepare("SELECT * FROM `records` WHERE `domain_id` = :id");
 	$query->bindParam(':id', $id, PDO::PARAM_STR);
 	$query->execute();

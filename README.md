@@ -11,5 +11,5 @@
 donate проектов на постоянной основне
 bounty за найденные уязвимости
 ```
-Проекту помогали: VoidLess, Amstaff, Аксентьев Александр, Илья Дударев, Павел Одинцов, ufish.<br/>
+Проекту помогали: <a href="https://github.com/voidless">VoidLess</a>, Amstaff, Sam3000, <a href="http://sanasol.ws/" target="_blank">Аксентьев Александр</a>, <a href="http://txtup.ru/" target="_blank">Илья Дударев</a>, <a href="http://www.stableit.ru" target="_blank">Павел Одинцов</a>, <a href="http://cube-art.ru" target="_blank">ufish</a>.<br/>
 Каждому из вас мы хотим сказать: "Большое спасибо!"

@@ -183,23 +183,23 @@ function change_passwd($id){
 	return $passwd;
 }
 
-function lepus_crypt($input, $do = 'encode', $key = 'Jml*Zwde4a#%ix$m'){
+function lepus_crypt($input, $do = 'encode'){
+	global $conf;
 	$algo = MCRYPT_RIJNDAEL_256;
 	$mode = MCRYPT_MODE_CBC;
 	$iv_size = mcrypt_get_iv_size($algo, $mode);
 	$iv = mcrypt_create_iv($iv_size, MCRYPT_DEV_URANDOM);
 	switch($do){
 		case 'encode':	
-		$ciphertext = mcrypt_encrypt($algo, $key, $input, $mode, $iv);
+		$ciphertext = mcrypt_encrypt($algo, $conf['lepus_crypt'], $input, $mode, $iv);
 		$ciphertext = $iv . $ciphertext;
 		$result = base64_encode($ciphertext);
 		break;
-			
 		case 'decode':
 		$ciphertext_dec = base64_decode($input);
 		$iv_dec = substr($ciphertext_dec, 0, $iv_size);
 		$ciphertext_dec = substr($ciphertext_dec, $iv_size);
-		$result = mcrypt_decrypt($algo, $key, $ciphertext_dec, $mode, $iv_dec);
+		$result = mcrypt_decrypt($algo, $conf['lepus_crypt'], $ciphertext_dec, $mode, $iv_dec);
 		break;
 	}
 	return $result;
@@ -752,7 +752,8 @@ function lepus_addCron($uid, $time, $url, $do, $id = 0){
 }
 
 function telegram_send($msg){
-	file_get_contents("https://api.telegram.org/bot160840517:AAGEazjmMcxvwbjhQvzzftJcbFzVKIX2RLA/sendMessage?chat_id=160138276&text=".urlencode($msg));
+	global $conf;
+	file_get_contents("https://api.telegram.org/{$conf['telegram']}/sendMessage?chat_id=160138276&text=".urlencode($msg));
 }
 
 function admin_lepus_getIPlist(){
@@ -765,13 +766,17 @@ function admin_lepus_getIPlist(){
 		$tmpQuery->execute();
 		$tmpRow = $tmpQuery->fetch();
 		$row['owner'] = $tmpRow['login'];
-
-		$tmpQuery = $db->prepare("SELECT * FROM `servers` WHERE `id` =:id");
-		$tmpQuery->bindParam(':id', $row['sid'], PDO::PARAM_STR);
-		$tmpQuery->execute();
-		$tmpRow = $tmpQuery->fetch();
-		$row['sid'] = $tmpRow['domain'];
-		
+		if(strlen($row['owner']) > 16)
+			$row['owner'] = mb_substr($row['owner'], 0, 16,'utf-8')."...";
+		if(!empty($row['sid'])){
+			$tmpQuery = $db->prepare("SELECT * FROM `servers` WHERE `id` =:id");
+			$tmpQuery->bindParam(':id', $row['sid'], PDO::PARAM_STR);
+			$tmpQuery->execute();
+			$tmpRow = $tmpQuery->fetch();
+			$row['sid'] = $tmpRow['domain'];
+		}else{
+			$row['sid'] = 'empty';
+		}
 		$row['ip'] = long2ip($row['ip']);
 		$data .= "<tr><td>{$row['id']}</td><td>{$row['ip']}</td><td>{$row['sid']}</td><td>{$row['service']}</td><td>{$row['owner']}</td><td>{$row['mac']}</td><td>{$row['domain']}</td><td><a href=\"nourl\" data-adminip-delete-id=\"{$row['id']}\"><i class=\"glyphicon glyphicon-remove\"></i></a></td></tr>";
 	}
@@ -912,7 +917,7 @@ function lepus_create_order($sid, $promo = 0){
 	if($info['price'] > $user['data']['balance']) return 'no_money';
 	$user['data']['balance'] -= $info['price'];
 	save_user_data($user['id'], $user['data']);
-	$time1 = time(); $time2 = $time1+60*60*24*30;
+	$time1 = time(); $time2 = strtotime("+1 month", $time1);
 	$query = $db->prepare("INSERT INTO `services` (`sid`, `uid`, `time1`, `time2`) VALUES (:sid, :uid, :time1, :time2)");
 	$query->bindParam(':sid', $sid, PDO::PARAM_STR);
 	$query->bindParam(':uid', $user['id'], PDO::PARAM_STR);
@@ -1049,7 +1054,7 @@ function lepus_AutoExtend($uid = 0){
 			//}
 		}else{
 			$row['time1'] = $row['time2'];
-			$row['time2'] += 60*60*24*30;
+			$row['time2'] = strtotime("+1 month", $row['time2']);
 			$user['data']['balance'] -= $price;
 			save_user_data($user['id'], $user['data']);
 			lepus_log_spend($user['id'], $row['id'], $row['time1'], $row['time2'], $price, "{$tmpRow['name']} [продление]");
@@ -1091,8 +1096,12 @@ function lepus_getService($id){
 						   <hr/><table id=\"IPList\" class=\"table table-striped table-bordered\" cellspacing=\"0\" width=\"100%\"><thead><tr><th>ID</th><th>IP</th><th>Domain</th><th>MAC</th></tr></thead>".lepus_getListIP($id)."<tbody></tbody></table>";
 			}
 		break;
+		case 'OVH-DEDIC':
+		case 'HETZNER-DEDIC':
+			$bottom = "<hr/><table id=\"IPList\" class=\"table table-striped table-bordered\" cellspacing=\"0\" width=\"100%\"><thead><tr><th>ID</th><th>IP</th><th>Domain</th><th>MAC</th></tr></thead>".lepus_getListIP($id)."<tbody></tbody></table>";
+		break;
 	}
-	return ['id' => $row['id'], 'sid' => $row['sid'], 'name' => $tmpRow['name'], 'time' => date("Y-m-d", $row['time2']), 'price' => $price, 'extra' => $arr['extra_text'], 'top' => $top, 'bottom' => $bottom];
+	return ['id' => $row['id'], 'gid' => $tmpRow['gid'], 'sid' => $row['sid'], 'name' => $tmpRow['name'], 'time' => date("Y-m-d", $row['time2']), 'price' => $price, 'extra' => $arr['extra_text'], 'top' => $top, 'bottom' => $bottom];
 }
 
 function lepus_moneyback($id, $sid){
@@ -1114,7 +1123,7 @@ function lepus_moneyback($id, $sid){
 	if($sid == $old_tariff_id) return 'already_tariff';
 	if($tmpRow['gid'] == '3' || $tmpRow['gid'] == '4') return 'no_gid_change_tariff';	
 	$time_moneyback = ($row['time2'] - time())/(60*60*24);
-	$day = $row['money']/30;
+	$day = $row['money']/(($row['time2']-strtotime("-1 month", $row['time2']))/(60*60*24));
 	$moneyback = floor($day*$time_moneyback);
 	$money_use = $row['money'] - $moneyback;
 	$log_id = $row['id'];

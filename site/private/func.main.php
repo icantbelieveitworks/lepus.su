@@ -1045,9 +1045,9 @@ function lepus_AutoExtend($uid = 0){
 	global $db;
 	$time = time()+60*60*24*3;
 	if($uid == 0){
-		$query = $db->prepare("SELECT * FROM `services` WHERE `time2` < :time");
+		$query = $db->prepare("SELECT * FROM `services` WHERE `time2` < :time AND `auto` = 1");
 	}else{
-		$query = $db->prepare("SELECT * FROM `services` WHERE `time2` < :time AND `uid` = :uid");
+		$query = $db->prepare("SELECT * FROM `services` WHERE `time2` < :time AND `uid` = :uid AND `auto` = 1");
 		$query->bindParam(':uid', $uid, PDO::PARAM_STR);
 	}
 	$query->bindParam(':time', $time, PDO::PARAM_STR);

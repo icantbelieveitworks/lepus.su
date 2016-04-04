@@ -40,10 +40,10 @@
 		</a>
 	</div>
 </div>
-<div class="alert alert-danger" role="alert">
+<!--<div class="alert alert-danger" role="alert">
 	<span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
 	<b>Пополнение счета через webmoney временно не работает</b>.<hr>
 	Проблема со стороны webmoney (<a href="https://poiuty.com/img/03/4fae4b3ff6bbd81e010df67f01c7fd03.png" target="_blank">screenshot</a>)<br/>
 	Обсуждение: <a href="http://goo.gl/j37gsX" target="_blank">searchengines</a> и <a href="http://goo.gl/ABFRLz" target="_blank">forum.webmoney</a><br/>
 	Пополнить счет можно через paypal и robokassa (visa, mastercard, qiwi и другие способы).
-</div>
+</div>-->

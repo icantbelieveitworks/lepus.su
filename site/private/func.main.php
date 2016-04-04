@@ -926,9 +926,6 @@ function lepus_create_order($sid, $promo = 0){
 	$query->execute();
 	$order_id = $db->lastInsertId();
 	lepus_log_spend($user['id'], $order_id, $time1, $time2, $info['price'], "{$info['name']} [заказ]");
-	switch($info['handler']){
-		case 'ISPmanagerV4': break;
-	}
 	$_POST['msg'] = "Дорогой клиент, благодарим за оплату.\nКак только ваш заказ будет готов - мы свяжемся с вами в этом тикете.";
 	$tmpData = support_create($user['id'], $info['name'], 2);
 	support_msg(5, $tmpData, 2, 1);
@@ -994,6 +991,32 @@ function lepus_getListServices($sid, $uid){
 		$data .= "<tr><td><a href='/pages/view.php?id={$row['id']}'>{$row['id']}</a></td><td>{$tmpRow['name']}</td><td>$price</td><td>{$row['time2']}</td><td>$i</td></tr>";
 	}
 	return $data;
+}
+
+function lepus_adminGetListServices(){
+	global $db; $data = null; $all = 0;
+	$query = $db->prepare("SELECT * FROM `services`");
+	$query->execute();
+	while($row=$query->fetch()){
+		$tmpQuery = $db->prepare("SELECT * FROM `users` WHERE `id` =:uid");
+		$tmpQuery->bindParam(':uid', $row['uid'], PDO::PARAM_STR);
+		$tmpQuery->execute();
+		$tmpRow = $tmpQuery->fetch();
+		$email = $tmpRow['login'];
+		if(strlen($email) > 15)
+			$email = mb_substr($email, 0, 15,'utf-8')."...";
+		$tmpQuery = $db->prepare("SELECT * FROM `tariff` WHERE `id` =:sid");
+		$tmpQuery->bindParam(':sid', $row['sid'], PDO::PARAM_STR);
+		$tmpQuery->execute();
+		$tmpRow = $tmpQuery->fetch();
+		if(time() > $row['time2']) $status = 'timeout'; else $status = 'paid';
+		$row['time2'] = date("Y-m-d", $row['time2']);
+		$arr = json_decode($row['data'], true);
+		$price = lepus_price($tmpRow['price'], $tmpRow['currency'])+lepus_price($arr['extra'], $arr['extra_currency']);
+		$data .= "<tr><td>{$row['id']}</td><td>{$tmpRow['name']}</td><td>{$email}</td><td>$price</td><td>{$row['time2']}</td><td>{$status}</td></tr>";
+		$all += $price;
+	}
+	return ['table' => $data, 'all' => $all];
 }
 
 function lepus_getServiceAccess($id){
@@ -1085,7 +1108,7 @@ function lepus_getService($id){
 				$select->execute();
 				$tmp = $select->fetch();
 				$data = json_decode($row['data'], true);
-				$top = "<br/><a href=\"https://{$tmp['domain']}\" target=\"_blank\">Панель управления</a> виртуальным хостингом.<br/>Пользователь {$data['user']} [<a href=\"https://{$tmp['domain']}/ispmgr?func=recovery\" target=\"_blank\">восстановить пароль</a>].";
+				$top = "<br/><a href=\"https://{$tmp['domain']}\" target=\"_blank\">Панель управления</a> виртуальным хостингом.<br/>Пользователь <u>{$data['user']}</u> [<a href=\"https://{$tmp['domain']}/ispmgr?func=recovery\" target=\"_blank\">восстановить пароль</a>].";
 				$bottom = null;
 			}
 		break;
@@ -1385,6 +1408,10 @@ function lepus_doTask(){
 	if($row['handler'] == 'ISPmanagerV4' || $row['handler'] == 'OpenVZ' || $row['handler'] == 'KVM'){
 		$server = lepus_searchFree($row['handler'], $data['tariff'], $data['order']);
 		if(!is_array($server)) $err = 'no_free_server';
+		$update = $db->prepare("UPDATE `services` SET `server` = :sid WHERE `id` = :id");
+		$update->bindParam(':sid', $server['id'], PDO::PARAM_STR);
+		$update->bindParam(':id', $data['order'], PDO::PARAM_STR);
+		$update->execute();
 	}
 	if(empty($err)){
 		switch($row['handler']){
@@ -1407,7 +1434,7 @@ function lepus_doTask(){
 						$xml = simplexml_load_string($info);
 						if(empty($xml->error['code']) && !empty($info)){
 							lepus_editServiceData($data['order'], 'edit', 'user', $login);
-							$_POST['msg'] = "Дорогой клиент, виртуальный хостинг готов.\nLogin: $login\nPassword:$passwd\nПожалуйста, поменяйте пароль.";
+							$_POST['msg'] = "Дорогой клиент, виртуальный хостинг готов.\nLogin: $login\nPassword:$passwd\nПожалуйста, поменяйте пароль.\nВы можете посмотреть более подробную информацию об услуге [urls=https://lepus.su/pages/view.php?id={$data['order']}]на этой странице[/urls].";
 							support_msg(5, $data['tiket'], 2, 1);
 						}
 					break;

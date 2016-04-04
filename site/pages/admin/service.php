@@ -9,8 +9,8 @@ if(empty($user)){
 	$tmpData = error('no_auth_page');
 	die(lepus_error_page($tmpData['mes']));
 }
-$tmpData = error(lepus_getService($_GET['id']));
-if($tmpData['err'] != 'OK')	die(lepus_error_page($tmpData['mes']));
+if($user['data']['access'] < 2) die('no_access');
+$tmpData = lepus_adminGetListServices();
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
@@ -35,7 +35,7 @@ if($tmpData['err'] != 'OK')	die(lepus_error_page($tmpData['mes']));
 
 		<script src="/js/alertify.js"></script>
 		<script src="/js/lepus.js"></script>
-	<script type="text/javascript" charset="utf-8"> $(document).ready(function() { $('#IPList').dataTable({ "order": [[ 0, "desc" ]] }); }); </script>
+	<script type="text/javascript" charset="utf-8"> $(document).ready(function() { $('#incomeTable').dataTable({ "order": [[ 0, "desc" ]] }); }); </script>
 	</head>
 	<body>
 		<div class="wrapper">
@@ -43,22 +43,27 @@ if($tmpData['err'] != 'OK')	die(lepus_error_page($tmpData['mes']));
 				<div class="content-box">
 					<div class="content-info box-shadow--2dp">
 						<div class="content-text">
-							<div class="page-title"><?php echo "{$tmpData['mes']['name']} #{$tmpData['mes']['id']}";?></div>
-							<div class="row">
+							<div class="page-title">Услуги</div>
+							Оборот за месяц: <?php echo $tmpData['all']; ?> рублей.
+							<div class="row">					
 								<div class="col-lg-14">
 									<div class="col-lg-12">
-										<input type="hidden" id="service_id" value="<?php echo $tmpData['mes']['id'];?>">
 										<hr/>
-										Услуга оплачена до: <?php echo $tmpData['mes']['time'];?>.<br/>
-										Стоимость: тариф <?php if(!empty($tmpData['mes']['extra'])) echo "+ доп услуги"; ?> = <?php echo $tmpData['mes']['price'];?> рублей.<br/>
-										<?php if(!empty($tmpData['mes']['extra'])) echo "Дополнительные услуги: {$tmpData['mes']['extra']}.<br/>"; ?>
-										<?php if(!empty($tmpData['mes']['top'])) echo $tmpData['mes']['top']."<br/>"; ?>
-										<?php if($tmpData['mes']['gid'] != 3 && $tmpData['mes']['gid'] != 4){ ?>
-										<hr/>
-										<select class="form-control" id="idServiceOrder" name="type"><?php echo lepus_getTariffList($tmpData['mes']['sid']); ?></select>
-										<input class="btn btn-sm btn-danger btn-block" style="margin-top: 4px;" data-change-tariff type="submit" value="Поменять тариф">
-										<?php }; ?>
-										<?php if(!empty($tmpData['mes']['bottom'])) echo $tmpData['mes']['bottom']; ?>
+										<table id="incomeTable" class="table table-striped table-bordered" cellspacing="0" width="100%">
+											<thead>
+												<tr>
+													<th>ID</th>
+													<th>Название</th>
+													<th>Пользователь</th>
+													<th>Стоимость</th>
+													<th>Дата</th>
+													<th>Статус</th>
+												</tr>
+											</thead>
+											<tbody>
+												<?php echo $tmpData['table']; ?>
+											</tbody>
+										</table>
 									</div>
 								</div>
 							</div>

@@ -7,7 +7,7 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/func.main.php');
 require_once($_SERVER['DOCUMENT_ROOT'].'/private/auth.php');
 
 foreach($_POST as $key => $value){
-	if(empty($value)){
+	if(empty($value) && $key != 'server'){
 		$tmpData = error('empty_post_value');
 		break;
 	}

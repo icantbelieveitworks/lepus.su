@@ -52,6 +52,7 @@ if($user['data']['access'] < 2) die('no_access');
 							<input class="form-control" id="ipHost"  style="width: 14%;"  type="text" name="count" value="" required="" placeholder="hostname">
 							<select id="ipServer" data-placeholder="Сервер..." class="chosen-select" style="width: 17%;">
 								<option value=""></option>
+									<option value=0>empty</option>
 									<?php echo lepus_getHTMLSelect('servers', 'domain'); ?>
 							</select>
 							<select id="ipUser" data-placeholder="Пользователь..." class="chosen-select" style="width: 30%;">

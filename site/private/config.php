@@ -21,3 +21,8 @@ $conf['unitpay_secret'] = 'xxxx';
 
 $conf['bitcoin_login'] = 'bitcoinrpc';
 $conf['bitcoin_passwd'] = 'xxxx';
+
+$conf['paymaster'] = 'xxxx';
+$conf['lepus_crypt'] = 'xxxx';
+
+$conf['telegram'] = 'bot1:xxxx';

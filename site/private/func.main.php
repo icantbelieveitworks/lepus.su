@@ -159,9 +159,10 @@ function save_user_data($id, $data){
 function _mail($email, $subject, $message){
 	$headers  = "MIME-Version: 1.0\r\n";
 	$headers .= "Content-type: text/html; charset=utf-8\r\n";
+	$headers .= "Content-Transfer-Encoding: base64\r\n";
 	$subject  = "=?utf-8?B?".base64_encode($subject)."?=";
 	$headers .= "From: Lepus Artifical Intelligence <support@lepus.su>\r\n";
-	mail($email, $subject, $message, $headers);
+	mail($email, $subject, rtrim(chunk_split(base64_encode($message))), $headers);
 }
 
 function genRandStr($length){

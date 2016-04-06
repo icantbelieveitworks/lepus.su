@@ -898,11 +898,11 @@ function lepus_check_discount($promo, $sid){
 	if(!in_array($sid, $allow)) return 'no_promo';
 	switch($data['handler']){
 		case 'only_new':
-			if(time() > $user['data']['regDate']+60*60*24*7) return 'old_promo';
+			if(time() > $user['data']['regDate']+60*60*24*7) return 'old_promo3';
 			$select = $db->prepare("SELECT * FROM `services` WHERE `uid` = :id");
 			$select->bindParam(':id', $user['id'], PDO::PARAM_STR);
-			$query->execute();
-			if($query->rowCount() != 0) return 'no_promo';
+			$select->execute();
+			if($select->rowCount() != 0) return 'no_promo';
 			$discont = $data['percent'];
 		break;
 	}

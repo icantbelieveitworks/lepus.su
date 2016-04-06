@@ -898,7 +898,7 @@ function lepus_check_discount($promo, $sid){
 	if(!in_array($sid, $allow)) return 'no_promo';
 	switch($data['handler']){
 		case 'only_new':
-			if(time() > $user['data']['regDate']+60*60*24*7) return 'old_promo3';
+			if(time() > $user['data']['regDate']+60*60*24*7) return 'old_promo';
 			$select = $db->prepare("SELECT * FROM `services` WHERE `uid` = :id");
 			$select->bindParam(':id', $user['id'], PDO::PARAM_STR);
 			$select->execute();
@@ -1065,6 +1065,22 @@ function lepus_AutoExtend($uid = 0){
 		$tmpRow = $tmpQuery->fetch();
 		$arr = json_decode($row['data'], true);
 		$price = lepus_price($tmpRow['price'], $tmpRow['currency'])+lepus_price($arr['extra'], $arr['extra_currency']);
+		switch($tmpRow['handler']){
+			case 'ISPmanagerV4':
+				$toTask['user'] = $arr['user'];
+			break;
+			case 'KVM':
+			case 'OpenVZ':
+				$toTask['order'] = $row['id'];
+			break;
+		}
+		if($uid == 0 && time() < $row['time2']){
+			if($user['data']['balance'] < $price){
+				$toTask['do'] = 'stop';
+			}else{
+				$toTask['do'] = 'start';
+			}
+		}
 		if($user['data']['balance'] < $price){
 			//if($uid == 0 && time()+60*60*24*7 < $row['time2']){
 			//	lepus_moveToArchive($row['id']);
@@ -1087,6 +1103,8 @@ function lepus_AutoExtend($uid = 0){
 			$tmpQuery->bindParam(':time2', $row['time2'], PDO::PARAM_STR);
 			$tmpQuery->execute();
 		}
+		if(!empty($toTask))
+			lepus_addTask(0, $tmpRow['handler'], $toTask);
 	}
 }
 
@@ -1429,7 +1447,6 @@ function lepus_doTask(){
 					case 'createUser': // params: email, preset, ip, login, password
 						$login = mb_strtolower(genRandStr(7));
 						$passwd = genRandStr(9);
-						$passwd = genRandStr(9);
 						$info = lepus_sendToPythonAPI($server['ip'], $server['port'], $server['access'], $commands[$data['do']], "{$data['email']}/{$preset}/{$server['ip']}/{$login}/{$passwd}", $row['id']);
 						$xml = simplexml_load_string($info);
 						if(empty($xml->error['code']) && !empty($info)){
@@ -1444,7 +1461,7 @@ function lepus_doTask(){
 					case 'blockUser': // params: user
 					case 'unblockUser':
 						lepus_sendToPythonAPI($server['ip'], $server['port'], $server['access'], $commands[$data['do']], $data['user'], $row['id']);
-					break;					
+					break;
 				}
 			break;
 			case 'KVM':

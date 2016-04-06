@@ -254,17 +254,15 @@ function lepus_domainLvl(){
 }
 
 function lepus_addDNSDomain($domain, $type, $master, $id){
-	global $pdns;
+	global $pdns; $arr = array_reverse(explode(".", $domain));
 	$lvl = ['kiev.ua', 'com.ua', 'pp.ua', 'ru.com', 'com.kz', 'org.kz', 'co.am', 'com.am', 'net.am', 'msk.ru', 'org.ru',
 			'org.am', 'co.in', 'net.in', 'org.in', 'gen.in', 'firm.in', 'ind.in', 'za.com', 'uy.com', 'br.com', 'msk.su',
 			'spb.su', 'spb.ru', 'com.ru', 'ru.net', 'co.ua', 'od.ua', 'in.ua', 'net.ua', 'kh.ua', 'kharkov.ua', 'co.uk', 'vn.ua'];
-	$query = $pdns->prepare("SELECT * FROM `domains` WHERE `name` = :domain");
-	$arr = array_reverse(explode(".", $domain));
 	if(count($arr) > 2){
 		if(!in_array("$arr[1].$arr[0]", $lvl)) return "wrong_domain";
 		$domain = "$arr[2].$arr[1].$arr[0]"; 
 	}
-	$query->bindParam(':domain', $domain, PDO::PARAM_STR);
+	$query = $pdns->prepare("SELECT * FROM `domains` WHERE `name` = :domain");
 	$query->bindParam(':domain', $domain, PDO::PARAM_STR);
 	$query->execute();
 	if($query->rowCount() != 0) return 'already_add';
@@ -1065,7 +1063,8 @@ function lepus_AutoExtend($uid = 0){
 		$tmpQuery->bindParam(':sid', $row['sid'], PDO::PARAM_STR);
 		$tmpQuery->execute();
 		$tmpRow = $tmpQuery->fetch();
-		$price = lepus_price($tmpRow['price'], $tmpRow['currency']);
+		$arr = json_decode($row['data'], true);
+		$price = lepus_price($tmpRow['price'], $tmpRow['currency'])+lepus_price($arr['extra'], $arr['extra_currency']);
 		if($user['data']['balance'] < $price){
 			//if($uid == 0 && time()+60*60*24*7 < $row['time2']){
 			//	lepus_moveToArchive($row['id']);

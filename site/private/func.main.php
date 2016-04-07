@@ -1074,12 +1074,15 @@ function lepus_AutoExtend($uid = 0){
 				$toTask['order'] = $row['id'];
 			break;
 		}
-		if($uid == 0 && time() < $row['time2']){
-			if($user['data']['balance'] < $price){
+		if(!empty($toTask) && time() > $row['time2']){
+			if($user['data']['balance'] < $price && $uid == 0){
 				$toTask['do'] = 'stop';
-			}else{
+			}
+			if($user['data']['balance'] >= $price){
 				$toTask['do'] = 'start';
 			}
+			lepus_addTask(0, $tmpRow['handler'], $toTask);
+			unset($toTask);
 		}
 		if($user['data']['balance'] < $price){
 			//if($uid == 0 && time()+60*60*24*7 < $row['time2']){
@@ -1089,7 +1092,7 @@ function lepus_AutoExtend($uid = 0){
 			//	Если вы хотите восстановить услугу - напишите в техническую поддержку. И возможно мы поможем восстановить ваши данные.");
 				// create task => delete
 			//}else{
-				_mail($user['login'], "Автоматическое продление #{$row['id']}", "Дорогой клиент, мы не смогли продлить услугу {$tmpRow['name']} #{$row['id']}<br/>Так как на вашем счете недостаточно средств.");
+				//_mail($user['login'], "Автоматическое продление #{$row['id']}", "Дорогой клиент, мы не смогли продлить услугу {$tmpRow['name']} #{$row['id']}<br/>Так как на вашем счете недостаточно средств.");
 			//}
 		}else{
 			$row['time1'] = $row['time2'];
@@ -1097,14 +1100,12 @@ function lepus_AutoExtend($uid = 0){
 			$user['data']['balance'] -= $price;
 			save_user_data($user['id'], $user['data']);
 			lepus_log_spend($user['id'], $row['id'], $row['time1'], $row['time2'], $price, "{$tmpRow['name']} [продление]");
-			_mail($user['login'], "Автоматическое продление", "Дорогой клиент, услуга {$tmpRow["name"]} оплачена до ".date("Y-m-d", $row['time2'])."<br/>Расход: $price, остаток: {$user['data']['balance']} рублей");
+			//_mail($user['login'], "Автоматическое продление #{$row['id']}", "Дорогой клиент, услуга {$tmpRow["name"]} #{$row['id']} оплачена до ".date("Y-m-d", $row['time2'])."<br/>Расход: $price, остаток: {$user['data']['balance']} рублей");
 			$tmpQuery = $db->prepare("UPDATE `services` SET `time2` = :time2 WHERE `id` = :id");
 			$tmpQuery->bindParam(':id', $row['id'], PDO::PARAM_STR);
 			$tmpQuery->bindParam(':time2', $row['time2'], PDO::PARAM_STR);
 			$tmpQuery->execute();
 		}
-		if(!empty($toTask))
-			lepus_addTask(0, $tmpRow['handler'], $toTask);
 	}
 }
 
@@ -1467,12 +1468,19 @@ function lepus_doTask(){
 			case 'KVM':
 			case 'OpenVZ':
 				$commands = ['stop' => 'stopServer', 'start' => 'startServer', 'restart' => 'restartServer'];
-				default: $info = 'no_action'; break;
-				case 'startServer':
-				case 'stopServer':
-				case 'restartServer':
-					lepus_sendToPythonAPI($server['ip'], $server['port'], $server['access'], $commands[$data['do']], $data['order']+100, $row['id']);
-				break;
+				switch($commands[$data['do']]){
+					default: $info = 'no_action'; break;
+					case 'startServer':
+					case 'stopServer':
+					case 'restartServer':
+						if($row['handler'] == 'OpenVZ'){
+							lepus_sendToPythonAPI($server['ip'], $server['port'], $server['access'], $commands[$data['do']], $data['order']+100, $row['id']);
+						}
+						if($row['handler'] == 'KVM'){
+							send_kvm($row['id'], $commands[$data['do']], $server['ip'], $server['access'], $data['order']+100);
+						}
+					break;
+				}
 			break;
 		}
 	}
@@ -1537,8 +1545,14 @@ function lepus_searchFree($handler, $tariff, $id){
 	return $server;
 }
 
-function send_kvm($id, $command, $host, $key){
-	return file_get_contents("http://$host/index.php?id=$id&command=$command&key=$key");
+function send_kvm($cid, $command, $host, $key, $id){
+	global $db;
+	$info = file_get_contents("http://$host/index.php?id=$id&command=$command&key=$key");
+	$query = $db->prepare("UPDATE `task` SET `info` = :info, `status` = 2 WHERE `id` = :id");
+	$query->bindParam(':info', $info, PDO::PARAM_STR);
+	$query->bindParam(':id', $cid, PDO::PARAM_STR);
+	$query->execute();
+	return $info;
 }
 
 function lepus_sendToPythonAPI($host, $port, $access, $action, $data, $id){

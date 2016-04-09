@@ -34,7 +34,6 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/auth.php');
 						<div class="page-title">Lepus хостинг</div>
 						<p>
 							— <a href="http://dom.lepus.su/" target="_blank" rel="nofollow">Регистрация доменов</a>.<br/>
-							
 							— Мощные <a href="/pages/vps.php">KVM VPS</a> на SSD дисках.<br/>
 							— Moneyback по первому требованию.<br/>
 							— <a href="/pages/hosting.php">Виртуальный хостинг</a> для ваших сайтов.<br/>

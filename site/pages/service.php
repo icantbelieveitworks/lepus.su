@@ -49,9 +49,10 @@ switch(@$_GET['q']){
 					<div class="content-info box-shadow--2dp">
 						<div class="content-text">
 							<div class="page-title"><?php echo $tmpVal; ?></div>
-							<div class="row">					
+							<div class="row">
 								<div class="col-lg-14">
 									<div class="col-lg-12">
+										<input class="btn btn-sm btn-danger btn-block" data-try-extend-services type="submit" value="Продлить услуги">
 										<hr/>
 										<table id="incomeTable" class="table table-striped table-bordered" cellspacing="0" width="100%">
 											<thead>

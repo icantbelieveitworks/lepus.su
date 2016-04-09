@@ -459,3 +459,12 @@ $(document).on("click", "[data-vm-restart]", function(e) {
 		}
 	});
 });
+
+$(document).on("click", "[data-try-extend-services]", function(e) {
+	$(this).blur();
+	e.preventDefault();
+	$.post("//"+document.domain+"/public/extend.php", function(data){
+		alertify.success(data);
+		setTimeout(function(){location.reload();}, 500);
+	});
+});

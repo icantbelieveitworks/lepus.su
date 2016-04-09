@@ -1,9 +1,8 @@
 <?php
-function rehash($passwd, $hash = 0){	
+function rehash($passwd, $hash = 0, $a = 'no_hash'){
 	if(empty($hash) || password_needs_rehash($hash, PASSWORD_DEFAULT))
-		return password_hash($passwd, PASSWORD_DEFAULT);
-	else
-		return 'no_hash';
+		$a = password_hash($passwd, PASSWORD_DEFAULT);
+	return $a;
 }
 
 function _exit(){
@@ -12,19 +11,15 @@ function _exit(){
 	$query->bindValue(':null', null, PDO::PARAM_INT);
 	$query->bindParam(':sess', $_SESSION["sess"], PDO::PARAM_STR);
 	$query->execute();
-	
     $params = session_get_cookie_params();
-    setcookie(session_name(), '', time() - 42000,
-        $params["path"], $params["domain"],
-        $params["secure"], $params["httponly"]
-    );
+    setcookie(session_name(), '', time() - 42000, $params["path"], $params["domain"], $params["secure"], $params["httponly"]);
 	session_unset();
 	session_destroy();
 	header("Location: https://".$_SERVER['SERVER_NAME']);
 }
 
 function is_lepus_user($login){
-	global $db;
+	global $db; $login = mb_strtolower($login);
 	$query = $db->prepare("SELECT * FROM `users` WHERE `login` =:login");
 	$query->bindParam(':login', $login, PDO::PARAM_STR);
 	$query->execute();
@@ -53,7 +48,7 @@ function lost_passwd($login){
 	return 'Мы отправили письмо с инструкцией на ваш email';
 }
 
-function login($login, $passwd){
+function login($login, $passwd, $a = 'bad_passwd'){
 	global $db; $login = mb_strtolower($login);
 	if(IsTorExitPoint()) return 'deny_tor';
 	if(empty($login) || empty($passwd)) return 'empty_post_value';
@@ -76,8 +71,9 @@ function login($login, $passwd){
 		$query->bindParam(':sess', $_SESSION['sess'], PDO::PARAM_STR);
 		$query->execute();
 		lepus_log_ip($row['id'], ip2long($_SERVER["REMOTE_ADDR"]));
-		return 'enter';
-	} else return 'bad_passwd';
+		$a = 'enter';
+	}
+	return $a;
 }
 
 function auth($id, $session){
@@ -101,50 +97,18 @@ function auth($id, $session){
 }
 
 function error($message, $j = 0){
+	global $db;
+	$result = ['mes' => $message, 'err' => 'OK'];
 	if(!is_array($message)){
-		$err = [
-			"no_auth" => "Неудачная попытка входа",
-			"no_user" => "Неправильный логин",
-			"bad_passwd" => "Неправильный пароль",
-			"block_user" => "Пользователь заблокирован",
-			"empty_message" => "Пустое сообщение",
-			"no_access" => "Нет доступа",
-			"close_tiket" => "Тикет уже закрыт",
-			"already_open" => "Тикет уже открыт",
-			"empty_post_value" => "Пустой POST",
-			"bad_email" => "Неправильный email",
-			"user_exist" => "Такой пользователь уже существует",
-			"captcha_fail" => "Проверка на бота не пройдена",
-			"wrong_hash" => "Неправильный hash",
-			"lost_passwd_time" => "Ссылка устарела, для восстановления пароля - получите новую ссылку",
-			"no_auth_page" => "У вас нет доступа к этой странице",
-			"wrong_phone" => "Неправильный телефонный номер",
-			"only_numeric" => "Только цифры",
-			"wrong_action" => "Неправильное действие",
-			"not_valid" => "Неправильное значение у переменной",
-			"max_limit" => "Вы превысили лимит",
-			"wrong_ip" => "Неправильный IP",
-			"wrong_mac" => "Неправильный MAC",
-			"wrong_host" => "Неправильный HOST",
-			"too_long_value" => "Слишком длинное значение",
-			"already_get_it" => "Такая запись уже есть",
-			"no_service" => "Нет такой услуги",
-			"no_money" => "Пополните баланс",
-			"no_moneyback" => "Нельзя сделать moneyback. Пожалуйста, обратитесь в техничекую поддержку.",
-			"already_tariff" => "Вы уже используете этот тариф.",
-			"error_task" => "Ошибка! Не могу добавить задание!",
-			"task_already" => "Ошибка! Такое задание уже добавлено!",
-			"no_gid_change_tariff" => "По этой услуге нельзя сделать манибек/ поменять тариф",
-			"wrong_tariff" => "Ошибка! Неправильный тариф",
-			"different_handler" => "Ошибка! Другой тип услуги",
-			"deny_tor" => "Tor deny",
-			"not_paid" => "Услуга не оплачена"
-		];
-		if (array_key_exists($message, $err)) $j = 1;
+		$query = $db->prepare("SELECT * FROM `error` WHERE `name` = :name");
+		$query->bindParam(':name', $message, PDO::PARAM_STR);
+		$query->execute();
+		if($query->rowCount() == 1){
+			$row = $query->fetch();
+			$result = ['mes' => $row['mes'], 'err' => $message];
+		}
 	}
-	if($j == 1) $message = ['mes' => $err[$message], 'err' => $message];
-	else $message = ['mes' => $message, 'err' => 'OK'];
-	return $message;
+	return $result;
 }
 
 function save_user_data($id, $data){
@@ -154,7 +118,6 @@ function save_user_data($id, $data){
 	$query->bindParam(':data', $data, PDO::PARAM_STR);
 	$query->bindParam(':id', $id, PDO::PARAM_STR);
 	$query->execute();
-	return '1';
 }
 
 function _mail($email, $subject, $message){
@@ -166,12 +129,8 @@ function _mail($email, $subject, $message){
 	mail($email, $subject, rtrim(chunk_split(base64_encode($message))), $headers);
 }
 
-function genRandStr($length){
-	$characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-	$randomString = '';	
-	for ($i = 0; $i < $length; $i++)
-		$randomString .= $characters[mt_rand(0, strlen($characters) - 1)];
-	return $randomString;
+function genRandStr($length = 10) {
+    return substr(str_shuffle('0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'), 0, $length);
 }
 
 function change_passwd($id){
@@ -214,11 +173,12 @@ function lepus_new_account($login){
 	$is_user = is_lepus_user($login);
 	if($is_user['0'] != 0) return 'user_exist';
 	$passwd = genRandStr(8);
-	$data = ['balance' => 0, 'phone' => NULL, 'regDate' => time(), 'access' => 1, 'lastIP' => NULL, 'apiKey' => genRandStr(32)];
+	$data = ['balance' => 0, 'phone' => NULL, 'regDate' => time(), 'access' => 1, 'lastIP' => NULL];
 	$json = json_encode($data);
-	$query = $db->prepare("INSERT INTO `users` (`login`, `passwd`, `data`) VALUES (:login, :passwd, :data)");
+	$query = $db->prepare("INSERT INTO `users` (`login`, `passwd`, `api`, `data`) VALUES (:login, :passwd, :api, :data)");
 	$query->bindParam(':login', $login, PDO::PARAM_STR);
 	$query->bindParam(':passwd', rehash($passwd), PDO::PARAM_STR);
+	$query->bindParam(':api', genRandStr(32), PDO::PARAM_STR);
 	$query->bindParam(':data', $json, PDO::PARAM_STR);
 	$query->execute();
 	_mail($login, "Регистрация нового аккаунта", "Дорогой клиент, ваш аккаунт готов.<br/>Ваш логин: $login<br/>Ваш пароль: $passwd<br/>Для активации, пожалуйста, авторизуйтесь на нашем сайте.<br/>В противном случае аккаунт будет автоматически удален через 7 дней.");
@@ -247,11 +207,6 @@ function lepus_get_logip($id, $i = 0){
 		$i++; $data .= "<tr><td>$i</td><td>".long2ip($row['ip'])."</td><td><img src=\"/images/flags16/".mb_strtolower(geoip_country_code_by_name(long2ip($row['ip']))).".png\" style=\"margin-bottom:-3px;\"> ".geoip_country_name_by_name(long2ip($row['ip']))."</td><td>".$row['platform']."</td><td>".$row['browser']."</td><td>".date('Y-m-d H:i', $row['time'])."</td></tr>";
 	}
 	return $data;
-}
-
-function lepus_domainLvl(){
-	global $db;
-	
 }
 
 function lepus_addDNSDomain($domain, $type, $master, $id){
@@ -408,7 +363,7 @@ function lepus_dnsValid($type, $value, $j = 'ok'){
 
 function lepus_get_tiketLabel($id, $uid, $tid, $access){
 	global $db;
-	$query = $db->prepare("SELECT * FROM `support_msg` WHERE `tid` = :tid ORDER BY `time` DESC LIMIT 1"); //
+	$query = $db->prepare("SELECT * FROM `support_msg` WHERE `tid` = :tid ORDER BY `time` DESC LIMIT 1");
 	$query->bindParam(':tid', $tid, PDO::PARAM_STR);
 	$query->execute();
 	$row = $query->fetch();
@@ -424,7 +379,7 @@ function lepus_get_tiketLabel($id, $uid, $tid, $access){
 }
 
 function lepus_get_supportList($uid, $access, $id = 0){
-	global $db; $data = null;
+	global $db; $data = '';
 	if($access > 1){
 		if($id == 0){
 			$query = $db->prepare("SELECT * FROM `support`");
@@ -546,7 +501,7 @@ function support_msg($uid, $tid, $access, $no_last = 0){
 	global $db;
 	$tiket = lepus_get_supportAccess($tid);
 	if($tiket['uid'] != $uid && $access < 2) return 'no_access';
-	if(strlen($_POST['msg']) < 1) return "empty_message";
+	if(strlen($_POST['msg']) < 1) return 'empty_message';
 	if($access > 1 && $_POST['msg'] != 'END' && $_POST['msg'] != 'OPEN') $_POST['msg'] .= "\n\n\n[i]С уважением, команда технической поддержки.[/i]";
 	if($tiket['status'] == 2 && $_POST['msg'] != 'OPEN') return 'close_tiket'; // if tiket close => we need first open it
 	if($tiket['status'] == 1 && $_POST['msg'] == 'OPEN') return 'already_open'; // dont open - open tiket
@@ -639,14 +594,12 @@ function lepus_update_balance($pid, $uid, $amount, $system){
 	if($query->rowCount() != 1) return 'no_user';
 	$row = $query->fetch();
 	$tmp['data'] = json_decode($row['data'], true);
-	
 	$query = $db->prepare("INSERT INTO `log_income` (`payment_id`, `user_id`, `amount`, `system`, `time`) VALUES (:pid, :uid, :amount, :system, unix_timestamp(now()))");
 	$query->bindParam(':pid', $pid, PDO::PARAM_STR);
 	$query->bindParam(':uid', $uid, PDO::PARAM_STR);
 	$query->bindParam(':amount', $amount, PDO::PARAM_STR);
 	$query->bindParam(':system', $system, PDO::PARAM_STR);
 	$query->execute();
-	
 	$tmp['data']['balance'] += $amount;
 	save_user_data($row['id'], $tmp['data']);
 	if($system != 'lepus'){
@@ -1416,10 +1369,11 @@ function lepus_doTask(){
 	global $db; $err = null;
 	$query = $db->prepare("SELECT * FROM `task` WHERE `status` = '1'");
 	$query->execute();
-	if($query->rowCount() > 0) return;
+	if($query->rowCount() > 0) return 'progress...';
 	$query = $db->prepare("SELECT * FROM `task` WHERE `status` = '0' LIMIT 1");
 	$query->execute();
 	$row = $query->fetch();
+	if($query->rowCount() == 0) return 'no_task';
 	$data = json_decode($row['data'], true);
 	$update = $db->prepare("UPDATE `task` SET `status` = 1 WHERE `id` = :id");
 	$update->bindParam(':id', $row['id'], PDO::PARAM_STR);
@@ -1428,12 +1382,18 @@ function lepus_doTask(){
 		if(empty($data['tiket']) || empty($data['tariff']) || empty($data['order'])) $err = 'wrong data params';
 	}
 	if($row['handler'] == 'ISPmanagerV4' || $row['handler'] == 'OpenVZ' || $row['handler'] == 'KVM'){
-		$server = lepus_searchFree($row['handler'], $data['tariff'], $data['order']);
+		if($data['do'] == 'create'){
+			$server = lepus_searchFree($row['handler'], $data['tariff'], $data['order']);
+		}else{
+			$server = lepus_searchFree($row['handler'], 0, $data['order']);
+		}
 		if(!is_array($server)) $err = 'no_free_server';
-		$update = $db->prepare("UPDATE `services` SET `server` = :sid WHERE `id` = :id");
-		$update->bindParam(':sid', $server['id'], PDO::PARAM_STR);
-		$update->bindParam(':id', $data['order'], PDO::PARAM_STR);
-		$update->execute();
+		if(empty($err) && $data['do'] == 'create'){
+			$update = $db->prepare("UPDATE `services` SET `server` = :sid WHERE `id` = :id");
+			$update->bindParam(':sid', $server['id'], PDO::PARAM_STR);
+			$update->bindParam(':id', $data['order'], PDO::PARAM_STR);
+			$update->execute();
+		}
 	}
 	if(empty($err)){
 		switch($row['handler']){
@@ -1522,8 +1482,9 @@ function lepus_searchFree($handler, $tariff, $id){
 		$query->bindParam(':id', $row['server'], PDO::PARAM_STR);
 		$query->execute();
 		$row = $query->fetch();
-		$server = ['id' => $row['id'], 'ip' => long2ip($row['ip']), 'port' => $row['port'], 'access' => $row['access']];
-	}else{
+		return ['id' => $row['id'], 'ip' => long2ip($row['ip']), 'port' => $row['port'], 'access' => $row['access']];
+	}
+	if(!empty($tariff)){
 		$query = $db->prepare("SELECT * FROM `tariff` WHERE `handler` = :handler");
 		$query->bindParam(':handler', $handler, PDO::PARAM_STR);
 		$query->execute();
@@ -1545,7 +1506,7 @@ function lepus_searchFree($handler, $tariff, $id){
 			if($points+$need < $row['points']){
 				$j = $points+$need;
 				$server = ['id' => $row['id'], 'ip' => long2ip($row['ip']), 'port' => $row['port'], 'access' => $row['access'], 'points' => $j];
-				continue;
+				break;
 			}
 		}
 	}

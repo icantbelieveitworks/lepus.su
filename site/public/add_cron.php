@@ -5,7 +5,7 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/init/memcache.php');
 require_once($_SERVER['DOCUMENT_ROOT'].'/private/init/session.php');
 require_once($_SERVER['DOCUMENT_ROOT'].'/private/func.main.php');
 require_once($_SERVER['DOCUMENT_ROOT'].'/private/auth.php');
-
+if(!is_login()) die("no_login");
 if($_POST['do'] == 'remove'){
 	$tmpData = error(lepus_addCron($user['id'], 0, 0, $_POST['do'], $_POST['id']));
 }else{

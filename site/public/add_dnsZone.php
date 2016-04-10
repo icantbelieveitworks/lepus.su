@@ -5,7 +5,7 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/init/memcache.php');
 require_once($_SERVER['DOCUMENT_ROOT'].'/private/init/session.php');
 require_once($_SERVER['DOCUMENT_ROOT'].'/private/func.main.php');
 require_once($_SERVER['DOCUMENT_ROOT'].'/private/auth.php');
-
+if(!is_login()) die("no_login");
 $tmpPOST = ['name', 'type', 'content', 'prio', 'domain_id'];
 foreach($tmpPOST as $val){
 	if(!isset($_POST[$val])) die("Empty POST value");

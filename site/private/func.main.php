@@ -1021,6 +1021,7 @@ function lepus_AutoExtend($uid = 0){
 		$price = lepus_price($tmpRow['price'], $tmpRow['currency'])+lepus_price($arr['extra'], $arr['extra_currency']);
 		switch($tmpRow['handler']){
 			case 'ISPmanagerV4':
+				$toTask['order'] = $row['id'];
 				$toTask['user'] = $arr['user'];
 			break;
 			case 'KVM':

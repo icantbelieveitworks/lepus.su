@@ -71,16 +71,18 @@ options {
 };
 </pre>
 										</blockquote>
+										
+										<div id="api_key"><center><a href=# data-change-api-key><i class="glyphicon glyphicon-refresh"></i></a> <?php echo "API: <a data-show-api={$user['api']}>".substr_replace($user['api'], '********************', -20, -6)."</a>"; ?></center></div>
 										<hr/>
 									</div>
-									<div class="col-lg-9 col-centered">
-										<div class="form-inline">
+									<div class="col-lg-12">
+										<div class="form-inline col-centered" style="width: 74%">
 											<input class="form-control" id="dnsDomain" style="width: 204px;" type="text" name="count" value="" required="" placeholder="example.com">
 												<select class="form-control" id="dnsDomainType" name="type">
 													<option value="master" selected="">MASTER</option>
 													<option value="slave">SLAVE</option>
 												</select>
-												<input class="form-control" id="dnsDomainMaster"  style="width: 208px;"  type="text" name="count" value="" required="" placeholder="8.8.8.8 (только для SLAVE)">
+												<input class="form-control" id="dnsDomainMaster"  style="width: 246px;"  type="text" name="count" value="" required="" placeholder="8.8.8.8 (только для SLAVE)">
 											<input class="btn btn-sm btn-danger btn-block" data-dns-domain-add style="margin-top: 2px;" type="submit" value="Добавить домен">
 										</div>
 									</div>

@@ -468,3 +468,19 @@ $(document).on("click", "[data-try-extend-services]", function(e) {
 		setTimeout(function(){location.reload();}, 500);
 	});
 });
+
+
+$(document).on("click", "[data-show-api]", function(e) {
+	$(this).blur();
+	e.preventDefault();
+	$(this).html($(this).data("show-api"));
+});
+
+$(document).on("click", "[data-change-api-key]", function(e) {
+	$(this).blur();
+	e.preventDefault();
+	if(!confirm("Вы подтверждаете действие?")) return;
+	$.post("//"+document.domain+"/public/change_api.php", function(data){
+		$("#api_key").html(data);
+	});
+});

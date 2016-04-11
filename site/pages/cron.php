@@ -65,10 +65,10 @@ if(empty($user)){
 										</blockquote>
 										<hr/>
 									</div>
-									<div class="col-lg-9 col-centered">
-										<div class="form-inline">
+									<div class="col-lg-12 ">
+										<div class="form-inline col-centered" style="width: 74%">
 											<input class="form-control" id="cronTime" style="width: 120px;" type="text" name="count" value="" required="" placeholder="*/2 * * * *">
-											<input class="form-control" id="cronURL"  style="width: 404px;"  type="text" name="count" value="" required="" placeholder="http://mysite.ru/cron.php">
+											<input class="form-control" id="cronURL"  style="width: 440px;"  type="text" name="count" value="" required="" placeholder="http://mysite.ru/cron.php">
 											<input class="btn btn-sm btn-danger btn-block" data-cron-add style="margin-top: 2px;" type="submit" value="Сохранить задание">
 										</div>
 									</div>

@@ -16,8 +16,8 @@ for($i=0; $i < 4; $i++){
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 	<head>
-		<title>Lepus - интернет хостинг</title>
-		<meta name="description" content="Виртуальный хостинг, быстрые VPS, выделенные серверы по привлекательной цене." />
+		<title>KVM VPS</title>
+		<meta name="description" content="Заказать быстрый KVM VPS на SSD дисках" />
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 		<meta name="yandex-verification" content="6940b644b3235f76" />
 		<link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />

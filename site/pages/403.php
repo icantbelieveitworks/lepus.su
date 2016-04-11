@@ -9,10 +9,9 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/auth.php');
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 	<head>
-		<title>Lepus - интернет хостинг</title>
-		<meta name="description" content="Виртуальный хостинг, быстрые VPS, выделенные серверы по привлекательной цене." />
+		<title>403</title>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-		<meta name='yandex-verification' content='450601432a8981ef' />
+		<meta name="yandex-verification" content="6940b644b3235f76" />
 		<link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
 		<link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css">
 		<link rel="stylesheet" type="text/css" href="/css/font-awesome.min.css">
@@ -31,20 +30,9 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/auth.php');
 			<div class="content-box">
 				<div class="content-info box-shadow--2dp">
 					<div class="content-text">
-						<div class="page-title">Lepus хостинг</div>
-						<p>
-							— <a href="http://dom.lepus.su/" target="_blank" rel="nofollow">Регистрация доменов</a>.<br/>
-							— Мощные <a href="/pages/vps.php">KVM VPS</a> на SSD дисках.<br/>
-							— Moneyback по первому требованию.<br/>
-							— <a href="/pages/hosting.php">Виртуальный хостинг</a> для ваших сайтов.<br/>
-							— Быстрые <a href="/pages/servers.php">выделенные серверы</a> по выгодной цене.<br/>
-							— Бесплатный перенос ваших сайтов на наш хостинг.<br/><br/>
-							Наша миссия - предоставление качественных услуг хостинга. Находим индивидуальный подход к каждому клиенту.<br/>
-							Оказываем профессиональные услуги по технической поддержке, администрированию и сопровождению проектов.<br/>
-							Самое ценное - это вы, наши клиенты. Мы болеем за вас, радуемся вашим победам и успехам! Добро пожаловать!
-						</p>
-						<hr/>
-					</div>
+						<div class="page-title">Ошибка 403</div>
+							Запрещен доступ к файлу/ каталогу.
+						</div>
 				</div>
 			</div>
 			<?php require_once($_SERVER['DOCUMENT_ROOT'].'/private/pages/navi.php'); ?>

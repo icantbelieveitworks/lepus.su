@@ -93,7 +93,7 @@ function auth($id, $session){
 		return 'no_auth';
 	}
 	$row = $query->fetch();
-	return ["id" => $row['id'], "login" => $row['login'], "passwd" => $row['passwd'], "bitcoin" => $row['bitcoin'], "data" => $row['data']];
+	return ["id" => $row['id'], "login" => $row['login'], "passwd" => $row['passwd'], "bitcoin" => $row['bitcoin'], "api" => $row['api'], "data" => $row['data']];
 }
 
 function error($message, $j = 0){
@@ -379,7 +379,7 @@ function lepus_get_tiketLabel($id, $uid, $tid, $access){
 }
 
 function lepus_get_supportList($uid, $access, $id = 0){
-	global $db; $data = '';
+	global $db; $data = null;
 	if($access > 1){
 		if($id == 0){
 			$query = $db->prepare("SELECT * FROM `support`");
@@ -407,7 +407,7 @@ function lepus_get_supportList($uid, $access, $id = 0){
 			$row['title'] = mb_substr($row['title'], 0, 23,'utf-8')."...";	 
 		}
 		if($id == 0){
-			$data .= "<tr><td><a href=\"/pages/tiket.php?id={$row['id']}\" title=\"Открыть\">".$row['id']."</a></td><td $tmpTitle>".$row['title']."</td><td>".$row['open']."</td><td>".$row['last']."</td><td style=\"padding-top: 11px;\"><span class=\"label label-pill label-".$ldata['label']." myLabel\">".$ldata['info']."</span></td></tr>";
+			$data .= "<tr><td><a href=\"/pages/tiket.php?id={$row['id']}\" title=\"Открыть\">".$row['id']."</a></td><td ".@$tmpTitle.">".$row['title']."</td><td>".$row['open']."</td><td>".$row['last']."</td><td style=\"padding-top: 11px;\"><span class=\"label label-pill label-".$ldata['label']." myLabel\">".$ldata['info']."</span></td></tr>";
 		}else{
 			$data = ['a' => "<a href=\"/pages/tiket.php?id={$row['id']}\" title=\"Открыть\">".$row['id']."</a>",
 					 'b' => $row['title'],
@@ -1580,4 +1580,15 @@ function IsTorExitPoint(){
 function ReverseIPOctets($inputip){
 		$ipoc = explode(".",$inputip);
 		return $ipoc[3].".".$ipoc[2].".".$ipoc[1].".".$ipoc[0];
+}
+
+function lepus_changeAPIkey(){
+	global $db, $user;
+	$a = genRandStr(32);
+	$b = substr_replace($a, '********************', -20, -6);
+	$query = $db->prepare("UPDATE `users` SET `api` = :api WHERE `id` = :id");
+	$query->bindParam(':api', $a, PDO::PARAM_STR);
+	$query->bindParam(':id', $user['id'], PDO::PARAM_STR);
+	$query->execute();
+	return "<center><a href=# data-change-api-key><i class='glyphicon glyphicon-refresh'></i></a> API: <a data-show-api=$a>$b</a></center>";
 }

@@ -1,11 +1,21 @@
 #!/bin/bash
-# Перед тем, как отправить данные от VPS клиенту => увеличим lvm раздел контейнера
 if [ ! -f /root/lepus/tmp/resize.lock ]; then
 	apt-get install -y parted
-	echo -e "p\nd\n5\nd\n2\nn\ne\n2\n\n\nn\nl\n\n\nt\n5\n8e\nw" | fdisk /dev/vda
+	echo -e "p\nd\nn\np\n1\n\n\np\nw" | fdisk /dev/vda
 	partprobe
-	pvresize /dev/vda5
-	lvextend -l +100%FREE /dev/debian-vg/root
-	resize2fs /dev/debian-vg/root
+	resize2fs /dev/vda1
 	echo "1" > /root/lepus/tmp/resize.lock
+	reboot
+fi
+
+# Иногда срабатывает сразу, иногда после reboot
+if [ -f /root/lepus/tmp/resize.lock ]; then
+	NUM=$(cat /root/lepus/tmp/resize.lock)
+	if [ "$NUM" -eq "1" ]; then
+		sleep 10
+		echo -e "p\nd\nn\np\n1\n\n\np\nw" | fdisk /dev/vda
+		partprobe
+		resize2fs /dev/vda1
+		echo "2" > /root/lepus/tmp/resize.lock
+	fi
 fi

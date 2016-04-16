@@ -1394,6 +1394,12 @@ function lepus_doTask(){
 			$update->bindParam(':sid', $server['id'], PDO::PARAM_STR);
 			$update->bindParam(':id', $data['order'], PDO::PARAM_STR);
 			$update->execute();
+			if($row['handler'] == 'KVM'){
+				$update = $db->prepare("UPDATE `ipmanager` SET `service` = :service WHERE `ip` = :ip");
+				$update->bindParam(':service', $row['id'], PDO::PARAM_STR);
+				$update->bindParam(':ip', $server['ipvm'], PDO::PARAM_STR);
+				$update->execute();
+			}
 		}
 	}
 	if(empty($err)){
@@ -1416,7 +1422,7 @@ function lepus_doTask(){
 						$xml = simplexml_load_string($info);
 						if(empty($xml->error['code']) && !empty($info)){
 							lepus_editServiceData($data['order'], 'edit', 'user', $login);
-							$_POST['msg'] = "Дорогой клиент, виртуальный хостинг готов.\nLogin: $login\nPassword:$passwd\nПожалуйста, поменяйте пароль.\nВы можете посмотреть более подробную информацию об услуге [urls=https://lepus.su/pages/view.php?id={$data['order']}]на этой странице[/urls].";
+							$_POST['msg'] = "Дорогой клиент, виртуальный хостинг готов.\nLogin: $login\nPassword: $passwd\nПожалуйста, поменяйте пароль.\nВы можете посмотреть более подробную информацию об услуге [urls=https://lepus.su/pages/view.php?id={$data['order']}]на этой странице[/urls].";
 							support_msg(5, $data['tiket'], 2, 1);
 						}
 					break;
@@ -1431,7 +1437,7 @@ function lepus_doTask(){
 			break;
 			case 'KVM':
 			case 'OpenVZ':
-				$commands = ['stop' => 'stopServer', 'start' => 'startServer', 'restart' => 'restartServer'];
+				$commands = ['stop' => 'stopServer', 'start' => 'startServer', 'restart' => 'restartServer', 'create' => 'createServer'];
 				switch($commands[$data['do']]){
 					default: $info = 'no_action'; break;
 					case 'startServer':
@@ -1442,6 +1448,18 @@ function lepus_doTask(){
 						}
 						if($row['handler'] == 'KVM'){
 							$info = send_kvm($row['id'], $commands[$data['do']], $server['ip'], $server['access'], $data['order']+100);
+						}
+					break;
+					case 'createServer':
+						$info = send_kvm($row['id'], 'getStatus', $server['ip'], $server['access'], $data['order']+100);
+						if($info == 'running'){
+							$_POST['msg'] = "Дорогой клиент, VPS готова.\nLogin: root\nPassword: {$data['passwd']}\nПожалуйста, поменяйте пароль.\nВы можете посмотреть более подробную информацию об услуге [urls=https://lepus.su/pages/view.php?id={$data['order']}]на этой странице[/urls].";
+							support_msg(5, $data['tiket'], 2, 1);
+						}else{
+							$update = $db->prepare("UPDATE `task` SET `status` = 0 WHERE `id` = :id");
+							$update->bindParam(':id', $row['id'], PDO::PARAM_STR);
+							$update->execute();
+							return;
 						}
 					break;
 				}
@@ -1483,6 +1501,13 @@ function lepus_searchFree($handler, $tariff, $id){
 		$query->bindParam(':id', $row['server'], PDO::PARAM_STR);
 		$query->execute();
 		$row = $query->fetch();
+		if($handler == 'KVM'){
+			$query = $db->prepare("SELECT * FROM `ipmanager` WHERE `service` = :id");
+			$query->bindParam(':id', $row['server'], PDO::PARAM_STR);
+			$query->execute();
+			$tmpData = $query->fetch();
+			return ['id' => $row['id'], 'ip' => long2ip($row['ip']), 'port' => $row['port'], 'access' => $row['access'], 'ipvm' => $tmpData['ip']];
+		}
 		return ['id' => $row['id'], 'ip' => long2ip($row['ip']), 'port' => $row['port'], 'access' => $row['access']];
 	}
 	if(!empty($tariff)){
@@ -1505,8 +1530,18 @@ function lepus_searchFree($handler, $tariff, $id){
 				$points += $data[$tmpRow['sid']];
 			}
 			if($points+$need < $row['points']){
+				if($handler == 'KVM'){
+					$select_ip = $db->prepare("SELECT * FROM `ipmanager` WHERE `sid` = :server AND `service` = 0 LIMIT 1");
+					$select_ip->bindParam(':server', $row['id'], PDO::PARAM_STR);
+					$select_ip->execute();
+					if($select_ip->rowCount() == 0) continue;
+					$x = $select_ip->fetch();
+				}
 				$j = $points+$need;
 				$server = ['id' => $row['id'], 'ip' => long2ip($row['ip']), 'port' => $row['port'], 'access' => $row['access'], 'points' => $j];
+				if($handler == 'KVM'){
+					$server['ipvm'] = $x['ip'];
+				}
 				break;
 			}
 		}

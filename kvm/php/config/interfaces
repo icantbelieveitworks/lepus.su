@@ -1,0 +1,11 @@
+auto lo eth0
+iface lo inet loopback
+
+iface eth0 inet static
+	address VMIP
+	netmask 255.255.255.255
+	broadcast VMIP
+	post-up route add NODE dev eth0
+	post-up route add default gw NODE
+	pre-down route del NODE dev eth0
+	pre-down route del default gw NODE

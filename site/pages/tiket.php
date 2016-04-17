@@ -36,7 +36,7 @@ if(strlen($tmpData['title']) > 30){
 		<link rel="stylesheet" type="text/css" href="/css/style.css"/>
 		<link rel="stylesheet" type="text/css" href="/css/alertify.core.css" />
 		<link rel="stylesheet" type="text/css" href="/css/alertify.bootstrap.css" />
-		<link rel="stylesheet" href="//cdn.datatables.net/plug-ins/1.10.10/integration/bootstrap/3/dataTables.bootstrap.css">
+		<link rel="stylesheet" href="/css/dataTables.bootstrap.css">
 		<style>
 			.panelbg { background: #FAFAFA; }
 			.myLabel { font-size: 85%; }
@@ -44,8 +44,8 @@ if(strlen($tmpData['title']) > 30){
 			blockquote { background: #f9f9f9; border-left: 10px solid #ccc; margin: 1.5em 10px; padding: 0.5em 10px; font-size: 100%; }
 		</style>
 		<script src="/js/jquery.min.js"></script>
-		<script src="//cdn.datatables.net/1.10.10/js/jquery.dataTables.min.js"></script>
-		<script src="//cdn.datatables.net/plug-ins/1.10.10/integration/bootstrap/3/dataTables.bootstrap.js"></script>
+		<script src="/js/jquery.dataTables.min.js"></script>
+		<script src="/js/dataTables.bootstrap.js"></script>
 		<script src="/js/bootstrap.min.js"></script>
 		<script type="text/javascript" charset="utf-8"> $(document).ready(function() { $('#supportList').dataTable({ "order": [[ 0, "desc" ]] }); }); </script>
 		<script src="/js/alertify.js"></script>

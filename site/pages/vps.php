@@ -6,7 +6,7 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/init/session.php');
 require_once($_SERVER['DOCUMENT_ROOT'].'/private/func.main.php');
 require_once($_SERVER['DOCUMENT_ROOT'].'/private/auth.php');
 $start_order = null;
-for($i=0; $i < 4; $i++){
+for($i=0; $i < 5; $i++){
 	if(!is_login())
 		$start_order .= "<td><a class=\"btn btn-danger btn-xs\" data-register-open rel=\"nofollow\">заказать</a></td>";
 	else
@@ -46,10 +46,11 @@ for($i=0; $i < 4; $i++){
 							<thead>
 								<tr>
 									<th>Тарифы</th>
-									<th><font color="IndianRed">KVM1</font></th>
-									<th>KVM2</th>
+									<th>KVM1</th>
+									<th><font color="IndianRed">KVM2</font></th>
 									<th>KVM3</th>
 									<th>KVM4</th>
+									<th>KVM5</th>
 								</tr>
 							</thead>
 							<tbody>
@@ -57,18 +58,21 @@ for($i=0; $i < 4; $i++){
 									<td>CPU (MHz)</td>
 									<td>2200</td>
 									<td>2200</td>
+									<td>2200</td>
 									<td>2x2200</td>
 									<td>2x2200</td>
 								</tr>
 								<tr>
 									<td>Диск (Gb)</td>
+									<td>10</td>
+									<td>20</td>
 									<td>30</td>
 									<td>40</td>
 									<td>50</td>
-									<td>60</td>
 								</tr>
 								<tr>
 									<td>RAM (Mb)</td>
+									<td>1024</td>
 									<td>2048</td>
 									<td>3072</td>
 									<td>4096</td>

@@ -779,14 +779,14 @@ function is_login($j = TRUE){
 function lepus_getTariffList($id = null){
 	global $db; $data = null;
 	if($id === null){
-		$query = $db->prepare("SELECT * FROM `tariff` WHERE `status` = 1");
+		$query = $db->prepare("SELECT * FROM `tariff` WHERE `status` = 1 ORDER BY `name`");
 	}else{
 		$query = $db->prepare("SELECT * FROM `tariff` WHERE `id` = :id");
 		$query->bindParam(':id', $id, PDO::PARAM_STR);
 		$query->execute();
 		$row = $query->fetch();
 		
-		$query = $db->prepare("SELECT * FROM `tariff` WHERE `gid` = :gid AND `id` != :id AND `status` = 1");
+		$query = $db->prepare("SELECT * FROM `tariff` WHERE `gid` = :gid AND `id` != :id AND `status` = 1 ORDER BY `point`");
 		$query->bindParam(':gid', $row['gid'], PDO::PARAM_STR);
 		$query->bindParam(':id', $id, PDO::PARAM_STR);
 	}
@@ -799,7 +799,7 @@ function lepus_getTariffList($id = null){
 
 function lepus_getTariffPrices($g){
 	global $db; $data = null;
-	$query = $db->prepare("SELECT * FROM `tariff` WHERE `gid` = :gid AND `status` = 1");
+	$query = $db->prepare("SELECT * FROM `tariff` WHERE `gid` = :gid AND `status` = 1 ORDER BY `point`");
 	$query->bindParam(':gid', $g, PDO::PARAM_STR);
 	$query->execute();
 	while($row = $query->fetch()){
@@ -1120,7 +1120,7 @@ function lepus_moneyback($id, $sid){
 	$tmpQuery->execute();
 	$tmpRow = $tmpQuery->fetch();
 	if($sid == $old_tariff_id) return 'already_tariff';
-	if($tmpRow['gid'] == '3' || $tmpRow['gid'] == '4') return 'no_gid_change_tariff';	
+	if($tmpRow['gid'] == '2' || $tmpRow['gid'] == '3' || $tmpRow['gid'] == '4') return 'no_gid_change_tariff';	
 	$time_moneyback = ($row['time2'] - time())/(60*60*24);
 	$day = $row['money']/(($row['time2']-strtotime("-1 month", $row['time2']))/(60*60*24));
 	$moneyback = floor($day*$time_moneyback);
@@ -1396,9 +1396,17 @@ function lepus_doTask(){
 			$update->execute();
 			if($row['handler'] == 'KVM'){
 				$update = $db->prepare("UPDATE `ipmanager` SET `service` = :service WHERE `ip` = :ip");
-				$update->bindParam(':service', $row['id'], PDO::PARAM_STR);
+				$update->bindParam(':service', $data['order'], PDO::PARAM_STR);
 				$update->bindParam(':ip', $server['ipvm'], PDO::PARAM_STR);
 				$update->execute();
+				$tmp = $db->prepare("SELECT * FROM `users` WHERE `login` = :login");
+				$tmp->bindParam(':login', $data['email'], PDO::PARAM_STR);
+				$tmp->execute();
+				$v = $tmp->fetch();
+				$tmp = $db->prepare("UPDATE `ipmanager` SET `owner` = :owner WHERE `ip` = :ip");
+				$tmp->bindParam(':owner', $v['id'], PDO::PARAM_STR);
+				$tmp->bindParam(':ip', $server['ipvm'], PDO::PARAM_STR);
+				$tmp->execute();
 			}
 		}
 	}
@@ -1581,6 +1589,7 @@ function lepus_userAddTask($id, $command){
 	switch($row['handler']){
 		case 'KVM':
 		case 'OpenVZ':
+			if(time() < $info['time1']+60*60) return 'wait_60min'; // time to install vps
 			if($command == 'restart'){
 				$j = lepus_addTask($user['id'], $row['handler'], ['do' => $command, 'order' => $id]);
 				if(!empty($j)) return $j;

@@ -22,15 +22,15 @@ if($user['data']['access'] < 2) die('no_access');
 		<link rel="stylesheet" type="text/css" href="/css/alertify.core.css" />
 		<link rel="stylesheet" type="text/css" href="/css/alertify.bootstrap.css" />
 		<link rel="stylesheet" type="text/css" href="/css/chosen.css">
-		<link rel="stylesheet" href="//cdn.datatables.net/plug-ins/1.10.10/integration/bootstrap/3/dataTables.bootstrap.css">
+		<link rel="stylesheet" href="/css/dataTables.bootstrap.css">
 		<style>
 			.col-centered{ float: none; margin: 0 auto; }
 			td,th { text-align: center; vertical-align: middle; }
 			blockquote { background: #f9f9f9; border-left: 10px solid #ccc; margin: 1.5em 10px; padding: 0.5em 10px; }
 		</style>
 		<script src="/js/jquery.min.js"></script>
-		<script src="//cdn.datatables.net/1.10.10/js/jquery.dataTables.min.js"></script>
-		<script src="//cdn.datatables.net/plug-ins/1.10.10/integration/bootstrap/3/dataTables.bootstrap.js"></script>
+		<script src="/js/jquery.dataTables.min.js"></script>
+		<script src="/js/dataTables.bootstrap.js"></script>
 		<script src="/js/bootstrap.min.js"></script>
 		<script src="/js/alertify.js"></script>
 		<script src="/js/lepus.js"></script>

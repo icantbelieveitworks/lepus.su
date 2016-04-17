@@ -1029,7 +1029,7 @@ function lepus_AutoExtend($uid = 0){
 				$toTask['order'] = $row['id'];
 			break;
 		}
-		if(!empty($toTask) && time() > $row['time2']){
+		if(!empty($toTask) && time() > $row['time2']+60*60*24){
 			if($user['data']['balance'] < $price && $uid == 0){
 				if(time() > $row['time3'])
 					$toTask['do'] = 'stop';

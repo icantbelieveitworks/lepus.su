@@ -14,6 +14,7 @@ switch(@$_GET['q']){
 	case '2': $tmpVal =  'VPS хостинг'; break;
 	case '3': $tmpVal =  'Выделенные серверы'; break;
 	case '4': $tmpVal =  'Администрирование'; break;
+	case '5': $tmpVal =  'Виртуальный хостинг (v2)'; break;
 	default: $tmpVal =  'Услуги'; $_GET['q'] = 'all'; break;
 }
 ?>

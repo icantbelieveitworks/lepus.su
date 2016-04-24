@@ -1,12 +1,16 @@
 <nav class="navbar navbar-default" style="margin-bottom: 0px;">
 	<div class="container-fluid">
-		<div class="navbar-header">
+		<div class="navbar-header" style="width:100%">
+			<ul class="nav navbar-nav navbar-right" style="float:right;">
+				<li><lu class="navbar-brand" style="font-size: 13px;">ns1.lepus.su | ns2.poiuty.com</lu></li>
+            </ul>
 			<a class="navbar-brand" href="/">
 				<img src="/images/lepuslogo.png" style="max-width: 100px;">
 			</a>
 			<ul class="nav navbar-nav">
 				<?php echo lepus_getPageNavi(); ?>
 			</ul>
+
 		</div>
 	</div>
 </nav>

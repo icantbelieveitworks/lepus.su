@@ -5,7 +5,7 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/init/memcache.php');
 require_once($_SERVER['DOCUMENT_ROOT'].'/private/func.main.php');
 
 $main = array();
-$query = $db->prepare("SELECT * FROM `task` WHERE `handler` = 'KVM' AND `status` = '0'");
+$query = $db->prepare("SELECT * FROM `task` WHERE (`handler` = 'KVM' OR `handler` = 'VH') AND `status` = '0'");
 $query->execute();
 while($row=$query->fetch()){
 	$arr = json_decode($row['data'], true);

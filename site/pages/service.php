@@ -10,11 +10,11 @@ if(empty($user)){
 	die(lepus_error_page($tmpData['mes']));
 }
 switch(@$_GET['q']){
-	case '1': $tmpVal =  'Виртуальный хостинг'; break;
+	case '1': $tmpVal =  'ISPmanager хостинг'; break;
 	case '2': $tmpVal =  'VPS хостинг'; break;
 	case '3': $tmpVal =  'Выделенные серверы'; break;
 	case '4': $tmpVal =  'Администрирование'; break;
-	case '5': $tmpVal =  'Виртуальный хостинг (v2)'; break;
+	case '5': $tmpVal =  'Виртуальный хостинг'; break;
 	default: $tmpVal =  'Услуги'; $_GET['q'] = 'all'; break;
 }
 ?>

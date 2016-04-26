@@ -41,7 +41,7 @@ for($i=0; $i < 4; $i++){
 			<div class="content-box">
 				<div class="content-info box-shadow--2dp">
 					<div class="content-text">
-						<div class="page-title">Виртуальный хостинг (v2)</div>
+						<div class="page-title">Виртуальный хостинг</div>
 							<table class="table table-striped table-bordered">
 								<thead>
 									<tr>
@@ -96,7 +96,7 @@ for($i=0; $i < 4; $i++){
 										<td>+</td>
 									</tr>
 									<tr>
-										<td>SSH</td>
+										<td>SSH (root)</td>
 										<td>+</td>
 										<td>+</td>
 										<td>+</td>
@@ -111,20 +111,6 @@ for($i=0; $i < 4; $i++){
 									</tr>
 									<tr>
 										<td>PHP (5.6)</td>
-										<td>+</td>
-										<td>+</td>
-										<td>+</td>
-										<td>+</td>
-									</tr>
-									<tr>
-										<td>ionCube</td>
-										<td>+</td>
-										<td>+</td>
-										<td>+</td>
-										<td>+</td>
-									</tr>
-									<tr>
-										<td>Zend Guard</td>
 										<td>+</td>
 										<td>+</td>
 										<td>+</td>
@@ -149,7 +135,9 @@ for($i=0; $i < 4; $i++){
 									</tfoot>
 								</tbody>
 							</table>
-							Внимание! Эта услуга находится в стадии разработки и тестирования. И пока недоступна к заказу. Подробнее на <a href="https://github.com/poiuty/lepus.su/issues/21">github</a>.
+							<a href="https://poiuty.com/img/64/007a5008eb2bd61ffd5bfc06fe8ba064.png" target="_blank">Подробное описание услуги</a>, <a href="https://github.com/poiuty/lepus.su/issues/21">github</a>.<br/>
+							В стандартной поставке => это виртуальный хостинг (<a href="https://poiuty.com/index.php?title=%D0%92%D0%B8%D1%80%D1%82%D1%83%D0%B0%D0%BB%D1%8C%D0%BD%D1%8B%D0%B9_%D1%85%D0%BE%D1%81%D1%82%D0%B8%D0%BD%D0%B3_-_%D0%B4%D0%BE%D0%B1%D0%B0%D0%B2%D0%B8%D1%82%D1%8C_%D1%81%D0%B0%D0%B9%D1%82" target="_blank">инструация как разместить сайт</a>).<br/>
+							Если же вы умеете работать с linux => то для вас => это еще и дешевая OpenVZ VPS c полным root доступом.
 							<hr/>
 						</div>
 				</div>

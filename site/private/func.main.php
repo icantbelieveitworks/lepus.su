@@ -786,7 +786,7 @@ function lepus_getTariffList($id = null){
 		$query->execute();
 		$row = $query->fetch();
 		
-		$query = $db->prepare("SELECT * FROM `tariff` WHERE `gid` = :gid AND `id` != :id AND `status` = 1 ORDER BY `point`");
+		$query = $db->prepare("SELECT * FROM `tariff` WHERE `gid` = :gid AND `id` != :id AND `status` != 0 ORDER BY `point`");
 		$query->bindParam(':gid', $row['gid'], PDO::PARAM_STR);
 		$query->bindParam(':id', $id, PDO::PARAM_STR);
 	}
@@ -913,7 +913,7 @@ function lepus_getLogSpend($id, $i = 0){
 }
 
 function lepus_getPageNavi(){
-	$navi = ''; $pages = ['/' => 'Главная',	'/pages/hosting.php' => 'Хостинг', '/pages/ovz.php' => 'Хостинг(v2)', '/pages/vps.php' => 'VPS', '/pages/servers.php' => 'Серверы', 'http://dom.lepus.su' => 'Домены', '/pages/doc.php' => 'Документы', '/pages/contacts.php' => 'Контакты'];
+	$navi = ''; $pages = ['/' => 'Главная', '/pages/ovz.php' => 'Хостинг', '/pages/vps.php' => 'VPS', '/pages/servers.php' => 'Серверы', 'http://dom.lepus.su' => 'Домены', '/pages/doc.php' => 'Документы', '/pages/contacts.php' => 'Контакты'];
 	foreach($pages as $key => $val){
 		if($_SERVER["REQUEST_URI"] == $key)
 			$navi .= "<li class=\"active\"><a href=\"$key\">$val</a></li>";
@@ -1145,7 +1145,7 @@ function lepus_changeTariff_preview($id, $sid){
 	if(!is_array($info)) return $info;
 	$info = lepus_moneyback($id, $sid);
 	if(!is_array($info)) return $info;	
-	if($info['status'] == 1 && $info['status2']){
+	if($info['status'] != 0 && $info['status2']){
 		$data .= "Возврат средств => {$info['moneyback']}, к оплате => {$user['data']['balance']} + {$info['moneyback']} - {$info['pay']}, остаток на счете => {$info['total']} рублей.";
 		if($info['total'] < 0){
 			$data .="<br/><font color='red'>Для смены тарифа, пожалуйста, пополните счет на ".abs($info['total'])." рублей.</font>";
@@ -1164,6 +1164,7 @@ function lepus_changeTariff($id, $sid){
 	if(!is_array($data)) return $data;
 	$info = lepus_moneyback($id, $sid);
 	if(!is_array($info)) return $info;
+	if($info['status'] == 0) die("error");
 	if($info['total'] < 0)
 		return "<center><font color='red'>Для смены тарифа, пожалуйста, пополните счет на ".abs($info['total'])." рублей.</font></center>";
 	$query = $db->prepare("UPDATE `log_spend` SET `time2` = unix_timestamp(now()), `money` = :money WHERE `id` = :id");
@@ -1469,8 +1470,8 @@ function lepus_doTask(){
 								$s1 = 'root';
 							}
 							if($row['handler'] == 'VH'){
-								$s = 'виртуальный хостинг готов';
-								$s1 = 'root или lepus';
+								$s = "виртуальный хостинг готов";
+								$s1 = 'root или lepus [доступ от SFTP/ FTP/ SSH/ MySQL]';
 							}
 							$_POST['msg'] = "Дорогой клиент, $s.\nLogin: $s1\nPassword: {$data['passwd']}\nПожалуйста, поменяйте пароль.\nВы можете посмотреть более подробную информацию об услуге [urls=https://lepus.su/pages/view.php?id={$data['order']}]на этой странице[/urls].";
 							support_msg(5, $data['tiket'], 2, 1);

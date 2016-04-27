@@ -1024,6 +1024,7 @@ function lepus_AutoExtend($uid = 0){
 				$toTask['order'] = $row['id'];
 				$toTask['user'] = $arr['user'];
 			break;
+			case 'VH':
 			case 'KVM':
 			case 'OpenVZ':
 				$toTask['order'] = $row['id'];
@@ -1121,7 +1122,7 @@ function lepus_moneyback($id, $sid){
 	$tmpQuery->execute();
 	$tmpRow = $tmpQuery->fetch();
 	if($sid == $old_tariff_id) return 'already_tariff';
-	if($tmpRow['gid'] == '2' || $tmpRow['gid'] == '3' || $tmpRow['gid'] == '4' || $tmpRow['gid'] == '5') return 'no_gid_change_tariff';	
+	if($tmpRow['gid'] == '2' || $tmpRow['gid'] == '3' || $tmpRow['gid'] == '4') return 'no_gid_change_tariff';	
 	$time_moneyback = ($row['time2'] - time())/(60*60*24);
 	$day = $row['money']/(($row['time2']-strtotime("-1 month", $row['time2']))/(60*60*24));
 	$moneyback = floor($day*$time_moneyback);
@@ -1189,6 +1190,14 @@ function lepus_changeTariff($id, $sid){
 	switch($row['handler']){
 		case 'ISPmanagerV4':
 			$toTask = ['do' => 'change', 'tariff' => $sid, 'user' => $arr['user'], 'email' => $user['login'], 'order' => $data['id']];
+		break;
+		case 'VH':
+			$query = $db->prepare("SELECT * FROM `tariff` WHERE `id` = :id");
+			$query->bindParam(':id', $sid, PDO::PARAM_STR);
+			$query->execute();
+			$tmp = $query->fetch();
+			$x = json_decode($tmp['data'], true);
+			$toTask = ['do' => 'change', 'memory' => $x['memory'], 'cpus' => $x['cpus'], 'diskspace' => $x['diskspace'], 'order' => $data['id']];
 		break;
 	}
 	if(!empty($toTask))
@@ -1448,9 +1457,14 @@ function lepus_doTask(){
 			case 'VH':
 			case 'KVM':
 			case 'OpenVZ':
-				$commands = ['stop' => 'stopServer', 'start' => 'startServer', 'restart' => 'restartServer', 'create' => 'createServer'];
+				$commands = ['stop' => 'stopServer', 'start' => 'startServer', 'restart' => 'restartServer', 'create' => 'createServer', 'change' => 'changeTariff'];
 				switch($commands[$data['do']]){
 					default: $info = 'no_action'; break;
+					case 'changeTariff':
+						if($row['handler'] == 'VH'){
+							$info = send_changeTariff($row['id'], $commands[$data['do']], $server['ip'], $server['access'], $data['order']+100, "memory={$data['memory']}&cpus={$data['cpus']}&diskspace={$data['diskspace']}");
+						}
+					break;
 					case 'startServer':
 					case 'stopServer':
 					case 'restartServer':
@@ -1567,6 +1581,10 @@ function lepus_searchFree($handler, $tariff, $id){
 		}
 	}
 	return $server;
+}
+
+function send_changeTariff($cid, $command, $host, $key, $id, $get){
+	return file_get_contents("http://$host/index.php?id=$id&command=$command&key=$key&$get");
 }
 
 function send_kvm($cid, $command, $host, $key, $id){

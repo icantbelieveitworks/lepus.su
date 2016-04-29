@@ -1117,12 +1117,13 @@ function lepus_moneyback($id, $sid){
 	$tmpQuery->execute();
 	$tmpRow = $tmpQuery->fetch();
 	$old_tariff_id = $tmpRow['sid'];
+	if($sid == $old_tariff_id) return 'already_tariff';
 	$tmpQuery = $db->prepare("SELECT * FROM `tariff` WHERE `id` = :id");
 	$tmpQuery->bindParam(':id', $old_tariff_id, PDO::PARAM_STR);
 	$tmpQuery->execute();
 	$tmpRow = $tmpQuery->fetch();
-	if($sid == $old_tariff_id) return 'already_tariff';
-	if($tmpRow['gid'] == '2' || $tmpRow['gid'] == '3' || $tmpRow['gid'] == '4') return 'no_gid_change_tariff';	
+	$old_tariff_poins = $tmpRow['point'];
+	if($tmpRow['gid'] == 3 || $tmpRow['gid'] == 4) return 'no_gid_change_tariff';	
 	$time_moneyback = ($row['time2'] - time())/(60*60*24);
 	$day = $row['money']/(($row['time2']-strtotime("-1 month", $row['time2']))/(60*60*24));
 	$moneyback = floor($day*$time_moneyback);
@@ -1133,6 +1134,7 @@ function lepus_moneyback($id, $sid){
 	$query->execute();
 	if($query->rowCount() != 1) return 'wrong_tariff';
 	$row = $query->fetch();
+	if($tmpRow['gid'] == '2' && $old_tariff_poins > $row['point']) return 'cant_tariff_lower';
 	if($tmpRow['handler'] != $tmpRow['handler']) return 'different_handler';
 	$arr = lepus_getExtra($id);
 	$pay = lepus_price($row["price"], $row["currency"])+lepus_price($arr['extra'], $arr['extra_currency']);
@@ -1192,6 +1194,7 @@ function lepus_changeTariff($id, $sid){
 			$toTask = ['do' => 'change', 'tariff' => $sid, 'user' => $arr['user'], 'email' => $user['login'], 'order' => $data['id']];
 		break;
 		case 'VH':
+		case 'KVM':
 			$query = $db->prepare("SELECT * FROM `tariff` WHERE `id` = :id");
 			$query->bindParam(':id', $sid, PDO::PARAM_STR);
 			$query->execute();
@@ -1461,7 +1464,7 @@ function lepus_doTask(){
 				switch($commands[$data['do']]){
 					default: $info = 'no_action'; break;
 					case 'changeTariff':
-						if($row['handler'] == 'VH'){
+						if($row['handler'] == 'VH' || $row['handler'] == 'KVM'){
 							$info = send_changeTariff($row['id'], $commands[$data['do']], $server['ip'], $server['access'], $data['order']+100, "memory={$data['memory']}&cpus={$data['cpus']}&diskspace={$data['diskspace']}");
 						}
 					break;
@@ -1660,7 +1663,7 @@ function ReverseIPOctets($inputip){
 function lepus_changeAPIkey(){
 	global $db, $user;
 	$a = genRandStr(32);
-	$b = substr_replace($a, '********************', -20, -6);
+	$b = substr_replace($a, str_repeat('*', 20), -20, -6);
 	$query = $db->prepare("UPDATE `users` SET `api` = :api WHERE `id` = :id");
 	$query->bindParam(':api', $a, PDO::PARAM_STR);
 	$query->bindParam(':id', $user['id'], PDO::PARAM_STR);

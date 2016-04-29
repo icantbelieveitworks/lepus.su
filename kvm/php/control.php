@@ -11,6 +11,16 @@ function get_status($name){
 	return libvirt_domain_get_info($id); // 1 => online, 5 => offline
 }
 
+function lepus_editKVM($key, $val){
+	global $config;
+	switch($key){
+		default: $config->$key = $val; break;
+		case 'disk': $config->devices->disk->source['dev'] = $val; break;
+		case 'mac': $config->devices->interface->mac['address'] = $val; break;
+		case 'vnc': $config->devices->graphics['passwd'] = $val; break;
+	}
+}
+
 $credentials = [VIR_CRED_AUTHNAME => "", VIR_CRED_PASSPHRASE => ""];
 $res = libvirt_connect("qemu+unix:///system", false, $credentials);
 
@@ -29,6 +39,22 @@ switch($_GET['command']){
 	break;
 	case 'restartServer':
 		kvm_exec("reboot", $vm_id);
+	break;
+	case 'changeTariff':
+	if(empty($_GET['memory']) || empty($_GET['cpus']) || empty($_GET['diskspace'])) die("error 2");
+		$conf_dir = '/etc/libvirt/qemu';
+		shell_exec("sudo zfs set volsize=".$_GET['diskspace']."G ssd/$vm_id");
+		shell_exec("sudo chmod 777 $conf_dir/$vm_id.xml");
+		$xml = file_get_contents("$conf_dir/$vm_id.xml");
+		$config = new SimpleXMLElement($xml);
+		lepus_editKVM('memory', $_GET['memory']);
+		lepus_editKVM('currentMemory', $_GET['memory']);
+		lepus_editKVM('vcpu', $_GET['cpus']);
+		file_put_contents("$conf_dir/$vm_id.xml", $config->saveXML());
+		shell_exec("sudo virsh define $conf_dir/$vm_id.xml");
+		kvm_exec("destroy", $vm_id);
+		sleep(3);
+		kvm_exec("start", $vm_id);
 	break;
 }
 

@@ -1,3 +1,4 @@
+#!/usr/bin/php5
 <?php
 /*
 <name>debian</name>
@@ -54,7 +55,7 @@ $res = libvirt_connect("qemu+unix:///system", false, $credentials);
 // id, ip, mac, root passwd, memory, cpus, diskspace, node
 $json = json_decode(file_get_contents('https://lepus.su/public/api/create.php'), true);
 
-if(empty(intval($json['id'])) || empty($json['ip']) || empty($json['mac']) || empty($json['passwd']) || empty($json['memory']) || empty($json['cpus']) || empty($json['diskspace']) || empty($json['node'])) die('empty');
+if(empty(intval($json['id'])) || empty($json['ip']) || empty($json['mac']) || empty($json['passwd']) || empty($json['memory']) || empty($json['cpus']) || empty($json['diskspace']) || empty($json['node'])) die("empty\n");
 var_dump($json);
 
 $arr = explode(".", $json['node']);
@@ -75,6 +76,7 @@ lepus_editKVM('mac', $json['mac']);
 file_put_contents("/etc/libvirt/qemu/$vm_id.xml", $config->saveXML());
 shell_exec("zfs create -s -V {$json['diskspace']}g ssd/$vm_id");
 shell_exec("zfs set compression=lz4 ssd/$vm_id");
+sleep(10);
 shell_exec("cp /dev/zvol/ssd/debian /dev/zvol/ssd/$vm_id");
 shell_exec("virsh define /etc/libvirt/qemu/$vm_id.xml");
 shell_exec("mkdir /mnt/$vm_id");

@@ -913,7 +913,7 @@ function lepus_getLogSpend($id, $i = 0){
 }
 
 function lepus_getPageNavi(){
-	$navi = ''; $pages = ['/' => 'Главная', '/pages/ovz.php' => 'Хостинг', '/pages/vps.php' => 'VPS', '/pages/servers.php' => 'Серверы', 'http://dom.lepus.su' => 'Домены', '/pages/doc.php' => 'Документы', '/pages/contacts.php' => 'Контакты'];
+	$navi = ''; $pages = ['/' => 'Главная', '/pages/ovz.php' => 'Хостинг', '/pages/vps.php' => 'VPS', '/pages/servers.php' => 'Серверы', '/pages/domains.php' => 'Домены', '/pages/doc.php' => 'Документы', '/pages/contacts.php' => 'Контакты'];
 	foreach($pages as $key => $val){
 		if($_SERVER["REQUEST_URI"] == $key)
 			$navi .= "<li class=\"active\"><a href=\"$key\">$val</a></li>";
@@ -998,9 +998,9 @@ function lepus_AutoExtend($uid = 0){
 	global $db;
 	$time = time()+60*60*24*3;
 	if($uid == 0){
-		$query = $db->prepare("SELECT * FROM `services` WHERE `time2` < :time AND `auto` = 1");
+		$query = $db->prepare("SELECT * FROM `services` WHERE `time2` < :time");
 	}else{
-		$query = $db->prepare("SELECT * FROM `services` WHERE `time2` < :time AND `uid` = :uid AND `auto` = 1");
+		$query = $db->prepare("SELECT * FROM `services` WHERE `time2` < :time AND `uid` = :uid");
 		$query->bindParam(':uid', $uid, PDO::PARAM_STR);
 	}
 	$query->bindParam(':time', $time, PDO::PARAM_STR);
@@ -1042,7 +1042,7 @@ function lepus_AutoExtend($uid = 0){
 				lepus_addTask(0, $tmpRow['handler'], $toTask);
 		}
 		unset($toTask);
-		if($user['data']['balance'] < $price){
+		if($user['data']['balance'] < $price || $row['auto'] != 1){
 			//if($uid == 0 && time()-60*60*24*7 < $row['time2'] && time() > $row['time3']){
 			//	lepus_moveToArchive($row['id']);
 			//	_mail($user['login'], "Перенос в архив", "Дорогой клиент, через семь дней, неоплаченные услуги удаляются и отправляются в архив.<br/>
@@ -1050,7 +1050,7 @@ function lepus_AutoExtend($uid = 0){
 			//	Если вы хотите восстановить услугу - напишите в техническую поддержку. И возможно мы поможем восстановить ваши данные.");
 				// create task => delete
 			//}else{
-				_mail($user['login'], "Автоматическое продление #{$row['id']}", "Дорогой клиент, мы не смогли продлить услугу {$tmpRow['name']} #{$row['id']}<br/>Так как на вашем счете недостаточно средств.");
+				_mail($user['login'], "Автоматическое продление #{$row['id']}", "Дорогой клиент, мы не смогли продлить услугу {$tmpRow['name']} #{$row['id']}<br/>Так как вы или выключили автопродление или на вашем счете недостаточно средств.");
 			//}
 		}else{
 			$row['time1'] = $row['time2'];

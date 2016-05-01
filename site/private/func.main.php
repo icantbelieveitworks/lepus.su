@@ -1031,12 +1031,10 @@ function lepus_AutoExtend($uid = 0){
 			break;
 		}
 		if(!empty($toTask) && time() > $row['time2']+60*60*24){
-			if($user['data']['balance'] < $price && $uid == 0){
-				if(time() > $row['time3'])
-					$toTask['do'] = 'stop';
-			}
-			if($user['data']['balance'] >= $price){
+			if($user['data']['balance'] >= $price && $row['auto'] == 1){
 				$toTask['do'] = 'start';
+			}else{
+				if(time() > $row['time3'] && $uid == 0) $toTask['do'] = 'stop';
 			}
 			if(!empty($toTask['do']))
 				lepus_addTask(0, $tmpRow['handler'], $toTask);

@@ -13,6 +13,7 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/auth.php');
 		<meta name="description" content="Виртуальный хостинг, быстрые VPS, выделенные серверы по привлекательной цене." />
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 		<meta name='yandex-verification' content='450601432a8981ef' />
+		<meta name="unitpay-verification" content="f06067263051b3f5a73ddeebadf6fa" />
 		<link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
 		<link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css">
 		<link rel="stylesheet" type="text/css" href="/css/font-awesome.min.css">
@@ -33,10 +34,10 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/auth.php');
 					<div class="content-text">
 						<div class="page-title">Lepus хостинг</div>
 						<p>
-							— <a href="http://dom.lepus.su/" target="_blank" rel="nofollow">Регистрация доменов</a>.<br/>
+							— <a href="/pages/domains.php">Регистрация доменов</a>.<br/>
 							— Мощные <a href="/pages/vps.php">KVM VPS</a> на SSD дисках.<br/>
 							— Moneyback по первому требованию.<br/>
-							— <a href="/pages/hosting.php">Виртуальный хостинг</a> для ваших сайтов.<br/>
+							— <a href="/pages/ovz.php">Виртуальный хостинг</a> для ваших сайтов.<br/>
 							— Быстрые <a href="/pages/servers.php">выделенные серверы</a> по выгодной цене.<br/>
 							— Бесплатный перенос ваших сайтов на наш хостинг.<br/><br/>
 							Наша миссия - предоставление качественных услуг хостинга. Находим индивидуальный подход к каждому клиенту.<br/>

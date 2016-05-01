@@ -6,12 +6,8 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/init/session.php');
 require_once($_SERVER['DOCUMENT_ROOT'].'/private/func.main.php');
 require_once($_SERVER['DOCUMENT_ROOT'].'/private/auth.php');
 $start_order = null;
-for($i=0; $i < 5; $i++){
-	if(!is_login())
-		$start_order .= "<td><a class=\"btn btn-danger btn-xs\" data-register-open rel=\"nofollow\">заказать</a></td>";
-	else
-		$start_order .= "<td><a class=\"btn btn-danger btn-xs\" rel=\"nofollow\" href=\"/pages/order.php\">заказать</a></td>";
-}
+for($i=0; $i < 7; $i++)
+		$start_order .= "<td><a id=\"noclick\" class=\"btn btn-danger btn-xs\" rel=\"nofollow\" href=\"https://my.lepus.su/billmgr?func=showroom.redirect&redirect_to=desktop&startform=service.order.itemtype&newwindow=yes\" target=\"_blank\">заказать</a></td>";
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
@@ -41,46 +37,30 @@ for($i=0; $i < 5; $i++){
 			<div class="content-box">
 				<div class="content-info box-shadow--2dp">
 					<div class="content-text">
-						<div class="page-title">KVM VPS на SSD дисках</div>
+						<div class="page-title">Домены</div>
 						<table class="table table-striped table-bordered">
 							<thead>
 								<tr>
-									<th>Тарифы</th>
-									<th>KVM1</th>
-									<th><font color="IndianRed">KVM2</font></th>
-									<th>KVM3</th>
-									<th>KVM4</th>
-									<th>KVM5</th>
+									<th>Зона</th>
+									<th>.RU</th>
+									<th>.РФ</th>
+									<th>.SU</th>
+									<th>.COM</th>
+									<th>.NET</th>
+									<th>.ORG</th>
+									<th>.INFO</th>
 								</tr>
 							</thead>
 							<tbody>
-								<tr>
-									<td>CPU (MHz)</td>
-									<td>2200</td>
-									<td>2200</td>
-									<td>2200</td>
-									<td>2x2200</td>
-									<td>2x2200</td>
-								</tr>
-								<tr>
-									<td>Диск (Gb)</td>
-									<td>10</td>
-									<td>20</td>
-									<td>30</td>
-									<td>40</td>
-									<td>50</td>
-								</tr>
-								<tr>
-									<td>RAM (Mb)</td>
-									<td>1024</td>
-									<td>2048</td>
-									<td>3072</td>
-									<td>4096</td>
-									<td>5120</td>
-								</tr>
-								<tr>
-									<th>Цена</th>
-									<?php echo lepus_getTariffPrices(2); ?>
+								<th>Цена</th>
+									<th>200</th>
+									<th>200</th>
+									<th>400</th>
+									<th>1000</th>
+									<th>1000</th>
+									<th>1000</th>
+									<th>1000</th>
+								
 								</tr>
 								<tfoot>
 									<tr>
@@ -90,8 +70,7 @@ for($i=0; $i < 5; $i++){
 								</tfoot>
 							</tbody>
 						</table>
-						Подключение к сети 100Mb/s. Защита от udp/ tcp DDOS атак на уровне дата центра. Низкий ping ping.lepus.su<br/>
-						В качестве панели управления, мы предлагаем использовать <a href="https://my.lepus.su/billmgr?func=showroom.redirect&redirect_to=desktop&startform=service.order.itemtype&newwindow=yes" target="_blank">ISPmanager</a> [~350 руб/ месяц] или <a href="http://vestacp.com/" target="_blank">VestaCP</a> [бесплатная].
+						Срок регистрации домена год. Продление равно стоимости регистрации.
 						<hr/>
 					</div>
 				</div>

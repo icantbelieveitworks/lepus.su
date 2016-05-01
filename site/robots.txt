@@ -1,14 +1,16 @@
-User-agent: Yandex
-Allow: /$
-Allow: /pages/hosting.php$
-Allow: /pages/vps.php$
-Allow: /pages/servers.php$
-Disallow: /
-Host: lepus.su
-
 User-agent: *
 Allow: /$
-Allow: /pages/hosting.php$
+Allow: /pages/ovz.php$
 Allow: /pages/vps.php$
 Allow: /pages/servers.php$
+Allow: /pages/domains.php$
+Allow: /*.js
+Allow: /*.css
+Allow: /*.png
+Allow: /*.gif
+Allow: /*.bmp
+Allow: /*.jpg
+Allow: /*.jpeg
 Disallow: /
+
+Host: lepus.su

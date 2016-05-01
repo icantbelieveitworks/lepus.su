@@ -65,7 +65,7 @@ $tmpData = lepus_get_dnsAccess($_GET['id'], $user['id']);
 													<option value="PTR">PTR</option>
 													<option value="SOA">SOA</option>
 												</select>
-												<input class="form-control" id="dnsZoneData"  style="width: 220px;"  type="text" name="count" value="" required="" placeholder="127.0.0.1">
+												<input class="form-control" id="dnsZoneData"  style="width: 266px;"  type="text" name="count" value="" required="" placeholder="127.0.0.1">
 												<input class="form-control" id="dnsZonePrio"  style="width: 120px;"  type="text" name="count" value="" required="" placeholder="10 [приоритет]">
 												<input id="dnsDomainZoneID" type="hidden" value=<?php echo intval($_GET['id']);?>>
 											<input class="btn btn-sm btn-danger btn-block" data-dns-zone-add style="margin-top: 2px;" type="submit" value="Добавить запись">

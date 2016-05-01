@@ -181,7 +181,7 @@ function lepus_orderLink(){
 						На всех серверах в дата центре OVH => работает фильтрация tcp/ udp DDOS.<br/>
 						Обработка вашего заказа может занять время. Если вам срочно требуется сервер => обратитесь в поддержку.<br/>
 						Дополнительный IP: 300 рублей/ один раз. E3-SAT-x => max 16 дополнительных IP. На всех остальных max 256.<br/>
-						В качестве панели управления, мы предлагаем использовать <a href="http://www.isplicense.ru/?from=2043" target="_blank">ISPmanager</a> [~250 руб/ месяц] или <a href="http://vestacp.com/" target="_blank">VestaCP</a> [бесплатная].
+						В качестве панели управления, мы предлагаем использовать <a href="https://my.lepus.su/billmgr?func=showroom.redirect&redirect_to=desktop&startform=service.order.itemtype&newwindow=yes" target="_blank">ISPmanager</a> [~350 руб/ месяц] или <a href="http://vestacp.com/" target="_blank">VestaCP</a> [бесплатная].
 						<hr/>
 					</div>
 				</div>

@@ -26,3 +26,6 @@ $conf['paymaster'] = 'xxxx';
 $conf['lepus_crypt'] = 'xxxx';
 
 $conf['telegram'] = 'bot1:xxxx';
+
+$conf['billmgr_user'] = 'xxxx'
+$conf['billmgr_pass'] = 'xxxx';

@@ -15,6 +15,11 @@ if(empty($user)){ ?>
 		</div>
 	</div>
 </div>
+<!-- BEGIN JIVOSITE CODE {literal} -->
+<script type='text/javascript'>
+(function(){ var widget_id = 'N1uLPFHAzH';var d=document;var w=window;function l(){
+var s = document.createElement('script'); s.type = 'text/javascript'; s.async = true; s.src = '//code.jivosite.com/script/widget/'+widget_id; var ss = document.getElementsByTagName('script')[0]; ss.parentNode.insertBefore(s, ss);}if(d.readyState=='complete'){l();}else{if(w.attachEvent){w.attachEvent('onload',l);}else{w.addEventListener('load',l,false);}}})();</script>
+<!-- {/literal} END JIVOSITE CODE -->
 <?php }else{ ?>
 <div class="blocks">
 	<div class="block-login box-shadow--2dp">
@@ -40,6 +45,7 @@ if(empty($user)){ ?>
 				<li><a href="/pages/service.php?q=2">VPS хостинг</a></li>
 				<li><a href="/pages/dns.php">DNS хостинг</a></li>
 				<li><a href="/pages/service.php?q=1">ISPmanager хостинг</a></li>
+				<li><a href="https://my.lepus.su/billmgr?func=showroom.redirect&redirect_to=desktop&startform=service.order.itemtype&newwindow=yes" target="_blank">Домены и лицензии</a></li>
 				<li><a href="/pages/service.php?q=4">Администрирование</a></li>
 				<li><a href="/pages/service.php?q=5">Виртуальный xостинг</a></li>
 				<li><a href="/pages/service.php?q=3">Выделенные серверы</a></li>

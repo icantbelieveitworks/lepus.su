@@ -819,10 +819,15 @@ function lepus_getTariffPrice($id){
 
 function lepus_price($val, $currency){
 	switch($currency){
-		case 'EUR': $val = round($val*90); break;
-		case 'USD': $val = round($val*80); break;
+		case 'EUR':
+		case 'EUR1':
+			$val = $val*90;
+		break;
+		case 'EUR2':
+			$val = $val*80;
+		break;
 	}
-	return $val;
+	return round($val);
 }
 
 function lepus_order_preview($sid, $promo = 0){
@@ -913,7 +918,7 @@ function lepus_getLogSpend($id, $i = 0){
 }
 
 function lepus_getPageNavi(){
-	$navi = ''; $pages = ['/' => 'Главная', '/pages/ovz.php' => 'Хостинг', '/pages/vps.php' => 'VPS', '/pages/servers.php' => 'Серверы', '/pages/domains.php' => 'Домены', '/pages/doc.php' => 'Документы', '/pages/contacts.php' => 'Контакты'];
+	$navi = ''; $pages = ['/' => 'Главная', '/pages/ovz.php' => 'Хостинг', '/pages/vps.php' => 'VPS', '/pages/servers.php' => 'Серверы', '/pages/domains.php' => 'Домены', '/pages/license.php' => 'Лицензии', '/pages/doc.php' => 'Документы', '/pages/contacts.php' => 'Контакты'];
 	foreach($pages as $key => $val){
 		if($_SERVER["REQUEST_URI"] == $key)
 			$navi .= "<li class=\"active\"><a href=\"$key\">$val</a></li>";
@@ -1647,10 +1652,14 @@ function lepus_admin_getMoneyLog($time = 'day'){
 }
 
 function IsTorExitPoint(){
-	if(gethostbyname(ReverseIPOctets($_SERVER['REMOTE_ADDR']).".".$_SERVER['SERVER_PORT'].".".ReverseIPOctets($_SERVER['SERVER_ADDR']).'.ip-port.exitlist.torproject.org') == '127.0.0.2')
-		return true;
-	else
-		return false;
+	global $cache;
+	$i = $cache->get($_SERVER['REMOTE_ADDR']);
+	if($i === FALSE){
+		if(gethostbyname(ReverseIPOctets($_SERVER['REMOTE_ADDR']).".".$_SERVER['SERVER_PORT'].".".ReverseIPOctets($_SERVER['SERVER_ADDR']).'.ip-port.exitlist.torproject.org') == '127.0.0.2') $i = 1; else $i = 2;
+		$cache->set($_SERVER['REMOTE_ADDR'], $i, MEMCACHE_COMPRESSED, 0);
+	}
+	if($i == 1) return true;
+	if($i == 2) return false;
 }
 
 function ReverseIPOctets($inputip){
@@ -1674,4 +1683,16 @@ function lepus_closeTikets(){
 	$query = $db->prepare("UPDATE `support` SET `status` = '2' WHERE `open` < :time AND `last` < :time");
 	$query->bindParam(':time', $time, PDO::PARAM_STR);
 	$query->execute();
+}
+
+function lepus_getBillprice($id, $period, $j = 0){
+	global $conf, $cache;
+	$price = $cache->get("billprice.$id.$period");
+	if($price === FALSE || $j == 1){
+		$ctx = stream_context_create(['http'=> ['timeout' => 30]]);
+		$arr = json_decode(@file_get_contents("https://my.lepus.su/billmgr?authinfo={$conf['billmgr_user']}:{$conf['billmgr_pass']}&out=json&func=pricelist.export&onlyavailable=on&pricelist=$id", false, $ctx), true);
+		$price = $arr["doc"]["pricelist"]["price"]["period"][$period]['$cost'];
+		$cache->set("billprice.$id.$period", $price, MEMCACHE_COMPRESSED, 3600);
+	}
+	return intval($price);
 }

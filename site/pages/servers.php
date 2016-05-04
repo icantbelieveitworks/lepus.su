@@ -57,7 +57,7 @@ function lepus_orderLink(){
 							<tbody>
 								<tr>
 									<td>E3-SAT-1</td>
-									<td><a href="http://ark.intel.com/ru/products/65733/Intel-Xeon-Processor-E3-1225V2-(8M-Cache-3_20-GHz)" target="_blank">E3-1225v2</a></td>
+									<td><a href="http://ark.intel.com/ru/products/65733/Intel-Xeon-Processor-E3-1225V2-(8M-Cache-3_20-GHz)" target="_blank">E3-1225</a></td>
 									<td>16 GB</td>
 									<td>2x 2TB SATA</td>
 									<td>250 Mbps</td>
@@ -68,7 +68,7 @@ function lepus_orderLink(){
 								</tr>
 								<tr>
 									<td>E3-SAT-2</td>
-									<td><a href="http://ark.intel.com/ru/products/65733/Intel-Xeon-Processor-E3-1225V2-(8M-Cache-3_20-GHz)" target="_blank">E3-1225v2</a></td>
+									<td><a href="http://ark.intel.com/ru/products/65733/Intel-Xeon-Processor-E3-1225V2-(8M-Cache-3_20-GHz)" target="_blank">E3-1225</a></td>
 									<td>32 GB</td>
 									<td>2x 2TB SATA</td>
 									<td>250 Mbps</td>
@@ -79,7 +79,7 @@ function lepus_orderLink(){
 								</tr>
 								<tr>
 									<td>E3-SAT-3</td>
-									<td><a href="http://ark.intel.com/ru/products/65729/Intel-Xeon-Processor-E3-1245-v2-8M-Cache-3_40-GHz" target="_blank">E3-1245v2</a></td>
+									<td><a href="http://ark.intel.com/ru/products/65729/Intel-Xeon-Processor-E3-1245-v2-8M-Cache-3_40-GHz" target="_blank">E3-1245</a></td>
 									<td>32 GB</td>
 									<td>2x 2TB SATA</td>
 									<td>250 Mbps</td>
@@ -89,8 +89,19 @@ function lepus_orderLink(){
 									<td><?php echo lepus_orderLink(); ?></td>
 								</tr>
 								<tr>
+									<td>E3-SSD-5</td>
+									<td><a href="http://ark.intel.com/ru/products/65729/Intel-Xeon-Processor-E3-1245-v2-8M-Cache-3_40-GHz" target="_blank">E3-1245</a></td>
+									<td>32 GB</td>
+									<td>2x 240GB SSD</td>
+									<td>250 Mbps</td>
+									<td>OVH</td>
+									<td><img src="https://lepus.su/images/flags/france-flag.png" title="France"></td>
+									<th><?php echo lepus_getTariffPrice(39); ?></th>
+									<td><?php echo lepus_orderLink(); ?></td>
+								</tr>
+								<tr>
 									<td>SP-32</td>
-									<td><a href="http://ark.intel.com/ru/products/80910/Intel-Xeon-Processor-E3-1231-v3-8M-Cache-3_40-GHz" target="_blank">E3-1231v3</a></td>
+									<td><a href="http://ark.intel.com/ru/products/80910/Intel-Xeon-Processor-E3-1231-v3-8M-Cache-3_40-GHz" target="_blank">E3-1231</a></td>
 									<td>32 GB</td>
 									<td>2x 2TB SATA</td>
 									<td>500 Mbps</td>
@@ -101,7 +112,7 @@ function lepus_orderLink(){
 								</tr>
 								<tr>
 									<td>SP-32-SSD</td>
-									<td><a href="http://ark.intel.com/ru/products/80910/Intel-Xeon-Processor-E3-1231-v3-8M-Cache-3_40-GHz" target="_blank">E3-1231v3</a></td>
+									<td><a href="http://ark.intel.com/ru/products/80910/Intel-Xeon-Processor-E3-1231-v3-8M-Cache-3_40-GHz" target="_blank">E3-1231</a></td>
 									<td>32 GB</td>
 									<td>2x 480GB SSD</td>
 									<td>500 Mbps</td>
@@ -112,7 +123,7 @@ function lepus_orderLink(){
 								</tr>
 								<tr>
 									<td>SP-64</td>
-									<td><a href="http://ark.intel.com/ru/products/80910/Intel-Xeon-Processor-E3-1231-v3-8M-Cache-3_40-GHz" target="_blank">E5-1630v3</a></td>
+									<td><a href="http://ark.intel.com/ru/products/82764/Intel-Xeon-Processor-E5-1630-v3-10M-Cache-3_70-GHz" target="_blank">E5-1630</a></td>
 									<td>64 GB</td>
 									<td>2x 2TB SATA</td>
 									<td>500 Mbps</td>
@@ -123,7 +134,7 @@ function lepus_orderLink(){
 								</tr>
 								<tr>
 									<td>SP-64-SSD</td>
-									<td><a href="http://ark.intel.com/ru/products/80910/Intel-Xeon-Processor-E3-1231-v3-8M-Cache-3_40-GHz" target="_blank">E5-1630v3</a></td>
+									<td><a href="http://ark.intel.com/ru/products/82764/Intel-Xeon-Processor-E5-1630-v3-10M-Cache-3_70-GHz" target="_blank">E5-1630</a></td>
 									<td>64 GB</td>
 									<td>2x 480GB SSD</td>
 									<td>500 Mbps</td>
@@ -133,8 +144,30 @@ function lepus_orderLink(){
 									<td><?php echo lepus_orderLink(); ?></td>
 								</tr>
 								<tr>
+									<td>SP-128</td>
+									<td><a href="http://ark.intel.com/ru/products/82765/Intel-Xeon-Processor-E5-1650-v3-15M-Cache-3_50-GHz" target="_blank">E5-1650</a></td>
+									<td>128 GB</td>
+									<td>2x 2TB SATA</td>
+									<td>500 Mbps</td>
+									<td>OVH</td>
+									<td><img src="https://lepus.su/images/flags/france-flag.png" title="France"></td>
+									<th><?php echo lepus_getTariffPrice(40); ?></th>
+									<td><?php echo lepus_orderLink(); ?></td>
+								</tr>
+								<tr>
+									<td>SP-128-SSD</td>
+									<td><a href="http://ark.intel.com/ru/products/82765/Intel-Xeon-Processor-E5-1650-v3-15M-Cache-3_50-GHz" target="_blank">E5-1650</a></td>
+									<td>128 GB</td>
+									<td>2x 480GB SSD</td>
+									<td>500 Mbps</td>
+									<td>OVH</td>
+									<td><img src="https://lepus.su/images/flags/france-flag.png" title="France"></td>
+									<th><?php echo lepus_getTariffPrice(41); ?></th>
+									<td><?php echo lepus_orderLink(); ?></td>
+								</tr>
+								<tr>
 									<td>MG-128</td>
-									<td>2x <a href="http://ark.intel.com/ru/products/83356/Intel-Xeon-Processor-E5-2630-v3-20M-Cache-2_40-GHz" target="_blank">E5-2630v3</a></td>
+									<td>2x <a href="http://ark.intel.com/ru/products/83356/Intel-Xeon-Processor-E5-2630-v3-20M-Cache-2_40-GHz" target="_blank">E5-2630</a></td>
 									<td>128 GB</td>
 									<td>2x 2TB SATA</td>
 									<td>1 Gbps</td>
@@ -145,7 +178,7 @@ function lepus_orderLink(){
 								</tr>
 								<tr>
 									<td>MG-128-SSD</td>
-									<td>2x <a href="http://ark.intel.com/ru/products/83356/Intel-Xeon-Processor-E5-2630-v3-20M-Cache-2_40-GHz" target="_blank">E5-2630v3</a></td>
+									<td>2x <a href="http://ark.intel.com/ru/products/83356/Intel-Xeon-Processor-E5-2630-v3-20M-Cache-2_40-GHz" target="_blank">E5-2630</a></td>
 									<td>128 GB</td>
 									<td>2x480GB SSD</td>
 									<td>1 Gbps</td>
@@ -156,7 +189,7 @@ function lepus_orderLink(){
 								</tr>
 								<tr>
 									<td>MG-256</td>
-									<td>2x <a href="http://ark.intel.com/ru/products/81705/Intel-Xeon-Processor-E5-2650-v3-25M-Cache-2_30-GHz" target="_blank">E5-2650v3</a></td>
+									<td>2x <a href="http://ark.intel.com/ru/products/81705/Intel-Xeon-Processor-E5-2650-v3-25M-Cache-2_30-GHz" target="_blank">E5-2650</a></td>
 									<td>256 GB</td>
 									<td>2x 2TB SATA</td>
 									<td>1 Gbps</td>
@@ -167,7 +200,7 @@ function lepus_orderLink(){
 								</tr>
 								<tr>
 									<td>MG-256-SSD</td>
-									<td>2x <a href="http://ark.intel.com/ru/products/81705/Intel-Xeon-Processor-E5-2650-v3-25M-Cache-2_30-GHz" target="_blank">E5-2650v3</a></td>
+									<td>2x <a href="http://ark.intel.com/ru/products/81705/Intel-Xeon-Processor-E5-2650-v3-25M-Cache-2_30-GHz" target="_blank">E5-2650</a></td>
 									<td>256 GB</td>
 									<td>2x480GB SSD</td>
 									<td>1 Gbps</td>
@@ -180,8 +213,8 @@ function lepus_orderLink(){
 						</table>
 						На всех серверах в дата центре OVH => работает фильтрация tcp/ udp DDOS.<br/>
 						Обработка вашего заказа может занять время. Если вам срочно требуется сервер => обратитесь в поддержку.<br/>
-						Дополнительный IP: 300 рублей/ один раз. E3-SAT-x => max 16 дополнительных IP. На всех остальных max 256.<br/>
-						В качестве панели управления, мы предлагаем использовать <a href="https://my.lepus.su/billmgr?func=showroom.redirect&redirect_to=desktop&startform=service.order.itemtype&newwindow=yes" target="_blank">ISPmanager</a> [~350 руб/ месяц] или <a href="http://vestacp.com/" target="_blank">VestaCP</a> [бесплатная].
+						Дополнительный IP: 300 рублей/ один раз. E3-x-x => max 16 дополнительных IP. На всех остальных max 256.<br/>
+						В качестве панели управления, мы предлагаем использовать <a href="https://my.lepus.su/billmgr?func=showroom.redirect&redirect_to=desktop&startform=service.order.itemtype&newwindow=yes" target="_blank">ISPmanager</a> [<?php echo lepus_getBillprice(17, 0); ?> руб/ месяц] или <a href="http://vestacp.com/" target="_blank">VestaCP</a> [бесплатная].
 						<hr/>
 					</div>
 				</div>

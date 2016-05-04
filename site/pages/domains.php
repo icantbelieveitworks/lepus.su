@@ -6,14 +6,14 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/init/session.php');
 require_once($_SERVER['DOCUMENT_ROOT'].'/private/func.main.php');
 require_once($_SERVER['DOCUMENT_ROOT'].'/private/auth.php');
 $start_order = null;
-for($i=0; $i < 7; $i++)
+for($i=0; $i < 9; $i++)
 		$start_order .= "<td><a id=\"noclick\" class=\"btn btn-danger btn-xs\" rel=\"nofollow\" href=\"https://my.lepus.su/billmgr?func=showroom.redirect&redirect_to=desktop&startform=service.order.itemtype&newwindow=yes\" target=\"_blank\">заказать</a></td>";
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 	<head>
-		<title>KVM VPS</title>
-		<meta name="description" content="Заказать быстрый KVM VPS на SSD дисках" />
+		<title>Домены</title>
+		<meta name="description" content="Купить домен ru, рф, su, name, com, net, org, biz, info" />
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 		<meta name="yandex-verification" content="6940b644b3235f76" />
 		<link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
@@ -45,22 +45,25 @@ for($i=0; $i < 7; $i++)
 									<th>.RU</th>
 									<th>.РФ</th>
 									<th>.SU</th>
+									<th>.NAME</th>
 									<th>.COM</th>
 									<th>.NET</th>
 									<th>.ORG</th>
+									<th>.BIZ</th>
 									<th>.INFO</th>
 								</tr>
 							</thead>
 							<tbody>
 								<th>Цена</th>
-									<th>200</th>
-									<th>200</th>
-									<th>400</th>
-									<th>1000</th>
-									<th>1000</th>
-									<th>1000</th>
-									<th>1000</th>
-								
+									<th><?php echo lepus_getBillprice(1, 1); ?></th>
+									<th><?php echo lepus_getBillprice(13, 1); ?></th>
+									<th><?php echo lepus_getBillprice(5, 1); ?></th>
+									<th><?php echo lepus_getBillprice(19, 1); ?></th>
+									<th><?php echo lepus_getBillprice(11, 1); ?></th>
+									<th><?php echo lepus_getBillprice(15, 1); ?></th>
+									<th><?php echo lepus_getBillprice(9, 1); ?></th>
+									<th><?php echo lepus_getBillprice(21, 1); ?></th>
+									<th><?php echo lepus_getBillprice(7, 1); ?></th>
 								</tr>
 								<tfoot>
 									<tr>
@@ -70,7 +73,7 @@ for($i=0; $i < 7; $i++)
 								</tfoot>
 							</tbody>
 						</table>
-						Срок регистрации домена год. Продление равно стоимости регистрации.
+						Срок регистрации домена год. Продление равно стоимости регистрации. Цены указаны в рублях.
 						<hr/>
 					</div>
 				</div>

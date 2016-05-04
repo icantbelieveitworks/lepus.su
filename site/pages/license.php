@@ -6,18 +6,14 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/init/session.php');
 require_once($_SERVER['DOCUMENT_ROOT'].'/private/func.main.php');
 require_once($_SERVER['DOCUMENT_ROOT'].'/private/auth.php');
 $start_order = null;
-for($i=0; $i < 5; $i++){
-	if(!is_login())
-		$start_order .= "<td><a class=\"btn btn-danger btn-xs\" data-register-open rel=\"nofollow\">заказать</a></td>";
-	else
-		$start_order .= "<td><a class=\"btn btn-danger btn-xs\" rel=\"nofollow\" href=\"/pages/order.php\">заказать</a></td>";
-}
+for($i=0; $i < 4; $i++)
+		$start_order .= "<td><a id=\"noclick\" class=\"btn btn-danger btn-xs\" rel=\"nofollow\" href=\"https://my.lepus.su/billmgr?func=showroom.redirect&redirect_to=desktop&startform=service.order.itemtype&newwindow=yes\" target=\"_blank\">заказать</a></td>";
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 	<head>
-		<title>KVM VPS</title>
-		<meta name="description" content="Заказать быстрый KVM VPS на SSD дисках" />
+		<title>Лицензии</title>
+		<meta name="description" content="Купить лицензию ispmanager, billmanager" />
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 		<meta name="yandex-verification" content="6940b644b3235f76" />
 		<link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
@@ -41,46 +37,23 @@ for($i=0; $i < 5; $i++){
 			<div class="content-box">
 				<div class="content-info box-shadow--2dp">
 					<div class="content-text">
-						<div class="page-title">KVM VPS на SSD дисках</div>
+						<div class="page-title">Лицензии</div>
 						<table class="table table-striped table-bordered">
 							<thead>
 								<tr>
-									<th>Тарифы</th>
-									<th>KVM1</th>
-									<th><font color="IndianRed">KVM2</font></th>
-									<th>KVM3</th>
-									<th>KVM4</th>
-									<th>KVM5</th>
+									<th></th>
+									<th>ISPmanager 5 Lite</th>
+									<th>ISPmanager 5 Business</th>
+									<th>BILLmanager 5 Standart</th>
+									<th>BILLmanager 5 Advance</th>
 								</tr>
 							</thead>
 							<tbody>
-								<tr>
-									<td>CPU (MHz)</td>
-									<td>2200</td>
-									<td>2200</td>
-									<td>2200</td>
-									<td>2x2200</td>
-									<td>2x2200</td>
-								</tr>
-								<tr>
-									<td>Диск (Gb)</td>
-									<td>10</td>
-									<td>20</td>
-									<td>30</td>
-									<td>40</td>
-									<td>50</td>
-								</tr>
-								<tr>
-									<td>RAM (Mb)</td>
-									<td>1024</td>
-									<td>2048</td>
-									<td>3072</td>
-									<td>4096</td>
-									<td>5120</td>
-								</tr>
-								<tr>
-									<th>Цена</th>
-									<?php echo lepus_getTariffPrices(2); ?>
+								<th>Цена</th>
+									<th><?php echo lepus_getBillprice(17, 0); ?></th>
+									<th><?php echo lepus_getBillprice(23, 0); ?></th>
+									<th><?php echo lepus_getBillprice(25, 0); ?></th>
+									<th><?php echo lepus_getBillprice(26, 0); ?></th>
 								</tr>
 								<tfoot>
 									<tr>
@@ -90,8 +63,7 @@ for($i=0; $i < 5; $i++){
 								</tfoot>
 							</tbody>
 						</table>
-						Подключение к сети 100Mb/s. Защита от udp/ tcp DDOS атак на уровне дата центра. Низкий ping ping.lepus.su<br/>
-						В качестве панели управления, мы предлагаем использовать <a href="https://my.lepus.su/billmgr?func=showroom.redirect&redirect_to=desktop&startform=service.order.itemtype&newwindow=yes" target="_blank">ISPmanager</a> [<?php echo lepus_getBillprice(17, 0); ?> руб/ месяц] или <a href="http://vestacp.com/" target="_blank">VestaCP</a> [бесплатная].
+						Срок лицензии - месяц. Продление равно стоимости заказа. Цены указаны в рублях.
 						<hr/>
 					</div>
 				</div>

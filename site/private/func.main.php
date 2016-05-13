@@ -971,7 +971,7 @@ function lepus_adminGetListServices(){
 		$row['time2'] = date("Y-m-d", $row['time2']);
 		$arr = json_decode($row['data'], true);
 		$price = lepus_price($tmpRow['price'], $tmpRow['currency'])+lepus_price($arr['extra'], $arr['extra_currency']);
-		$data .= "<tr><td>{$row['id']}</td><td>{$tmpRow['name']}</td><td>{$email}</td><td>$price</td><td>{$row['time2']}</td><td>{$status}</td></tr>";
+		$data .= "<tr><td>{$row['id']}</td><td>{$tmpRow['name']}</td><td>{$email}</td><td>$price</td><td>{$row['time2']}</td><td>{$status}</td><td><a href=\"nourl\" data-move-archive-id=\"{$row['id']}\"><i class=\"glyphicon glyphicon-remove\"></i></a></td></tr>";
 		$all += $price;
 	}
 	return ['table' => $data, 'all' => $all];
@@ -1046,15 +1046,7 @@ function lepus_AutoExtend($uid = 0){
 		}
 		unset($toTask);
 		if($user['data']['balance'] < $price || $row['auto'] != 1){
-			//if($uid == 0 && time()-60*60*24*7 < $row['time2'] && time() > $row['time3']){
-			//	lepus_moveToArchive($row['id']);
-			//	_mail($user['login'], "Перенос в архив", "Дорогой клиент, через семь дней, неоплаченные услуги удаляются и отправляются в архив.<br/>
-			//	Вы  не продлили услугу {$tmpRow["name"]} => данные удалены, услуга перенесена в архив.<br/>
-			//	Если вы хотите восстановить услугу - напишите в техническую поддержку. И возможно мы поможем восстановить ваши данные.");
-				// create task => delete
-			//}else{
-				_mail($user['login'], "Автоматическое продление #{$row['id']}", "Дорогой клиент, мы не смогли продлить услугу {$tmpRow['name']} #{$row['id']}<br/>Так как вы или выключили автопродление или на вашем счете недостаточно средств.");
-			//}
+			_mail($user['login'], "Автоматическое продление #{$row['id']}", "Дорогой клиент, мы не смогли продлить услугу {$tmpRow['name']} #{$row['id']}<br/>Так как вы или выключили автопродление или на вашем счете недостаточно средств.");
 		}else{
 			$row['time1'] = $row['time2'];
 			$row['time2'] = strtotime("+1 month", $row['time2']);
@@ -1258,12 +1250,25 @@ function lepus_getArchiveList($id = null){
 }
 
 function lepus_moveToArchive($id){
-	global $db;
+	global $db; $ips = null;
 	$query = $db->prepare("SELECT * FROM `services` WHERE `id` = :id");
 	$query->bindParam(':id', $id, PDO::PARAM_STR);
 	$query->execute();
 	if($query->rowCount() != 1) return 'no_info';
 	$row = $query->fetch();
+	if($row['time2'] > time()-60*60*24*7) return 'no_time';
+	if($row['time3'] > time()-60*60*24*2) return 'no_time';
+	$getips = $db->prepare("SELECT * FROM `ipmanager` WHERE `service` = :id");
+	$getips->bindParam(':id', $id, PDO::PARAM_STR);
+	$getips->execute();
+	while($row2 = $getips->fetch()){
+		$ips .= long2ip($row2['ip']).", ";
+	}
+	if(!empty($ips)){
+		$row['data'] = json_decode($row['data'], true);
+		$row['data']['ips'] = substr($ips, 0, -2);
+		$row['data'] = json_encode($row['data']);
+	}
 	$query = $db->prepare("INSERT INTO `archive` (`oid`, `sid`, `uid`, `time1`, `time2`, `data`) VALUES (:oid, :sid, :uid, :time1, :time2, :data)");
 	$query->bindParam(':oid', $row['id'], PDO::PARAM_STR);
 	$query->bindParam(':sid', $row['sid'], PDO::PARAM_STR);
@@ -1275,6 +1280,16 @@ function lepus_moveToArchive($id){
 	$query = $db->prepare("DELETE FROM `services` WHERE `id` = :id");
 	$query->bindParam(':id', $id, PDO::PARAM_STR);
 	$query->execute();
+	$query = $db->prepare("UPDATE `ipmanager` SET `owner` = 5, `service` = 0 WHERE `service` = :id");
+	$query->bindParam(':id', $id, PDO::PARAM_STR);
+	$query->execute();
+	$query = $db->prepare("SELECT * FROM `users` WHERE `id` = :id");
+	$query->bindParam(':id', $row['uid'], PDO::PARAM_STR);
+	$query->execute();
+	$row = $query->fetch();
+	_mail($row['login'], "Перенос в архив # $id", "Дорогой клиент, через семь дней, неоплаченные попадают в архив.<br/>
+						Вы  не продлили услугу # $id => данные удалены, <a href=\"https://lepus.su/pages/archive.php\">услуга перенесена в архив</a>.<br/>
+						Если вы хотите восстановить услугу - напишите в техническую поддержку. И возможно мы поможем восстановить ваши данные.");				
 	return 'OK';
 }
 

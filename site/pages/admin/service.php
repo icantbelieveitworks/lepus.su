@@ -52,11 +52,12 @@ $tmpData = lepus_adminGetListServices();
 											<thead>
 												<tr>
 													<th>ID</th>
-													<th>Название</th>
-													<th>Пользователь</th>
-													<th>Стоимость</th>
-													<th>Дата</th>
-													<th>Статус</th>
+													<th>Name</th>
+													<th>User</th>
+													<th>Pirce</th>
+													<th>Date</th>
+													<th>Status</th>
+													<th></th>
 												</tr>
 											</thead>
 											<tbody>

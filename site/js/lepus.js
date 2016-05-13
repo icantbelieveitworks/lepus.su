@@ -6,6 +6,8 @@ var onloadCallback = function() {
 	widgetId2 = grecaptcha.render(document.getElementById('captcha_lost'), { 'sitekey' : '6LcI6RETAAAAAOGz1Pbig57ErQ70tIRlvbhECQIw' });
 };
 
+$(document).on('click', '#noclick', function(e){ $(this).blur(); })
+
 $(document).on("click", "[data-dns-domain-add]", function(e) {
 	$(this).blur();
 	var table = $('#dnsDomainsList').DataTable();
@@ -469,7 +471,6 @@ $(document).on("click", "[data-try-extend-services]", function(e) {
 	});
 });
 
-
 $(document).on("click", "[data-show-api]", function(e) {
 	$(this).blur();
 	e.preventDefault();
@@ -482,5 +483,27 @@ $(document).on("click", "[data-change-api-key]", function(e) {
 	if(!confirm("Вы подтверждаете действие?")) return;
 	$.post("//"+document.domain+"/public/change_api.php", function(data){
 		$("#api_key").html(data);
+	});
+});
+
+$(document).on("click", "[data-move-archive-id]", function(e) {
+	$(this).blur();
+	e.preventDefault();
+
+	if(!confirm("Вы подтверждаете действие?")) return;
+	
+	id = $(this).data("move-archive-id");
+
+	var table = $('#incomeTable').DataTable();
+	var this_income = $(this).parents('tr');
+
+	$.post("//"+document.domain+"/public/admin/move_archive.php", {id: id}, function(json){
+		data = JSON.parse(json);
+		if(data.err == 'OK'){
+			table.row(this_income).remove().draw();
+			alertify.success(data.mes);
+		}else{
+			alertify.error(data.mes);
+		}
 	});
 });

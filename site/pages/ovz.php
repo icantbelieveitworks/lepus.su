@@ -62,7 +62,7 @@ for($i=0; $i < 4; $i++){
 									</tr>
 									<tr>
 										<td>CPU (MHz)</td>
-										<td>420</td>
+										<td>600</td>
 										<td>840</td>
 										<td>1260</td>
 										<td>1680</td>
@@ -123,6 +123,20 @@ for($i=0; $i < 4; $i++){
 										<td>+</td>
 										<td>+</td>
 									</tr>
+								<tr>
+									<td>Дата-центр</td>
+									<td>OVH</td>
+									<td>OVH</td>
+									<td>OVH</td>
+									<td>OVH</td>
+								</tr>
+								<tr>
+									<td>Страна</td>
+									<td><img src="https://lepus.su/images/flags/france-flag.png" title="France"></td>
+									<td><img src="https://lepus.su/images/flags/france-flag.png" title="France"></td>
+									<td><img src="https://lepus.su/images/flags/france-flag.png" title="France"></td>
+									<td><img src="https://lepus.su/images/flags/france-flag.png" title="France"></td>
+								</tr>
 									<tr>
 										<th>Цена</th>
 										<?php echo lepus_getTariffPrices(5); ?>
@@ -135,9 +149,15 @@ for($i=0; $i < 4; $i++){
 									</tfoot>
 								</tbody>
 							</table>
-							<a href="https://poiuty.com/img/64/007a5008eb2bd61ffd5bfc06fe8ba064.png" target="_blank">Подробное описание услуги</a>, <a href="https://github.com/poiuty/lepus.su/issues/21">github</a>.<br/>
-							В стандартной поставке => это виртуальный хостинг (<a href="https://poiuty.com/index.php?title=%D0%92%D0%B8%D1%80%D1%82%D1%83%D0%B0%D0%BB%D1%8C%D0%BD%D1%8B%D0%B9_%D1%85%D0%BE%D1%81%D1%82%D0%B8%D0%BD%D0%B3_-_%D0%B4%D0%BE%D0%B1%D0%B0%D0%B2%D0%B8%D1%82%D1%8C_%D1%81%D0%B0%D0%B9%D1%82" target="_blank">инструкция как разместить сайт</a> + <a href="https://github.com/poiuty/lepus.su/wiki/%D0%92%D0%B8%D1%80%D1%82%D1%83%D0%B0%D0%BB%D1%8C%D0%BD%D1%8B%D0%B9-%D1%85%D0%BE%D1%81%D1%82%D0%B8%D0%BD%D0%B3">ответы на вопросы</a>) .<br/>
-							Если же вы умеете работать с linux => то для вас => это еще и дешевая OpenVZ VPS c полным root доступом.
+							Предлагаем решение на базе OpenVZ контейнеров. Бесплатно <a href="https://github.com/poiuty/lepus.su/wiki/%D0%9F%D0%B5%D1%80%D0%B5%D0%BD%D0%BE%D1%81-%D1%81%D0%B0%D0%B9%D1%82%D0%BE%D0%B2" target="_blank">перенесем ваши сайты</a>. <u><i>Новым клиентам 50% скидка!</i></u><br/>
+							Уникальный IP, хорошая изоляция от соседей, SSD диск, Anti-DDoS (tcp/udp) на уровне дата-центра, и полный root доступ.<br/><br/>
+							Вы сможете легко разместить ваш сайт (<a href="https://wiki.lepus.su/index.php?title=%D0%A0%D0%B0%D0%B7%D0%BC%D0%B5%D1%81%D1%82%D0%B8%D0%BC_%D1%81%D0%B0%D0%B9%D1%82_%D0%BD%D0%B0_%D0%B2%D0%B8%D1%80%D1%82%D1%83%D0%B0%D0%BB%D1%8C%D0%BD%D0%BE%D0%BC_%D1%85%D0%BE%D1%81%D1%82%D0%B8%D0%BD%D0%B3%D0%B5" target="_blank">подробная инструкция</a> + <a href="https://github.com/poiuty/lepus.su/wiki/%D0%92%D0%B8%D1%80%D1%82%D1%83%D0%B0%D0%BB%D1%8C%D0%BD%D1%8B%D0%B9-%D1%85%D0%BE%D1%81%D1%82%D0%B8%D0%BD%D0%B3" target="_blank">ответы на вопросы</a>).<br/>
+							1. Делегируем домен на наши NS + создаем записи.<br/>
+							2. Заходим на FTP, создаем папку (название домен, например lepus.su) и загружаем в нее файлы сайта.<br/>
+							3. Заходим в phpmyadmin, создаем базу+пользователя и загружаем дамп базы.<br/><br/>
+
+							В стандартной поставке => это виртуальный хостинг: apache24-event + apache mod_vhost_alias, php56-fpm, proftpd, mysql.<br/>
+							Если же вы умеете работать с linux, то для вас => это еще и недорогая VPS (где вы можете запустить любое приложение).
 							<hr/>
 						</div>
 				</div>

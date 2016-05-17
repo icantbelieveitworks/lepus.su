@@ -33,6 +33,7 @@ var s = document.createElement('script'); s.type = 'text/javascript'; s.async = 
 				<li><a href="/pages/admin/income.php">Доход</a></li>
 				<li><a href="/pages/admin/ipmanager.php">IPmanager</a></li>
 				<li><a href="/pages/admin/service.php">Список услуг</a></li>
+				<li><a href="/pages/admin/servers.php">Список серверов</a></li>
 				<?php } ?> 
 				<hr/>
 				<li><a href="/pages/cp.php">Настройки</a></li>

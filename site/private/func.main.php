@@ -485,7 +485,7 @@ function lepus_get_supportMsg($tid, $uid, $access, $msgID = 0, $update = 0, $dat
 		$tmpData = json_decode($tmpRow['data'], true);
 		if($tmpData['access'] > 1){
 			$panel = 'panel-danger';
-			$who = "Ответ службы поддержи";
+			$who = "Ответ службы поддержки";
 		}else{
 			$panel = 'panel-info';
 			$who = "Пользователь написал ({$tmpRow['login']})";
@@ -1710,4 +1710,45 @@ function lepus_getBillprice($id, $period, $j = 0){
 		$cache->set("billprice.$id.$period", $price, MEMCACHE_COMPRESSED, 3600);
 	}
 	return intval($price);
+}
+
+function lepus_getServStat(){
+	global $db; $i = null;
+	$query = $db->prepare("SELECT * FROM `servers`");
+	$query->execute();
+	while($row=$query->fetch()){
+		$percent = $percent2 = $points = 0;
+		$row['ip'] = long2ip($row['ip']);
+
+		$tmp_query = $db->prepare("SELECT count(*) FROM `ipmanager` WHERE `sid` = :id");
+		$tmp_query->bindParam(':id', $row['id'], PDO::PARAM_STR);
+		$tmp_query->execute();
+		$ips = $tmp_query->fetchColumn();
+
+		$tmp_query = $db->prepare("SELECT count(*) FROM `ipmanager` WHERE `sid` = :id AND `service` != 0");
+		$tmp_query->bindParam(':id', $row['id'], PDO::PARAM_STR);
+		$tmp_query->execute();
+		$use = $tmp_query->fetchColumn();
+
+		$tmp_query = $db->prepare("SELECT * FROM `services` WHERE `server` = :id");
+		$tmp_query->bindParam(':id', $row['id'], PDO::PARAM_STR);
+		$tmp_query->execute();
+		while($tmp_row=$tmp_query->fetch()){
+			$tmp2_query = $db->prepare("SELECT * FROM `tariff` WHERE `id` = :id");
+			$tmp2_query->bindParam(':id', $tmp_row['sid'], PDO::PARAM_STR);
+			$tmp2_query->execute();
+			$tmp2_row = $tmp2_query->fetch();
+			$points += $tmp2_row['point'];
+		}
+
+		$percent = round($points*100/$row['points']);
+		if($ips == 0) $percent2 = 100;
+			else $percent2 =  round($use*100/$ips);
+
+		if($percent < 25) $width = 25; else $width = $percent;
+		if($percent2 < 25) $width2 = 25; else $width2 = $percent2;
+		
+		$i .= "<tr><td>{$row['id']}</td><td>{$row['ip']}</td><td>{$row['domain']}</td><td><div class=\"progress\"><div class=\"progress-bar\" role=\"progressbar\" style=\"width:$width%\">$percent%</div></div></td><td><div class=\"progress\"><div class=\"progress-bar\" role=\"progressbar\" style=\"width:$width2%\">$percent2%</div></div></td><td>{$row['status']}</td></tr>";
+	}
+	return $i;
 }

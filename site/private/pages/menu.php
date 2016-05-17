@@ -23,15 +23,15 @@
 	</ol>
 	<div class="carousel-inner" role="listbox">
 		<div class="item active">
-				<img src="/images/lepusbar1.png">
-				<div class="carousel-caption"></div>
-		</div>
-		<div class="item">
-			<img src="/images/lepusbar2.png">
+			<a href="https://lepus.su/pages/contacts.php"><img src="/images/lepusbar1.png"></a>
 			<div class="carousel-caption"></div>
 		</div>
 		<div class="item">
-			<img src="/images/lepusbar3.png">
+			<a href="https://lepus.su/pages/ovz.php"><img src="/images/lepusbar2.png"></a>
+			<div class="carousel-caption"></div>
+		</div>
+		<div class="item">
+			<a href="https://lepus.su/pages/vps.php"><img src="/images/lepusbar3.png"></a>
 			<div class="carousel-caption"></div>
 		</div>
 		<a class="left carousel-control" href="#carousel-example-generic" role="button" data-slide="prev">

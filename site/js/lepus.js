@@ -489,14 +489,10 @@ $(document).on("click", "[data-change-api-key]", function(e) {
 $(document).on("click", "[data-move-archive-id]", function(e) {
 	$(this).blur();
 	e.preventDefault();
-
 	if(!confirm("Вы подтверждаете действие?")) return;
-	
 	id = $(this).data("move-archive-id");
-
 	var table = $('#incomeTable').DataTable();
 	var this_income = $(this).parents('tr');
-
 	$.post("//"+document.domain+"/public/admin/move_archive.php", {id: id}, function(json){
 		data = JSON.parse(json);
 		if(data.err == 'OK'){

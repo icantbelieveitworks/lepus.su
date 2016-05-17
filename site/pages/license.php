@@ -41,29 +41,44 @@ for($i=0; $i < 4; $i++)
 						<table class="table table-striped table-bordered">
 							<thead>
 								<tr>
-									<th></th>
-									<th>ISPmanager 5 Lite</th>
-									<th>ISPmanager 5 Business</th>
-									<th>BILLmanager 5 Standart</th>
-									<th>BILLmanager 5 Advance</th>
+									<th>Название</th>
+									<th>Лицензия</th>
+									<th>Период</th>
+									<th>Цена</th>
+									<th>&nbsp;</th>
 								</tr>
 							</thead>
 							<tbody>
-								<th>Цена</th>
-									<th><?php echo lepus_getBillprice(17, 0); ?></th>
-									<th><?php echo lepus_getBillprice(23, 0); ?></th>
-									<th><?php echo lepus_getBillprice(25, 0); ?></th>
-									<th><?php echo lepus_getBillprice(26, 0); ?></th>
+								<tr>
+									<td>ISPmanager 5</td>
+									<td>Lite</td>
+									<td>Месяц</td>
+									<td><?php echo lepus_getBillprice(17, 0); ?></td>
+									<td><a id="noclick" class="btn btn-danger btn-xs" rel="nofollow" href="https://my.lepus.su/billmgr?func=showroom.redirect&amp;redirect_to=desktop&amp;startform=service.order.itemtype&amp;newwindow=yes" target="_blank">заказать</a></td>
 								</tr>
-								<tfoot>
-									<tr>
-										<td>&nbsp;</td>
-										<?php echo $start_order;?>
-									</tr>
-								</tfoot>
+								<tr>
+									<td>ISPmanager 5</td>
+									<td>Business</td>
+									<td>Месяц</td>
+									<td><?php echo lepus_getBillprice(23, 0); ?></td>
+									<td><a id="noclick" class="btn btn-danger btn-xs" rel="nofollow" href="https://my.lepus.su/billmgr?func=showroom.redirect&amp;redirect_to=desktop&amp;startform=service.order.itemtype&amp;newwindow=yes" target="_blank">заказать</a></td>
+								</tr>
+								<tr>
+									<td>BILLmanager 5</td>
+									<td>Standart</td>
+									<td>Месяц</td>
+									<td><?php echo lepus_getBillprice(25, 0); ?></td>
+									<td><a id="noclick" class="btn btn-danger btn-xs" rel="nofollow" href="https://my.lepus.su/billmgr?func=showroom.redirect&amp;redirect_to=desktop&amp;startform=service.order.itemtype&amp;newwindow=yes" target="_blank">заказать</a></td>
+								</tr>
+								<tr>
+									<td>BILLmanager 5</td>
+									<td>Advance</td>
+									<td>Месяц</td>
+									<td><?php echo lepus_getBillprice(26, 0); ?></td>
+									<td><a id="noclick" class="btn btn-danger btn-xs" rel="nofollow" href="https://my.lepus.su/billmgr?func=showroom.redirect&amp;redirect_to=desktop&amp;startform=service.order.itemtype&amp;newwindow=yes" target="_blank">заказать</a></td>
+								</tr>								
 							</tbody>
 						</table>
-						Срок лицензии - месяц. Продление равно стоимости заказа. Цены указаны в рублях.
 						<hr/>
 					</div>
 				</div>

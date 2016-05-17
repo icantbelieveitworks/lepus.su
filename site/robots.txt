@@ -4,6 +4,10 @@ Allow: /pages/ovz.php$
 Allow: /pages/vps.php$
 Allow: /pages/servers.php$
 Allow: /pages/domains.php$
+Allow: /pages/license.php$
+Allow: /pages/doc.php$
+Allow: /pages/contacts.php$
+Allow: /sitemap.xml$
 Allow: /*.js
 Allow: /*.css
 Allow: /*.png
@@ -14,3 +18,4 @@ Allow: /*.jpeg
 Disallow: /
 
 Host: lepus.su
+Sitemap: https://lepus.su/sitemap.xml

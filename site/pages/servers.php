@@ -88,7 +88,7 @@ function lepus_orderLink(){
 									<th><?php echo lepus_getTariffPrice(19); ?></th>
 									<td><?php echo lepus_orderLink(); ?></td>
 								</tr>
-								<tr>
+								<!--<tr>
 									<td>E3-SSD-5</td>
 									<td><a href="http://ark.intel.com/ru/products/65729/Intel-Xeon-Processor-E3-1245-v2-8M-Cache-3_40-GHz" target="_blank">E3-1245</a></td>
 									<td>32 GB</td>
@@ -98,7 +98,7 @@ function lepus_orderLink(){
 									<td><img src="https://lepus.su/images/flags/france-flag.png" title="France"></td>
 									<th><?php echo lepus_getTariffPrice(39); ?></th>
 									<td><?php echo lepus_orderLink(); ?></td>
-								</tr>
+								</tr>-->
 								<tr>
 									<td>SP-32</td>
 									<td><a href="http://ark.intel.com/ru/products/80910/Intel-Xeon-Processor-E3-1231-v3-8M-Cache-3_40-GHz" target="_blank">E3-1231</a></td>
@@ -211,7 +211,7 @@ function lepus_orderLink(){
 								</tr>
 							</tbody>
 						</table>
-						На всех серверах в дата центре OVH => работает фильтрация tcp/ udp DDOS.<br/>
+						Бесплатно <a href="https://github.com/poiuty/lepus.su/wiki/%D0%9F%D0%B5%D1%80%D0%B5%D0%BD%D0%BE%D1%81-%D1%81%D0%B0%D0%B9%D1%82%D0%BE%D0%B2" target="_blank">перенесем ваши сайты</a>. В дата центре OVH работает фильтрация tcp/ udp DDOS.<br/>
 						Обработка вашего заказа может занять время. Если вам срочно требуется сервер => обратитесь в поддержку.<br/>
 						Дополнительный IP: 300 рублей/ один раз. E3-x-x => max 16 дополнительных IP. На всех остальных max 256.<br/>
 						В качестве панели управления, мы предлагаем использовать <a href="https://my.lepus.su/billmgr?func=showroom.redirect&redirect_to=desktop&startform=service.order.itemtype&newwindow=yes" target="_blank">ISPmanager</a> [<?php echo lepus_getBillprice(17, 0); ?> руб/ месяц] или <a href="http://vestacp.com/" target="_blank">VestaCP</a> [бесплатная].

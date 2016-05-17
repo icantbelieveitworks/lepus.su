@@ -33,17 +33,18 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/auth.php');
 				<div class="content-info box-shadow--2dp">
 					<div class="content-text">
 						<div class="page-title">Lepus хостинг</div>
+						Мы рады предложить вам услуги интернет хостинга. Готовы сотрудничать как с физическими, так и с юридическими лицами.<br/>
+						Работаем с крупными дата центрами <a href="https://www.ovh.com/us/about-us/" target="_blank" rel="nofollow">OVH</a> и <a href="https://www.hetzner.de/us/hosting/unternehmen/ueber-uns" target="_blank" rel="nofollow">Hetzner</a>. Принимаем к оплате: webmoney, yandex, paypal, qiwi и visa/ mastercard.
+						<br/><br/>
 						<p>
 							— <a href="/pages/domains.php">Регистрация доменов</a>.<br/>
 							— Мощные <a href="/pages/vps.php">KVM VPS</a> на SSD дисках.<br/>
 							— Moneyback по первому требованию.<br/>
 							— <a href="/pages/ovz.php">Виртуальный хостинг</a> для ваших сайтов.<br/>
 							— Быстрые <a href="/pages/servers.php">выделенные серверы</a> по выгодной цене.<br/>
-							— Бесплатный перенос ваших сайтов на наш хостинг.<br/><br/>
-							Наша миссия - предоставление качественных услуг хостинга. Находим индивидуальный подход к каждому клиенту.<br/>
-							Оказываем профессиональные услуги по технической поддержке, администрированию и сопровождению проектов.<br/>
-							Самое ценное - это вы, наши клиенты. Мы болеем за вас, радуемся вашим победам и успехам! Добро пожаловать!
+							— Бесплатный <a href="https://github.com/poiuty/lepus.su/wiki/%D0%9F%D0%B5%D1%80%D0%B5%D0%BD%D0%BE%D1%81-%D1%81%D0%B0%D0%B9%D1%82%D0%BE%D0%B2" target="_blank">перенос ваших сайтов</a> на наш хостинг.<br/><br/>
 						</p>
+						Для нас самое ценное - наши клиенты. Мы болеем за вас, радуемся вашим победам и успехам. Добро пожаловать!
 						<hr/>
 					</div>
 				</div>

@@ -79,6 +79,22 @@ for($i=0; $i < 5; $i++){
 									<td>5120</td>
 								</tr>
 								<tr>
+									<td>Дата-центр</td>
+									<td>OVH</td>
+									<td>OVH</td>
+									<td>OVH</td>
+									<td>OVH</td>
+									<td>OVH</td>
+								</tr>
+								<tr>
+									<td>Страна</td>
+									<td><img src="https://lepus.su/images/flags/france-flag.png" title="France"></td>
+									<td><img src="https://lepus.su/images/flags/france-flag.png" title="France"></td>
+									<td><img src="https://lepus.su/images/flags/france-flag.png" title="France"></td>
+									<td><img src="https://lepus.su/images/flags/france-flag.png" title="France"></td>
+									<td><img src="https://lepus.su/images/flags/france-flag.png" title="France"></td>
+								</tr>
+								<tr>
 									<th>Цена</th>
 									<?php echo lepus_getTariffPrices(2); ?>
 								</tr>
@@ -90,7 +106,8 @@ for($i=0; $i < 5; $i++){
 								</tfoot>
 							</tbody>
 						</table>
-						Подключение к сети 100Mb/s. Защита от udp/ tcp DDOS атак на уровне дата центра. Низкий ping ping.lepus.su<br/>
+						Предлагаем решение на базе виртуализации KVM. Бесплатно <a href="https://github.com/poiuty/lepus.su/wiki/%D0%9F%D0%B5%D1%80%D0%B5%D0%BD%D0%BE%D1%81-%D1%81%D0%B0%D0%B9%D1%82%D0%BE%D0%B2" target="_blank">перенесем ваши сайты</a>. <u><i>Новым клиентам 50% скидка!</i></u><br/>
+						Подключение к сети 100Mb/s, защита от DDoS (tcp/udp) на уровне дата-центра, SSD диск, низкий пинг (~40ms MSK).<br/>
 						В качестве панели управления, мы предлагаем использовать <a href="https://my.lepus.su/billmgr?func=showroom.redirect&redirect_to=desktop&startform=service.order.itemtype&newwindow=yes" target="_blank">ISPmanager</a> [<?php echo lepus_getBillprice(17, 0); ?> руб/ месяц] или <a href="http://vestacp.com/" target="_blank">VestaCP</a> [бесплатная].
 						<hr/>
 					</div>

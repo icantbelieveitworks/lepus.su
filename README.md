@@ -11,5 +11,4 @@
 donate проектов на постоянной основе
 bounty за найденные уязвимости
 ```
-Проекту помогали: <a href="https://github.com/voidless">VoidLess</a>, <a href="https://github.com/AmsTaFFix">Amstaff</a>, Sam3000, <a href="http://sanasol.ws/">Аксентьев Александр</a>, <a href="http://txtup.ru/">Илья Дударев</a>, <a href="http://www.stableit.ru">Павел Одинцов</a>, <a href="http://cube-art.ru">ufish</a>.<br/>
-Каждому из вас мы хотим сказать: "Большое спасибо!"
+Проекту помогали: <a href="https://github.com/voidless">VoidLess</a>, <a href="https://github.com/AmsTaFFix">Amstaff</a>, Sam3000, <a href="http://sanasol.ws/">Аксентьев Александр</a>, <a href="http://txtup.ru/">Илья Дударев</a>, <a href="http://www.stableit.ru">Павел Одинцов</a>, <a href="http://cube-art.ru">ufish</a>.

@@ -11,7 +11,6 @@ $(document).on('click', '#noclick', function(e){ $(this).blur(); })
 $(document).on("click", "[data-dns-domain-add]", function(e) {
 	$(this).blur();
 	var table = $('#dnsDomainsList').DataTable();
-	var dnsNumber = $('#dnsDomainsList tr').length;
 	dnsDomain = $('input[id=dnsDomain]').val();
 	dnsDomainType = $('select[id=dnsDomainType]').val();
 	dnsDomainMaster = $('input[id=dnsDomainMaster]').val();
@@ -20,7 +19,7 @@ $(document).on("click", "[data-dns-domain-add]", function(e) {
 		if($.isNumeric(data)){
 			table.row.add({
 				DT_RowId: data,
-				0:     dnsNumber,
+				0:     table.page.info().recordsTotal+1,
 				1:     dnsDomain,
 				2:     dnsDomainType.toUpperCase(),
 				3:     dnsDomainMaster,

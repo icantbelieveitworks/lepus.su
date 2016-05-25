@@ -185,6 +185,9 @@ $(document).on("click", "[data-dns-zone-add]", function(e) {
 $(document).on("click", "[data-open-new-tiket]", function(e) {
 	$(this).blur();
 	e.preventDefault();
+	$(this).parent().hide();
+	var that = $(this);
+	setTimeout(function(){that.parent().show()},5000);
 	var table = $('#supportList').DataTable();	
 	title = $('input[id=tiketTitle]').val();
 	msg = $('textarea[id=tiketMsg]').val();
@@ -367,8 +370,10 @@ $(document).on("click", "[data-order-service]", function(e) {
 $(document).on("click", "[data-order-finish]", function(e) {
 	$(this).hide();
 	var order_id = $("#idServiceOrder option:selected").val();
+	var ostype = $("#ostype option:selected").val(); 
 	var promo = $("#promo_code").val();
-	$.post("//"+document.domain+"/public/order.php", {id: order_id, promo: promo}, function(json){
+	if(!ostype) ostype = 'no';
+	$.post("//"+document.domain+"/public/order.php", {id: order_id, promo: promo, ostype: ostype}, function(json){
 		data = JSON.parse(json);
 		if(data.err == 'OK'){
 			alertify.success("Готово");

@@ -16,6 +16,7 @@ while($row=$query->fetch()){
 	if($select->rowCount() == 0) continue;
 	$info = $select->fetch();
 	$info = json_decode($info['data'], true);
+	if(empty($arr['os'])) $arr['os'] = 'debian';
 	$select = $db->prepare("SELECT * FROM `ipmanager` WHERE `service` = :service");
 	$select->bindParam(':service', $arr['order'], PDO::PARAM_STR);
 	$select->execute();
@@ -37,11 +38,11 @@ while($row=$query->fetch()){
 	$arr['order'] += 100;
 	$data['ip'] = long2ip($data['ip']);
 	$server['ip'] = long2ip($server['ip']);
-	$main[] = ['id' => $arr['order'], 'ip' => $data['ip'], 'mac' => $data['mac'], 'passwd' => $arr['passwd'], 'memory' => $info['memory'], 'cpus' => $info['cpus'], 'diskspace' => $info['diskspace'], 'node' => $server['ip']];
+	$main[] = ['id' => $arr['order'], 'ip' => $data['ip'], 'mac' => $data['mac'], 'passwd' => $arr['passwd'], 'memory' => $info['memory'], 'cpus' => $info['cpus'], 'diskspace' => $info['diskspace'], 'node' => $server['ip'], 'os' => $arr['os']];
 }
 
 foreach($main as $val){
 	if($val['node'] != $_SERVER['REMOTE_ADDR']) continue;
-	echo json_encode(['id' => $val['id'], 'ip' => $val['ip'], 'mac' => $val['mac'], 'passwd' => $val['passwd'], 'memory' => $val['memory'], 'cpus' => $val['cpus'], 'diskspace' => $val['diskspace'], 'node' => $val['node']]);
+	echo json_encode(['id' => $val['id'], 'ip' => $val['ip'], 'mac' => $val['mac'], 'passwd' => $val['passwd'], 'memory' => $val['memory'], 'cpus' => $val['cpus'], 'diskspace' => $val['diskspace'], 'node' => $val['node'], 'os' => $val['os']]);
 	break;
 }

@@ -9,3 +9,5 @@ if(!is_login()) die("no_login");
 if(empty($_POST['id'])) die('empty post');
 $tmpData = lepus_order_preview($_POST['id'], lepus_check_discount(@$_POST['promo'], $_POST['id']));
 echo "<center>{$tmpData["name"]} | <u><font color=\"green\">Cкидка {$tmpData["discont"]} RUR</font></u> | К оплате {$tmpData["price"]} RUR</center>";
+if($tmpData['handler'] == 'KVM' || $tmpData['handler'] == 'OVH-DEDIC')
+	echo "<br/><center><select id='ostype' style='width: 68%;' class='form-control'><option value='1'>Debian 7</option><option value='2'>Ubuntu 14.04</option><option value='3'>CentOS 7</option></select></center>";

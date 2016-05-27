@@ -5,6 +5,7 @@ iface eth0 inet static
 	address VMIP
 	netmask 255.255.255.255
 	broadcast VMIP
+	dns-nameservers 8.8.8.8 8.8.4.4
 	post-up route add NODE dev eth0
 	post-up route add default gw NODE
 	pre-down route del NODE dev eth0

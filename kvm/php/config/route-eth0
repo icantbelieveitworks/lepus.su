@@ -1,0 +1,2 @@
+NODE dev eth0
+default via NODE dev eth0

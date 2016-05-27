@@ -10,11 +10,12 @@
 		</p>
 		<div class="banners">
 			<div>
-				<a href="https://money.yandex.ru" target="_blank" rel="nofollow"><img src="/images/other/yamoney_logo88x31.gif"></a>
-				<a href="http://www.webmoney.ru/" target="_blank" rel="nofollow"><img src="/images/other/88x31_wm_blue_on_transparent_ru.png"></a>
-				<a href="https://qiwi.ru/" target="_blank" rel="nofollow"><img src="/images/other/qiwi_b.png"></a>
-				<img src="/images/other/payment_method_card_visa-48.png">
-				<img style="padding-bottom:5px;" src="/images/other/mastercard.png">
+				<a href="https://money.yandex.ru" target="_blank" rel="nofollow"><img src="/images/other/ya.png" style="width:32px;"></a>
+				<a href="http://www.webmoney.ru/" target="_blank" rel="nofollow"><img src="/images/other/wm.png" style="width:32px;"></a>
+				<a href="https://qiwi.ru/" target="_blank" rel="nofollow"><img src="/images/other/qiwi.png" style="width:32px;"></a>
+				<a href="https://www.paypal.com" target="_blank" rel="nofollow"><img src="/images/other/pp.png" style="width:32px;"></a>
+				<img src="/images/other/payment_method_card_visa-48.png" style="width:34px; padding-bottom:5px;">
+				<img src="/images/other/mastercard.png" style="width:32px; padding-bottom:5px;">
 			</div>
 		</div>
 	</div>

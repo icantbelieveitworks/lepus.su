@@ -7,5 +7,5 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/func.main.php');
 require_once($_SERVER['DOCUMENT_ROOT'].'/private/auth.php');
 if(!is_login()) die("no_login");
 if(empty($_POST['id'])) die('empty post');
-$tmpData = error(lepus_create_order($_POST['id'], $_POST['promo']));
+$tmpData = error(lepus_create_order($_POST['id'], $_POST['promo'], $_POST['ostype']));
 echo json_encode($tmpData);

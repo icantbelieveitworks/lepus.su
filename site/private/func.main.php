@@ -213,7 +213,7 @@ function lepus_addDNSDomain($domain, $type, $master, $id){
 	global $pdns; $arr = array_reverse(explode(".", $domain));
 	$lvl = ['kiev.ua', 'com.ua', 'pp.ua', 'ru.com', 'com.kz', 'org.kz', 'co.am', 'com.am', 'net.am', 'msk.ru', 'org.ru',
 			'org.am', 'co.in', 'net.in', 'org.in', 'gen.in', 'firm.in', 'ind.in', 'za.com', 'uy.com', 'br.com', 'msk.su',
-			'spb.su', 'spb.ru', 'com.ru', 'ru.net', 'co.ua', 'od.ua', 'in.ua', 'net.ua', 'kh.ua', 'kharkov.ua', 'co.uk', 'vn.ua'];
+			'spb.su', 'spb.ru', 'com.ru', 'ru.net', 'co.ua', 'od.ua', 'in.ua', 'net.ua', 'kh.ua', 'kharkov.ua', 'co.uk', 'vn.ua', 'org.ua'];
 	if(count($arr) > 2){
 		if(!in_array("$arr[1].$arr[0]", $lvl)) return "wrong_domain";
 		$domain = "$arr[2].$arr[1].$arr[0]"; 
@@ -868,8 +868,8 @@ function lepus_check_discount($promo, $sid){
 	return $discont;
 }
 
-function lepus_create_order($sid, $promo = 0){
-	global $db, $user;
+function lepus_create_order($sid, $promo = 0, $os){
+	global $db, $user; $os_info['full'] ='';
 	$info = lepus_order_preview($sid, lepus_check_discount($promo, $sid));
 	if(!is_array($info)) return $info; 
 	if($info['price'] > $user['data']['balance']) return 'no_money';
@@ -884,11 +884,13 @@ function lepus_create_order($sid, $promo = 0){
 	$query->execute();
 	$order_id = $db->lastInsertId();
 	lepus_log_spend($user['id'], $order_id, $time1, $time2, $info['price'], "{$info['name']} [заказ]");
-	$_POST['msg'] = "Дорогой клиент, благодарим за оплату.\nКак только ваш заказ будет готов - мы свяжемся с вами в этом тикете.";
+	if(!ctype_digit($os) && $os != 'no') $os = 'no';
+	if($os > 0 && $os < 4) $os_info = lepus_osType($os, 'full');
+	$_POST['msg'] = "Дорогой клиент, благодарим за оплату.\nКак только ваш заказ будет готов - мы свяжемся с вами в этом тикете.\n Дополнение к заказу: операционная система {$os_info['full']}";
 	$tmpData = support_create($user['id'], $info['name'], 2);
 	support_msg(5, $tmpData, 2, 1);
 	telegram_send("Заявка №[$tmpData]\nКлиент сделал новый заказ.\nhttps://".$_SERVER['SERVER_NAME']."/pages/tiket.php?id=$tmpData");
-	lepus_addTask($user['id'], $info['handler'], ['do' => 'create', 'tiket' => $tmpData, 'tariff' => $sid, 'email' => $user['login'], 'order' => $order_id]);
+	lepus_addTask($user['id'], $info['handler'], ['do' => 'create', 'tiket' => $tmpData, 'tariff' => $sid, 'email' => $user['login'], 'order' => $order_id, 'os' => $os_info['name']]);
 	return $tmpData;
 }
 
@@ -1673,8 +1675,7 @@ function IsTorExitPoint(){
 		if(gethostbyname(ReverseIPOctets($_SERVER['REMOTE_ADDR']).".".$_SERVER['SERVER_PORT'].".".ReverseIPOctets($_SERVER['SERVER_ADDR']).'.ip-port.exitlist.torproject.org') == '127.0.0.2') $i = 1; else $i = 2;
 		$cache->set($_SERVER['REMOTE_ADDR'], $i, MEMCACHE_COMPRESSED, 0);
 	}
-	if($i == 1) return true;
-	if($i == 2) return false;
+	if($i == 1) return true; else return false;
 }
 
 function ReverseIPOctets($inputip){
@@ -1719,17 +1720,14 @@ function lepus_getServStat(){
 	while($row=$query->fetch()){
 		$percent = $percent2 = $points = 0;
 		$row['ip'] = long2ip($row['ip']);
-
 		$tmp_query = $db->prepare("SELECT count(*) FROM `ipmanager` WHERE `sid` = :id");
 		$tmp_query->bindParam(':id', $row['id'], PDO::PARAM_STR);
 		$tmp_query->execute();
 		$ips = $tmp_query->fetchColumn();
-
 		$tmp_query = $db->prepare("SELECT count(*) FROM `ipmanager` WHERE `sid` = :id AND `service` != 0");
 		$tmp_query->bindParam(':id', $row['id'], PDO::PARAM_STR);
 		$tmp_query->execute();
 		$use = $tmp_query->fetchColumn();
-
 		$tmp_query = $db->prepare("SELECT * FROM `services` WHERE `server` = :id");
 		$tmp_query->bindParam(':id', $row['id'], PDO::PARAM_STR);
 		$tmp_query->execute();
@@ -1740,15 +1738,20 @@ function lepus_getServStat(){
 			$tmp2_row = $tmp2_query->fetch();
 			$points += $tmp2_row['point'];
 		}
-
 		$percent = round($points*100/$row['points']);
 		if($ips == 0) $percent2 = 100;
 			else $percent2 =  round($use*100/$ips);
-
 		if($percent < 25) $width = 25; else $width = $percent;
 		if($percent2 < 25) $width2 = 25; else $width2 = $percent2;
-		
 		$i .= "<tr><td>{$row['id']}</td><td>{$row['ip']}</td><td>{$row['domain']}</td><td><div class=\"progress\"><div class=\"progress-bar\" role=\"progressbar\" style=\"width:$width%\">$percent%</div></div></td><td><div class=\"progress\"><div class=\"progress-bar\" role=\"progressbar\" style=\"width:$width2%\">$percent2%</div></div></td><td>{$row['status']}</td></tr>";
 	}
 	return $i;
+}
+
+function lepus_osType($id){
+	$arr = [1 => ['name' => 'debian', 'version' => 7, 'full' => 'Debian 7'],
+			2 => ['name' => 'ubuntu', 'version' => '14.04', 'full' => 'Ubuntu 14.04'],
+			3 => ['name' => 'centos', 'version' => 7, 'full' => 'centOS 7']];
+	if($id == 0) return $arr;
+	return $arr[$id];
 }

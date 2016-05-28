@@ -98,10 +98,10 @@ if(strlen($tmpData['title']) > 30){
 										[i]наклонный шрифт[/i] => <i>наклонный шрифт</i><br/>
 										[u]подчеркнутый текст[/u] => <u>подчеркнутый текст</u><br/>
 										[s]зачеркнутый шрифт[/s] => <s>зачеркнутый шрифт</s><br/><br/>
-										[url]http://google.ru[/url] => <a href="http://google.ru" target="_blank">google.ru</a><br>
-										[urls]https://google.ru[/urls] => <a href="https://google.ru" target="_blank">google.ru</a><br><br>
+										[url]http://google.ru[/url] => <a href="http://google.ru" target="_blank">http://google.ru</a><br>
+										[url]https://google.ru[/url] => <a href="https://google.ru" target="_blank">https://google.ru</a><br><br>
 										[url=http://google.ru]google google google![/url] => <a href="http://google.ru" target="_blank"> google google google!</a><br>
-										[urls=https://google.ru]google google google![/urls] => <a href="https://google.ru" target="_blank">google google google!</a><br>	
+										[url=https://google.ru]google google google![/url] => <a href="https://google.ru" target="_blank">google google google!</a><br>	
 									</blockquote>
 									<hr>
 									<textarea id="tiketMsg" class="form-control" rows="5" id="comment" style="resize:vertical;" placeholder=""></textarea>

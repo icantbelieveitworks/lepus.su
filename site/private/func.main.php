@@ -502,7 +502,7 @@ function support_msg($uid, $tid, $access, $no_last = 0){
 	$tiket = lepus_get_supportAccess($tid);
 	if($tiket['uid'] != $uid && $access < 2) return 'no_access';
 	if(strlen($_POST['msg']) < 1) return 'empty_message';
-	if($access > 1 && $_POST['msg'] != 'END' && $_POST['msg'] != 'OPEN') $_POST['msg'] .= "\n\n\n[i]С уважением, команда технической поддержки.[/i]";
+	if($access > 1 && $_POST['msg'] != 'END' && $_POST['msg'] != 'OPEN') $_POST['msg'] .= "\n\n\n[i]С уважением, команда технической поддержки.\nДокументация: [url=https://github.com/poiuty/lepus.su/wiki/%D0%92%D0%B8%D1%80%D1%82%D1%83%D0%B0%D0%BB%D1%8C%D0%BD%D1%8B%D0%B9-%D1%85%D0%BE%D1%81%D1%82%D0%B8%D0%BD%D0%B3]виртуальный хостинг[/url], [url=https://github.com/poiuty/lepus.su/wiki/KVM-VPS]vps[/url], [url=https://wiki.lepus.su]wiki[/url].[/i]";
 	if($tiket['status'] == 2 && $_POST['msg'] != 'OPEN') return 'close_tiket'; // if tiket close => we need first open it
 	if($tiket['status'] == 1 && $_POST['msg'] == 'OPEN') return 'already_open'; // dont open - open tiket
 	$msg = parse_bb_code(nl2br(htmlentities($_POST['msg'], ENT_QUOTES, 'UTF-8')));
@@ -549,13 +549,33 @@ function support_msg($uid, $tid, $access, $no_last = 0){
 	return ['tid' => $tid, 'msgID' => $lastID];
 }
 
-function parse_bb_code($text){
-	$text = preg_replace('/\[(\/?)(b|i|u|s)\s*\]/', "<$1$2>", $text);
-	$text = preg_replace('/\[url\](?:http:\/\/)?(.+)\[\/url\]/', "<a href=\"http://$1\" target=\"_blank\">$1</a>", $text);
-	$text = preg_replace('/\[url\s?=\s?([\'"]?)(?:http:\/\/)?(.+)\1\](.*?)\[\/url\]/', "<a href=\"http://$2\" target=\"_blank\">$3</a>", $text);
-	$text = preg_replace('/\[urls\](?:https:\/\/)?(.+)\[\/urls\]/', "<a href=\"https://$1\" target=\"_blank\">$1</a>", $text);
-	$text = preg_replace('/\[urls\s?=\s?([\'"]?)(?:https:\/\/)?(.+)\1\](.*?)\[\/urls\]/', "<a href=\"https://$2\" target=\"_blank\">$3</a>", $text);
-	return $text;
+function parse_bb_code($text) {
+	$find = [
+		'~\[b\](.*?)\[/b\]~s',
+		'~\[i\](.*?)\[/i\]~s',
+		'~\[u\](.*?)\[/u\]~s',
+		'~\[s\](.*?)\[/s\]~s',
+		'~\[url\]((?:http|https?)://.*?)\[/url\]~s',
+		'~\[url=((?:http|https?)://.*?)\](.*?)\[/url\]~s'
+		//'~\[quote\](.*?)\[/quote\]~s',
+		//'~\[size=(.*?)\](.*?)\[/size\]~s',
+		//'~\[color=(.*?)\](.*?)\[/color\]~s',
+		//'~\[img\](https?://.*?\.(?:jpg|jpeg|gif|png|bmp))\[/img\]~s'
+	];
+	$replace = [
+		'<b>$1</b>',
+		'<i>$1</i>',
+		'<u>$1</u>',
+		'<s>$1</s>',
+		'<a href="$1" target="_blank">$1</a>',
+		'<a href="$1" target="_blank">$2</a>',
+		//'<span style="text-decoration:underline;">$1</span>',
+		//'<pre>$1</'.'pre>',
+		//'<span style="font-size:$1px;">$2</span>',
+		//'<span style="color:$1;">$2</span>',
+		//'<img src="$1" alt="" />'
+	];
+	return preg_replace($find, $replace, $text);
 }
 
 function lepus_error_page($mes){
@@ -886,7 +906,11 @@ function lepus_create_order($sid, $promo = 0, $os){
 	lepus_log_spend($user['id'], $order_id, $time1, $time2, $info['price'], "{$info['name']} [заказ]");
 	if(!ctype_digit($os) && $os != 'no') $os = 'no';
 	if($os > 0 && $os < 4) $os_info = lepus_osType($os, 'full');
-	$_POST['msg'] = "Дорогой клиент, благодарим за оплату.\nКак только ваш заказ будет готов - мы свяжемся с вами в этом тикете.\n Дополнение к заказу: операционная система {$os_info['full']}";
+	if($os == 'no'){
+		$_POST['msg'] = "Дорогой клиент, благодарим за оплату.\nКак только ваш заказ будет готов - мы свяжемся с вами в этом тикете.";
+	}else{
+		$_POST['msg'] = "Дорогой клиент, благодарим за оплату.\nКак только ваш заказ будет готов - мы свяжемся с вами в этом тикете.\nДополнение к заказу: операционная система {$os_info['full']}";
+	}
 	$tmpData = support_create($user['id'], $info['name'], 2);
 	support_msg(5, $tmpData, 2, 1);
 	telegram_send("Заявка №[$tmpData]\nКлиент сделал новый заказ.\nhttps://".$_SERVER['SERVER_NAME']."/pages/tiket.php?id=$tmpData");
@@ -1464,7 +1488,7 @@ function lepus_doTask(){
 						$xml = simplexml_load_string($info);
 						if(empty($xml->error['code']) && !empty($info)){
 							lepus_editServiceData($data['order'], 'edit', 'user', $login);
-							$_POST['msg'] = "Дорогой клиент, виртуальный хостинг готов.\nLogin: $login\nPassword: $passwd\nПожалуйста, поменяйте пароль.\nВы можете посмотреть более подробную информацию об услуге [urls=https://lepus.su/pages/view.php?id={$data['order']}]на этой странице[/urls].";
+							$_POST['msg'] = "Дорогой клиент, виртуальный хостинг готов.\nLogin: $login\nPassword: $passwd\nПожалуйста, поменяйте пароль.\nВы можете посмотреть более подробную информацию об услуге [url=https://lepus.su/pages/view.php?id={$data['order']}]на этой странице[/url].";
 							support_msg(5, $data['tiket'], 2, 1);
 						}
 					break;
@@ -1510,7 +1534,7 @@ function lepus_doTask(){
 								$s = "виртуальный хостинг готов";
 								$s1 = 'root или lepus [доступ от SFTP/ FTP/ SSH/ MySQL]';
 							}
-							$_POST['msg'] = "Дорогой клиент, $s.\nLogin: $s1\nPassword: {$data['passwd']}\nПожалуйста, поменяйте пароль.\nВы можете посмотреть более подробную информацию об услуге [urls=https://lepus.su/pages/view.php?id={$data['order']}]на этой странице[/urls].";
+							$_POST['msg'] = "Дорогой клиент, $s.\nLogin: $s1\nPassword: {$data['passwd']}\nПожалуйста, поменяйте пароль.\nВы можете посмотреть более подробную информацию об услуге [url=https://lepus.su/pages/view.php?id={$data['order']}]на этой странице[/url].";
 							support_msg(5, $data['tiket'], 2, 1);
 						}else{
 							$update = $db->prepare("UPDATE `task` SET `status` = 0 WHERE `id` = :id");
@@ -1751,7 +1775,7 @@ function lepus_getServStat(){
 function lepus_osType($id){
 	$arr = [1 => ['name' => 'debian', 'version' => 7, 'full' => 'Debian 7'],
 			2 => ['name' => 'ubuntu', 'version' => '14.04', 'full' => 'Ubuntu 14.04'],
-			3 => ['name' => 'centos', 'version' => 7, 'full' => 'centOS 7']];
+			3 => ['name' => 'centos', 'version' => 7, 'full' => 'CentOS 7']];
 	if($id == 0) return $arr;
 	return $arr[$id];
 }

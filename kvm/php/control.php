@@ -41,6 +41,8 @@ switch($_GET['command']){
 		kvm_exec("start", $vm_id);
 	break;
 	case 'restartServer':
+	case 'hardrestartServer':
+	case 'stopANDstart':
 		if(empty($_GET['boot'])) die("error 2");
 		switch($_GET['boot']){
 			default: $file = '/home/debian.iso'; $boot = 'hd'; break;
@@ -55,9 +57,19 @@ switch($_GET['command']){
 		lepus_editKVM('cdfile', $file);
 		file_put_contents("$conf_dir/$vm_id.xml", $config->saveXML());
 		shell_exec("sudo virsh define $conf_dir/$vm_id.xml");
-		kvm_exec("destroy", $vm_id);
-		sleep(3);
-		kvm_exec("start", $vm_id);
+		if($_GET['command'] == 'hardrestartServer'){
+			kvm_exec("destroy", $vm_id);
+			sleep(3);
+			kvm_exec("start", $vm_id);
+		}
+		if($_GET['command'] == 'restartServer'){
+			kvm_exec("reboot", $vm_id);
+		}
+		if($_GET['command'] == 'stopANDstart'){
+			kvm_exec("shutdown", $vm_id);
+			sleep(3);
+			kvm_exec("start", $vm_id);
+		}
 	break;
 	case 'changeTariff':
 		if(empty($_GET['memory']) || empty($_GET['cpus']) || empty($_GET['diskspace'])) die("error 2");
@@ -86,7 +98,7 @@ switch($_GET['command']){
 	break;
 	case 'portVNC':
 		$pid = intval(trim(shell_exec("sudo ps uax | grep 'qemu-system-x86_64 -enable-kvm -name $vm_id ' | grep -v grep | awk '{print $2}'")));
-		die(shell_exec("sudo netstat -tupan | grep $pid | awk '{print $4}'"));
+		die(shell_exec("sudo netstat -tupan | grep LISTEN | grep $pid | head -n1 | awk '{print $4}'"));
 	break;
 	
 }

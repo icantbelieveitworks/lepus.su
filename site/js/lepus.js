@@ -452,12 +452,21 @@ $(document).on("click", "[data-archive-show]", function(e) {
 	});
 });
 
-$(document).on("click", "[data-vm-restart]", function(e) {
+$(document).on("click", "[data-vm-restart], [data-vm-restart-hard], [data-vm-stopandstart]", function(e) {
 	$(this).blur();
 	e.preventDefault();
 	id = $(this).data("vm-restart");
-	boot = $('select[id=idboot]').val(); 
-	$.post("//"+document.domain+"/public/add_task.php", {id: id, boot: boot, command: 'restart'}, function(json){
+	command = 'restart';
+	if(!id){
+		id = $(this).data("vm-restart-hard");
+		command = 'hardrestart';
+	}
+	if(!id){
+		id = $(this).data("vm-stopandstart");
+		command = 'stopandstart';
+	}
+	boot = $('select[id=idboot]').val();
+	$.post("//"+document.domain+"/public/add_task.php", {id: id, boot: boot, command: command}, function(json){
 		data = JSON.parse(json);
 		if(data.err == 'OK'){
 			alertify.success(data.mes);

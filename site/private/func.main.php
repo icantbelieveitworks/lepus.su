@@ -1116,7 +1116,9 @@ function lepus_getService($id){
 			if($row['server'] != 0){
 				if($tmpRow['handler'] == 'KVM'){
 				$bottom = "<hr/><select class=\"form-control\" id=\"idboot\" style=\"margin-top: 4px;\" name=\"type\"><option value=\"1\">Boot => hard drive</option><option value=\"2\">Boot => Debian (cdrom)</option><option value=\"3\">Boot => Ubuntu (cdrom)</option><option value=\"4\">Boot => CentOS (cdrom)</option></select>
-						   <input class=\"btn btn-sm btn-danger btn-block\" style=\"margin-top: 4px;\" data-vm-restart={$id} type=\"submit\" value=\"Перезагрузить\">
+						   <input class=\"btn btn-sm btn-danger\" style=\"margin-top: 4px; width: 33%;\" data-vm-stopandstart={$id} type=\"submit\" value=\"Выключить => включить\">
+						   <input class=\"btn btn-sm btn-danger\" style=\"margin-top: 4px; width: 33%;\" data-vm-restart={$id} type=\"submit\" value=\"Перезагрузить\">
+						   <input class=\"btn btn-sm btn-danger\" style=\"margin-top: 4px; width: 33%;\" data-vm-restart-hard={$id} type=\"submit\" value=\"Перезагрузить (hard reboot)\">
 						   <input class=\"btn btn-sm btn-danger btn-block\" style=\"margin-top: 4px;\" data-vm-vnc={$id} type=\"submit\" value=\"Получить VNC доступ\">
 						   <hr/><table id=\"IPList\" class=\"table table-striped table-bordered\" cellspacing=\"0\" width=\"100%\"><thead><tr><th>ID</th><th>IP</th><th>Domain</th><th>MAC</th></tr></thead>".lepus_getListIP($id)."<tbody></tbody></table>";
 				}else{
@@ -1511,7 +1513,10 @@ function lepus_doTask(){
 			case 'VH':
 			case 'KVM':
 			case 'OpenVZ':
-				$commands = ['stop' => 'stopServer', 'start' => 'startServer', 'restart' => 'restartServer', 'create' => 'createServer', 'change' => 'changeTariff'];
+				if($row['handler'] == 'KVM')
+					$commands = ['stop' => 'stopServer', 'start' => 'startServer', 'restart' => 'restartServer', 'hardrestart' => 'hardrestartServer', 'stopandstart' => 'stopANDstart', 'create' => 'createServer', 'change' => 'changeTariff'];
+				else
+					$commands = ['stop' => 'stopServer', 'start' => 'startServer', 'restart' => 'restartServer', 'create' => 'createServer', 'change' => 'changeTariff'];
 				switch($commands[$data['do']]){
 					default: $info = 'no_action'; break;
 					case 'changeTariff':
@@ -1522,11 +1527,13 @@ function lepus_doTask(){
 					case 'startServer':
 					case 'stopServer':
 					case 'restartServer':
+					case 'hardrestartServer':
+					case 'stopANDstart':
 						if($row['handler'] == 'OpenVZ'){
 							$info = lepus_sendToPythonAPI($server['ip'], $server['port'], $server['access'], $commands[$data['do']], $data['order']+100, $row['id']);
 						}
 						if($row['handler'] == 'KVM' || $row['handler'] == 'VH'){
-							if($commands[$data['do']] == 'restartServer'){
+							if($commands[$data['do']] == 'restartServer' || $commands[$data['do']] == 'hardrestartServer' || $commands[$data['do']] == 'stopANDstart'){
 								 $info = send_kvm_restart($row['id'], $commands[$data['do']], $server['ip'], $server['access'], $data['order']+100, $data['boot']);
 							}else{
 								$info = send_kvm($row['id'], $commands[$data['do']], $server['ip'], $server['access'], $data['order']+100);
@@ -1687,7 +1694,7 @@ function lepus_userAddTask($id, $command){
 		case 'KVM':
 		case 'OpenVZ':
 			if(time() < $info['time1']+60*60) return 'wait_60min'; // time to install vps
-			if($command == 'restart'){
+			if($command == 'restart' || $command == 'hardrestart' || $command == 'stopandstart'){
 				if(empty($_POST['boot'])) $_POST['boot'] = 1;
 				elseif($_POST['boot'] != 2 && $_POST['boot'] != 3 && $_POST['boot'] != 4) $_POST['boot'] = 1;
 				$j = lepus_addTask($user['id'], $row['handler'], ['do' => $command, 'order' => $id, 'boot' => $_POST['boot']]);

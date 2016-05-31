@@ -1114,8 +1114,15 @@ function lepus_getService($id){
 		case 'KVM':
 		case 'OpenVZ':
 			if($row['server'] != 0){
+				if($tmpRow['handler'] == 'KVM'){
+				$bottom = "<hr/><select class=\"form-control\" id=\"idboot\" style=\"margin-top: 4px;\" name=\"type\"><option value=\"1\">Boot => hard drive</option><option value=\"2\">Boot => Debian (cdrom)</option><option value=\"3\">Boot => Ubuntu (cdrom)</option><option value=\"4\">Boot => CentOS (cdrom)</option></select>
+						   <input class=\"btn btn-sm btn-danger btn-block\" style=\"margin-top: 4px;\" data-vm-restart={$id} type=\"submit\" value=\"Перезагрузить\">
+						   <input class=\"btn btn-sm btn-danger btn-block\" style=\"margin-top: 4px;\" data-vm-vnc={$id} type=\"submit\" value=\"Получить VNC доступ\">
+						   <hr/><table id=\"IPList\" class=\"table table-striped table-bordered\" cellspacing=\"0\" width=\"100%\"><thead><tr><th>ID</th><th>IP</th><th>Domain</th><th>MAC</th></tr></thead>".lepus_getListIP($id)."<tbody></tbody></table>";
+				}else{
 				$bottom = "<input class=\"btn btn-sm btn-danger btn-block\" style=\"margin-top: 4px;\" data-vm-restart={$id} type=\"submit\" value=\"Перезагрузить\">
 						   <hr/><table id=\"IPList\" class=\"table table-striped table-bordered\" cellspacing=\"0\" width=\"100%\"><thead><tr><th>ID</th><th>IP</th><th>Domain</th><th>MAC</th></tr></thead>".lepus_getListIP($id)."<tbody></tbody></table>";
+				}
 			}
 		break;
 		case 'OVH-DEDIC':
@@ -1519,7 +1526,11 @@ function lepus_doTask(){
 							$info = lepus_sendToPythonAPI($server['ip'], $server['port'], $server['access'], $commands[$data['do']], $data['order']+100, $row['id']);
 						}
 						if($row['handler'] == 'KVM' || $row['handler'] == 'VH'){
-							$info = send_kvm($row['id'], $commands[$data['do']], $server['ip'], $server['access'], $data['order']+100);
+							if($commands[$data['do']] == 'restartServer'){
+								 $info = send_kvm_restart($row['id'], $commands[$data['do']], $server['ip'], $server['access'], $data['order']+100, $data['boot']);
+							}else{
+								$info = send_kvm($row['id'], $commands[$data['do']], $server['ip'], $server['access'], $data['order']+100);
+							}
 						}
 					break;
 					case 'createServer':
@@ -1634,6 +1645,14 @@ function send_changeTariff($cid, $command, $host, $key, $id, $get){
 	return file_get_contents("http://$host/index.php?id=$id&command=$command&key=$key&$get");
 }
 
+function send_kvm_restart($cid, $command, $host, $key, $id, $boot){
+	return file_get_contents("http://$host/index.php?id=$id&command=$command&key=$key&boot=$boot");
+}
+
+function send_kvm_vnc($command, $host, $key, $id, $passwd){
+	return file_get_contents("http://$host/index.php?id=$id&command=$command&key=$key&vnc=$passwd");
+}
+
 function send_kvm($cid, $command, $host, $key, $id){
 	return file_get_contents("http://$host/index.php?id=$id&command=$command&key=$key");
 }
@@ -1669,7 +1688,9 @@ function lepus_userAddTask($id, $command){
 		case 'OpenVZ':
 			if(time() < $info['time1']+60*60) return 'wait_60min'; // time to install vps
 			if($command == 'restart'){
-				$j = lepus_addTask($user['id'], $row['handler'], ['do' => $command, 'order' => $id]);
+				if(empty($_POST['boot'])) $_POST['boot'] = 1;
+				elseif($_POST['boot'] != 2 && $_POST['boot'] != 3 && $_POST['boot'] != 4) $_POST['boot'] = 1;
+				$j = lepus_addTask($user['id'], $row['handler'], ['do' => $command, 'order' => $id, 'boot' => $_POST['boot']]);
 				if(!empty($j)) return $j;
 				$i = 'Мы скоро перезагрузим VM';
 			}
@@ -1778,4 +1799,19 @@ function lepus_osType($id){
 			3 => ['name' => 'centos', 'version' => 7, 'full' => 'CentOS 7']];
 	if($id == 0) return $arr;
 	return $arr[$id];
+}
+
+function lepus_kvmVNC($id, $do){
+	$info = lepus_getServiceAccess($id);
+	if(!is_array($info)) return 'Нет доступа';
+	if(time() > $info['time2']) return 'Услуга не оплачена';
+	$server = lepus_searchFree('KVM', 0, $id);
+	$text = send_kvm(0, 'portVNC', $server['ip'], $server['access'], $id+100);
+	$text = str_replace("0.0.0.0", "Настройки подключения: {$server['ip']}", $text);
+	if($do == 'passwd'){
+		$passwd = genRandStr(32);
+		send_kvm_vnc('changeVNC', $server['ip'], $server['access'], $id+100, $passwd);
+		$text .= "<br/>Пароль: ".md5($passwd);
+	}
+	return $text;
 }

@@ -79,6 +79,10 @@ for($i=0; $i < 5; $i++){
 									<td>5120</td>
 								</tr>
 								<tr>
+									<td style="line-height: 35px;">ОС</td>
+									<td class="text-center" colspan="5"><img src="https://lepus.su/images/flags/debian.png" title="Debian"> <img src="https://lepus.su/images/flags/ubuntu.png" style="margin-left: 55px;" title="Ubuntu"> <img src="https://lepus.su/images/flags/centos.png" style="margin-left: 55px;" title="CentOS"></td>
+								</tr>
+								<tr>
 									<td>Дата-центр</td>
 									<td>OVH</td>
 									<td>OVH</td>
@@ -87,7 +91,7 @@ for($i=0; $i < 5; $i++){
 									<td>OVH</td>
 								</tr>
 								<tr>
-									<td>Страна</td>
+									<td style="line-height: 25px;">Страна</td>
 									<td><img src="https://lepus.su/images/flags/france-flag.png" title="France"></td>
 									<td><img src="https://lepus.su/images/flags/france-flag.png" title="France"></td>
 									<td><img src="https://lepus.su/images/flags/france-flag.png" title="France"></td>

@@ -58,6 +58,7 @@ if($tmpData['err'] != 'OK')	die(lepus_error_page($tmpData['mes']));
 										<input class="btn btn-sm btn-danger btn-block" style="margin-top: 4px;" data-change-tariff type="submit" value="Поменять тариф">
 										<?php }; ?>
 										<?php if(!empty($tmpData['mes']['bottom'])) echo $tmpData['mes']['bottom']; ?>
+										<hr/>
 									</div>
 								</div>
 							</div>

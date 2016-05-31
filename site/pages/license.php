@@ -79,6 +79,8 @@ for($i=0; $i < 4; $i++)
 								</tr>								
 							</tbody>
 						</table>
+						<a href="https://www.ispsystem.ru/software/ispmanager" target="_blank" rel="nofollow">ISPmanager</a> (<a href="https://www.ispsystem.ru/software/ispmanager/compare" target="_blank" rel="nofollow">сравнение версий</a>) - это панель управления сервером. <a href="https://vestacp.com/" target="_blank" rel="nofollow">Бесплатный аналог</a> => VestaCP.<br/>
+						<a href="https://www.ispsystem.ru/software/billmanager" target="_blank" rel="nofollow">BILLmanager</a> (<a href="https://www.ispsystem.ru/software/billmanager/compare" target="_blank" rel="nofollow">cравнение версий</a>) - биллинг панель для комплексной автоматизации деятельности хостинговой компании.
 						<hr/>
 					</div>
 				</div>

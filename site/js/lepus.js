@@ -456,7 +456,8 @@ $(document).on("click", "[data-vm-restart]", function(e) {
 	$(this).blur();
 	e.preventDefault();
 	id = $(this).data("vm-restart");
-	$.post("//"+document.domain+"/public/add_task.php", {id: id, command: 'restart'}, function(json){
+	boot = $('select[id=idboot]').val(); 
+	$.post("//"+document.domain+"/public/add_task.php", {id: id, boot: boot, command: 'restart'}, function(json){
 		data = JSON.parse(json);
 		if(data.err == 'OK'){
 			alertify.success(data.mes);
@@ -506,4 +507,24 @@ $(document).on("click", "[data-move-archive-id]", function(e) {
 			alertify.error(data.mes);
 		}
 	});
+});
+
+$(document).on("click", "[data-vm-vnc]", function(e) {
+  $(this).blur();
+  e.preventDefault();
+  var vps_id = $(this).data("vm-vnc");
+  $('#modalVNC').find('[data-vnc-passwd]').data('vm-vnc', vps_id);
+  $('#modalVNC').modal('show');
+  $.post("//"+document.domain+"/public/vnc.php", {id: vps_id, do: 'info'}, function(data){
+    $("#modal_vnc_text").html(data);
+  });
+});
+
+$(document).on("click", "[data-vnc-passwd]", function(e) {
+  $(this).blur();
+  var vps_id = $(this).data("vm-vnc");
+  e.preventDefault();
+  $.post("//"+document.domain+"/public/vnc.php", {id: vps_id, do: 'passwd'}, function(data){
+    $("#modal_vnc_text").html(data);
+  });
 });

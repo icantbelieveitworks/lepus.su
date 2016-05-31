@@ -15,23 +15,33 @@
 	</div>
 </nav>
 
-<div id="carousel-example-generic" class="carousel slide" data-ride="carousel">
+<div id="carousel-example-generic" class="carousel slide" data-ride="carousel" data-interval="7500">
 	<ol class="carousel-indicators">
 		<li data-target="#carousel-example-generic" data-slide-to="0" class="active"></li>
 		<li data-target="#carousel-example-generic" data-slide-to="1"></li>
 		<li data-target="#carousel-example-generic" data-slide-to="2"></li>
+		<li data-target="#carousel-example-generic" data-slide-to="3"></li>
+		<li data-target="#carousel-example-generic" data-slide-to="4"></li>
 	</ol>
 	<div class="carousel-inner" role="listbox">
 		<div class="item active">
-			<a href="https://lepus.su/pages/contacts.php"><img src="/images/lepusbar1.png"></a>
+			<a href="https://lepus.su/pages/contacts.php"><img src="/images/lepusbar2.png"></a>
 			<div class="carousel-caption"></div>
 		</div>
 		<div class="item">
-			<a href="https://lepus.su/pages/ovz.php"><img src="/images/lepusbar2.png"></a>
+			<a href="https://lepus.su/pages/ovz.php"><img src="/images/lepusbar1.png"></a>
 			<div class="carousel-caption"></div>
 		</div>
 		<div class="item">
 			<a href="https://lepus.su/pages/vps.php"><img src="/images/lepusbar3.png"></a>
+			<div class="carousel-caption"></div>
+		</div>
+		<div class="item">
+			<a href="https://lepus.su/pages/servers.php"><img src="/images/lepusbar5.png"></a>
+			<div class="carousel-caption"></div>
+		</div>
+		<div class="item">
+			<a href="https://lepus.su/pages/domains.php"><img src="/images/lepusbar4.png"></a>
 			<div class="carousel-caption"></div>
 		</div>
 		<a class="left carousel-control" href="#carousel-example-generic" role="button" data-slide="prev">

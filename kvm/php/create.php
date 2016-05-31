@@ -74,6 +74,7 @@ lepus_editKVM('currentMemory', $json['memory']);
 lepus_editKVM('vcpu', $json['cpus']);
 lepus_editKVM('disk', "/dev/zvol/ssd/$vm_id");
 lepus_editKVM('mac', $json['mac']);
+lepus_editKVM('vnc', md5(rand(0,100000)));
 file_put_contents("/etc/libvirt/qemu/$vm_id.xml", $config->saveXML());
 shell_exec("zfs create -s -V {$json['diskspace']}g ssd/$vm_id");
 shell_exec("zfs set compression=lz4 ssd/$vm_id");

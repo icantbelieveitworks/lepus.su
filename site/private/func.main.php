@@ -1630,16 +1630,27 @@ function lepus_searchFree($handler, $tariff, $id){
 			}
 			if($points+$need < $row['points']){
 				if($handler == 'KVM' || $handler == 'VH'){
-					$select_ip = $db->prepare("SELECT * FROM `ipmanager` WHERE `sid` = :server AND `service` = 0 LIMIT 1");
+					$xx = null;
+					$select_ip = $db->prepare("SELECT * FROM `ipmanager` WHERE `sid` = :server AND `service` = 0");
 					$select_ip->bindParam(':server', $row['id'], PDO::PARAM_STR);
 					$select_ip->execute();
 					if($select_ip->rowCount() == 0) continue;
-					$x = $select_ip->fetch();
+					while($x = $select_ip->fetch()){
+						$check_mac = $db->prepare("SELECT * FROM `ipmanager` WHERE `sid` = :server AND `mac` = :mac");
+						$check_mac->bindParam(':server', $row['id'], PDO::PARAM_STR);
+						$check_mac->bindParam(':mac', $x['mac'], PDO::PARAM_STR);
+						$check_mac->execute();
+						if($check_mac->rowCount() == 1 || $handler == 'VH'){
+							$xx = $x['ip'];
+							break;
+						}
+					}
+					if(empty($xx)) continue;
 				}
 				$j = $points+$need;
 				$server = ['id' => $row['id'], 'ip' => long2ip($row['ip']), 'port' => $row['port'], 'access' => $row['access'], 'points' => $j];
 				if($handler == 'KVM' || $handler == 'VH'){
-					$server['ipvm'] = $x['ip'];
+					$server['ipvm'] = $xx;
 				}
 				break;
 			}

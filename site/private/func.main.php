@@ -421,9 +421,9 @@ function lepus_get_supportList($uid, $access, $id = 0){
 }
 
 function support_create($uid, $title, $access){
-	global $db;
+	global $db; $title = trim($title);
 	if(strlen($_POST['msg']) < 1) return 'empty_message';
-	if(empty(trim($title)) || empty($uid)) return('empty_post_value');
+	if(empty($title) || empty($uid)) return('empty_post_value');
 	if($access < 2){
 		$tmpTime = time()-60*60*24;
 		$query = $db->prepare("SELECT * FROM `support` WHERE `uid` = :uid AND `open` > :time");

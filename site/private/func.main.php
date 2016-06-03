@@ -502,7 +502,7 @@ function support_msg($uid, $tid, $access, $no_last = 0){
 	$tiket = lepus_get_supportAccess($tid);
 	if($tiket['uid'] != $uid && $access < 2) return 'no_access';
 	if(strlen($_POST['msg']) < 1) return 'empty_message';
-	if($access > 1 && $_POST['msg'] != 'END' && $_POST['msg'] != 'OPEN') $_POST['msg'] .= "\n\n\n[i]С уважением, команда технической поддержки.\nДокументация: [url=https://github.com/poiuty/lepus.su/wiki/%D0%92%D0%B8%D1%80%D1%82%D1%83%D0%B0%D0%BB%D1%8C%D0%BD%D1%8B%D0%B9-%D1%85%D0%BE%D1%81%D1%82%D0%B8%D0%BD%D0%B3]виртуальный хостинг[/url], [url=https://github.com/poiuty/lepus.su/wiki/KVM-VPS]vps[/url], [url=https://wiki.lepus.su]wiki[/url].[/i]";
+	if($access > 1 && $_POST['msg'] != 'END' && $_POST['msg'] != 'OPEN') $_POST['msg'] .= "\n\n\n[i]С уважением, команда технической поддержки.\nДокументация: [url=https://github.com/poiuty/lepus.su/wiki/%D0%92%D0%B8%D1%80%D1%82%D1%83%D0%B0%D0%BB%D1%8C%D0%BD%D1%8B%D0%B9-%D1%85%D0%BE%D1%81%D1%82%D0%B8%D0%BD%D0%B3]виртуальный хостинг[/url], [url=https://github.com/poiuty/lepus.su/wiki/KVM-VPS]vps[/url].[/i]";
 	if($tiket['status'] == 2 && $_POST['msg'] != 'OPEN') return 'close_tiket'; // if tiket close => we need first open it
 	if($tiket['status'] == 1 && $_POST['msg'] == 'OPEN') return 'already_open'; // dont open - open tiket
 	$msg = parse_bb_code(nl2br(htmlentities($_POST['msg'], ENT_QUOTES, 'UTF-8')));
@@ -1521,7 +1521,7 @@ function lepus_doTask(){
 					default: $info = 'no_action'; break;
 					case 'changeTariff':
 						if($row['handler'] == 'VH' || $row['handler'] == 'KVM'){
-							$info = send_changeTariff($row['id'], $commands[$data['do']], $server['ip'], $server['access'], $data['order']+100, "memory={$data['memory']}&cpus={$data['cpus']}&diskspace={$data['diskspace']}");
+							$info = send_changeTariff($commands[$data['do']], $server['ip'], $server['access'], $data['order']+100, "memory={$data['memory']}&cpus={$data['cpus']}&diskspace={$data['diskspace']}");
 						}
 					break;
 					case 'startServer':
@@ -1534,14 +1534,14 @@ function lepus_doTask(){
 						}
 						if($row['handler'] == 'KVM' || $row['handler'] == 'VH'){
 							if($commands[$data['do']] == 'restartServer' || $commands[$data['do']] == 'hardrestartServer' || $commands[$data['do']] == 'stopANDstart'){
-								 $info = send_kvm_restart($row['id'], $commands[$data['do']], $server['ip'], $server['access'], $data['order']+100, $data['boot']);
+								 $info = send_kvm_restart($commands[$data['do']], $server['ip'], $server['access'], $data['order']+100, $data['boot']);
 							}else{
-								$info = send_kvm($row['id'], $commands[$data['do']], $server['ip'], $server['access'], $data['order']+100);
+								$info = send_kvm($commands[$data['do']], $server['ip'], $server['access'], $data['order']+100);
 							}
 						}
 					break;
 					case 'createServer':
-						$info = send_kvm($row['id'], 'getStatus', $server['ip'], $server['access'], $data['order']+100);
+						$info = send_kvm('getStatus', $server['ip'], $server['access'], $data['order']+100);
 						var_dump($info);
 						if($info == 'running'){
 							if($row['handler'] == 'KVM'){
@@ -1659,11 +1659,11 @@ function lepus_searchFree($handler, $tariff, $id){
 	return $server;
 }
 
-function send_changeTariff($cid, $command, $host, $key, $id, $get){
+function send_changeTariff($command, $host, $key, $id, $get){
 	return file_get_contents("http://$host/index.php?id=$id&command=$command&key=$key&$get");
 }
 
-function send_kvm_restart($cid, $command, $host, $key, $id, $boot){
+function send_kvm_restart($command, $host, $key, $id, $boot){
 	return file_get_contents("http://$host/index.php?id=$id&command=$command&key=$key&boot=$boot");
 }
 
@@ -1671,7 +1671,7 @@ function send_kvm_vnc($command, $host, $key, $id, $passwd){
 	return file_get_contents("http://$host/index.php?id=$id&command=$command&key=$key&vnc=$passwd");
 }
 
-function send_kvm($cid, $command, $host, $key, $id){
+function send_kvm($command, $host, $key, $id){
 	return file_get_contents("http://$host/index.php?id=$id&command=$command&key=$key");
 }
 
@@ -1824,7 +1824,7 @@ function lepus_kvmVNC($id, $do){
 	if(!is_array($info)) return 'Нет доступа';
 	if(time() > $info['time2']) return 'Услуга не оплачена';
 	$server = lepus_searchFree('KVM', 0, $id);
-	$text = send_kvm(0, 'portVNC', $server['ip'], $server['access'], $id+100);
+	$text = send_kvm('portVNC', $server['ip'], $server['access'], $id+100);
 	$text = str_replace("0.0.0.0", "Настройки подключения: {$server['ip']}", $text);
 	if($do == 'passwd'){
 		$passwd = genRandStr(32);

@@ -29,6 +29,8 @@ $tmpData = lepus_addDNSDomain($_POST['name'], $_POST['type'], $_POST['master'], 
 if($tmpData == 'already_add') die('We already add this domain');
 if($tmpData == 'wrong_domain') die('Wrong domain');
 if($_POST['type'] != 'slave'){
-	lepus_add_dnsRecord($_POST['name'], 'SOA', 'ns2.lepus.su ns1.lepus.su 2012012402 28800 7200 604800 86400', '0', $tmpData);
+	lepus_add_dnsRecord($_POST['name'], 'SOA', "ns1.lepus.su. admin.lepus.su. ".date('Ymd', time())."01 28800 7200 604800 86400", '0', $tmpData);
+	lepus_add_dnsRecord($_POST['name'], 'NS', 'ns1.lepus.su', '0', $tmpData);
+	lepus_add_dnsRecord($_POST['name'], 'NS', 'ns2.poiuty.com', '0', $tmpData);
 }
 echo $tmpData;

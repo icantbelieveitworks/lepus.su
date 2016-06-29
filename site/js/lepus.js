@@ -519,21 +519,36 @@ $(document).on("click", "[data-move-archive-id]", function(e) {
 });
 
 $(document).on("click", "[data-vm-vnc]", function(e) {
-  $(this).blur();
-  e.preventDefault();
-  var vps_id = $(this).data("vm-vnc");
-  $('#modalVNC').find('[data-vnc-passwd]').data('vm-vnc', vps_id);
-  $('#modalVNC').modal('show');
-  $.post("//"+document.domain+"/public/vnc.php", {id: vps_id, do: 'info'}, function(data){
-    $("#modal_vnc_text").html(data);
-  });
+	$(this).blur();
+	e.preventDefault();
+	var vps_id = $(this).data("vm-vnc");
+	$('#modalVNC').find('[data-vnc-passwd]').data('vm-vnc', vps_id);
+	$('#modalVNC').modal('show');
+	$.post("//"+document.domain+"/public/vnc.php", {id: vps_id, do: 'info'}, function(data){
+		$("#modal_vnc_text").html(data);
+	});
 });
 
 $(document).on("click", "[data-vnc-passwd]", function(e) {
-  $(this).blur();
-  var vps_id = $(this).data("vm-vnc");
-  e.preventDefault();
-  $.post("//"+document.domain+"/public/vnc.php", {id: vps_id, do: 'passwd'}, function(data){
-    $("#modal_vnc_text").html(data);
-  });
+	$(this).blur();
+	var vps_id = $(this).data("vm-vnc");
+	e.preventDefault();
+	$.post("//"+document.domain+"/public/vnc.php", {id: vps_id, do: 'passwd'}, function(data){
+		$("#modal_vnc_text").html(data);
+	});
+});
+
+$(document).on("click", "[data-admin-send-emails]", function(e) {
+	$(this).blur();
+	e.preventDefault();
+	text = $('textarea[id=email_text]').val();
+	title = $('input[id=email_title]').val();
+	$.post("//"+document.domain+"/public/admin/send.php", {title: title, text: text}, function(json){
+		data = JSON.parse(json);
+		if(data.err == 'OK'){
+			alertify.success(data.mes);
+		}else{
+			alertify.error(data.mes);
+		}
+	});
 });

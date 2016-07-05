@@ -11,10 +11,10 @@ switch($_GET['command']){
 		$cpu = round($_GET['cpus']/(2200/100));
 		shell_exec("sudo vzctl set $id --ram {$_GET['memory']} --cpus 1  --cpulimit $cpu --diskspace {$_GET['diskspace']} --save");
 	break;
-	case 'startServ':
+	case 'startServer':
 		shell_exec("sudo vzctl start $id");
 	break;
-	case 'stopServ':
+	case 'stopServer':
 		shell_exec("sudo vzctl stop $id");
 	break;
 	case 'restartServer':

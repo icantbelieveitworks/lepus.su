@@ -19,7 +19,7 @@ switch(@$_POST['type']){
 foreach($tmpPOST as $val){
 	if(!isset($_POST[$val])) die("Empty POST value");
 	if($val == 'name'){
-		$_POST[$val] = idn_to_ascii(mb_strtolower($_POST[$val]));
+		$_POST[$val] = idn_to_ascii(mb_strtolower(trim($_POST[$val])));
 	}
 	$tmpTest = lepus_dnsValid($val, $_POST[$val]);
 	if($tmpTest != 'ok') die($tmpTest);

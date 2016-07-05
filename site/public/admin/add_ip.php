@@ -5,8 +5,9 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/init/memcache.php');
 require_once($_SERVER['DOCUMENT_ROOT'].'/private/init/session.php');
 require_once($_SERVER['DOCUMENT_ROOT'].'/private/func.main.php');
 require_once($_SERVER['DOCUMENT_ROOT'].'/private/auth.php');
-
+if(!is_login()) die("no_login");
 foreach($_POST as $key => $value){
+	$_POST[$key] = trim($_POST[$key]);
 	if(empty($value) && $key != 'server'){
 		$tmpData = error('empty_post_value');
 		break;
@@ -23,7 +24,7 @@ foreach($_POST as $key => $value){
 		$tmpData = error('wrong_mac');
 		break;
 	}
-	if($key == 'host' && preg_match('/[^0-9a-z.]/', $value)){
+	if($key == 'host' && preg_match('/[^0-9a-z.-]/', $value)){
 		$tmpData = error('wrong_host');
 		break;
 	}

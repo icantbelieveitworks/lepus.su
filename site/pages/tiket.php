@@ -17,9 +17,9 @@ if($tmpData["title"] === NULL){
 	die;
 }
 $tmpTitle = '';
-if(strlen($tmpData['title']) > 30){
+if(strlen($tmpData['title']) > 100){
 	$tmpTitle = "title='{$tmpData['title']}'";
-	$tmpData['title'] = mb_substr($tmpData['title'], 0, 28,'utf-8')."...";	 
+	$tmpData['title'] = mb_substr($tmpData['title'], 0, 97,'utf-8')."...";	 
 }
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">

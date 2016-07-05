@@ -1542,7 +1542,6 @@ function lepus_doTask(){
 					break;
 					case 'createServer':
 						$info = send_kvm('getStatus', $server['ip'], $server['access'], $data['order']+100);
-						var_dump($info);
 						if($info == 'running'){
 							if($row['handler'] == 'KVM'){
 								$s = 'VPS готова';
@@ -1552,7 +1551,11 @@ function lepus_doTask(){
 								$s = "виртуальный хостинг готов";
 								$s1 = 'root или lepus [доступ от SFTP/ FTP/ SSH/ MySQL]';
 							}
-							$_POST['msg'] = "Дорогой клиент, $s.\nLogin: $s1\nPassword: {$data['passwd']}\nПожалуйста, поменяйте пароль.\nВы можете посмотреть более подробную информацию об услуге [url=https://lepus.su/pages/view.php?id={$data['order']}]на этой странице[/url].";
+							$x = $db->prepare("SELECT * FROM `ipmanager` WHERE `service` = :id");
+							$x->bindParam(':id', $data['order'], PDO::PARAM_STR);
+							$x->execute();
+							$r = $x->fetch();
+							$_POST['msg'] = "Дорогой клиент, $s.\nIP: ".long2ip($r['ip'])."\nLogin: $s1\nPassword: {$data['passwd']}\nПожалуйста, поменяйте пароль.\nВы можете посмотреть более подробную информацию об услуге [url=https://lepus.su/pages/view.php?id={$data['order']}]на этой странице[/url].";
 							support_msg(5, $data['tiket'], 2, 1);
 						}else{
 							$update = $db->prepare("UPDATE `task` SET `status` = 0 WHERE `id` = :id");

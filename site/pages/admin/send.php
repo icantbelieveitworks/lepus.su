@@ -26,6 +26,7 @@ $tmpData = lepus_getServStat();
 		<link rel="stylesheet" type="text/css" href="/css/style.css"/>
 		<link rel="stylesheet" type="text/css" href="/css/alertify.core.css" />
 		<link rel="stylesheet" type="text/css" href="/css/alertify.bootstrap.css" />
+		<link rel="stylesheet" type="text/css" href="/css/chosen.css">
 		<link rel="stylesheet" href="/css/dataTables.bootstrap.css">
 		<style> td,th { text-align: center; vertical-align: middle; } </style>
 		<script src="/js/jquery.min.js"></script>
@@ -42,7 +43,13 @@ $tmpData = lepus_getServStat();
 							<div class="page-title">Рассылка</div>
 							<div class="row">
 								<div class="col-lg-12">
-									<input class="form-control" id="email_title" type="text" style="margin-top: 5px;" name="count" value="" required="" placeholder="Заголовок">
+									<div class="form-inline" style="margin-top: 5px;">
+										<input class="form-control" id="email_title" type="text" style="width: 70%;" name="count" value="" required="" placeholder="Заголовок">
+										<select id="sendServer" data-placeholder="Выберите сервер..." class="chosen-select" style="width: 29%;">
+											<option value="no"></option>
+											<?php echo lepus_getHTMLSelect('servers', 'domain'); ?>
+										</select>
+									</div>
 									<textarea id="email_text" class="form-control" rows="20"  style="resize:vertical; margin-top: 5px" placeholder="Текст письма"></textarea>
 									<input class="form-control btn btn-sm btn-danger btn-block" data-admin-send-emails style="margin-top: 5px;" type="submit" value="Отправить">
 									<hr/>
@@ -55,6 +62,19 @@ $tmpData = lepus_getServStat();
 		</div>
 		<?php require_once($_SERVER['DOCUMENT_ROOT'].'/private/pages/footer.php'); ?>
 		<?php require_once($_SERVER['DOCUMENT_ROOT'].'/private/pages/modal.php'); ?>
+		<script src="/js/chosen.jquery.min.js" type="text/javascript"></script>
+		<script type="text/javascript">
+			var config = {
+				'.chosen-select'           : {},
+				'.chosen-select-deselect'  : {allow_single_deselect:true},
+				'.chosen-select-no-single' : {disable_search_threshold:10},
+				'.chosen-select-no-results': {no_results_text:'Oops, nothing found!'},
+				'.chosen-select-width'     : {width:"95%"}
+			}
+			for (var selector in config) {
+				$(selector).chosen(config[selector]);
+			}
+		</script>
 		<script src="//www.google.com/recaptcha/api.js?onload=onloadCallback&render=explicit" async defer></script>
 	</body>
 </html>

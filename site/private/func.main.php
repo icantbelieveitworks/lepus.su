@@ -844,7 +844,7 @@ function lepus_price($val, $currency){
 			$val = $val*90;
 		break;
 		case 'EUR2':
-			$val = $val*80;
+			$val = $val*70;
 		break;
 	}
 	return round($val);
@@ -1837,12 +1837,17 @@ function lepus_kvmVNC($id, $do){
 	return $text;
 }
 
-function lepus_admin_send_emails($title, $text){
+function lepus_admin_send_emails($title, $text, $server){
 	global $db;
 	if(empty($title) || empty($text)) return 'empty_post_value';
 	$text .= "\n\n\n[i]С уважением, команда технической поддержки [url=https://lepus.su]lepus hosting[/url].\nДокументация: [url=https://github.com/poiuty/lepus.su/wiki/%D0%92%D0%B8%D1%80%D1%82%D1%83%D0%B0%D0%BB%D1%8C%D0%BD%D1%8B%D0%B9-%D1%85%D0%BE%D1%81%D1%82%D0%B8%D0%BD%D0%B3]виртуальный хостинг[/url], [url=https://github.com/poiuty/lepus.su/wiki/KVM-VPS]vps[/url].[/i]"; 
 	$text = parse_bb_code(nl2br($text));
-	$query = $db->prepare("INSERT INTO `send` (`title`, `text`) VALUES (:title, :text)");
+	if(!empty($server)){
+		$query = $db->prepare("INSERT INTO `send` (`title`, `text`, `info`) VALUES (:title, :text, :server)");
+		$query->bindParam(':server', $server, PDO::PARAM_STR);
+	}else{
+		$query = $db->prepare("INSERT INTO `send` (`title`, `text`) VALUES (:title, :text)");
+	}
 	$query->bindParam(':title', $title, PDO::PARAM_STR);
 	$query->bindParam(':text', $text, PDO::PARAM_STR);
 	$query->execute();
@@ -1850,9 +1855,10 @@ function lepus_admin_send_emails($title, $text){
 }
 
 function lepus_doSendMails(){
-	global $db; $step = 10;
+	global $db; $step = 100;
 	$query = $db->prepare("SELECT * FROM `send` WHERE `status` = 0 LIMIT 1");
 	$query->execute();
+	if($query->rowCount() == 0) return 1;
 	$row = $query->fetch();
 	$select = $db->prepare("SELECT * FROM `users` LIMIT $row[last], $step");
 	$select->execute();
@@ -1862,8 +1868,16 @@ function lepus_doSendMails(){
 		$update->execute();
 		return 1;
 	} 
-	while($tmp = $select->fetch())
+	while($tmp = $select->fetch()){
+		if($row['info'] != 'all'){
+			$check = $db->prepare("SELECT * FROM `services` WHERE `server` = :id AND `uid` = :uid");
+			$check->bindParam(':id', $row['info'], PDO::PARAM_STR);
+			$check->bindParam(':uid', $tmp['id'], PDO::PARAM_STR);
+			$check->execute();
+			if($check->rowCount() == 0) continue;
+		}
 		_mail($tmp['login'], $row['title'], $row['text']);
+	}
 	$row['last'] = $row['last']+$step;
 	$update = $db->prepare("UPDATE `send` SET `last` = :last WHERE `id` = :id");
 	$update->bindParam(':last', $row['last'], PDO::PARAM_STR);

@@ -838,14 +838,13 @@ function lepus_getTariffPrice($id){
 }
 
 function lepus_price($val, $currency){
-	switch($currency){
-		case 'EUR':
-		case 'EUR1':
-			$val = $val*90;
-		break;
-		case 'EUR2':
-			$val = $val*70;
-		break;
+	global $db;
+	$query = $db->prepare("SELECT * FROM `currency` WHERE `name` = :name");
+	$query->bindParam(':name', $currency, PDO::PARAM_STR);
+	$query->execute();
+	if($query->rowCount() == 1){
+		$row = $query->fetch();
+		$val = $val*$row['val'];
 	}
 	return round($val);
 }
@@ -1855,7 +1854,7 @@ function lepus_admin_send_emails($title, $text, $server){
 }
 
 function lepus_doSendMails(){
-	global $db; $step = 100;
+	global $db; $step = 10;
 	$query = $db->prepare("SELECT * FROM `send` WHERE `status` = 0 LIMIT 1");
 	$query->execute();
 	if($query->rowCount() == 0) return 1;

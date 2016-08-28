@@ -52,12 +52,12 @@ if(strlen($tmpData['title']) > 100){
 		<script src="/js/lepus.js"></script>
 		<script>
 			function f(){
-				count = parseInt($('input[id=countMSG]').val());
+				var count = parseInt($('input[id=countMSG]').val());
 				tid = $('input[id=tiketID]').val();
 				$.post("//"+document.domain+"/public/support.php", {do: 'update_msg', tid: tid, count: count}, function(json){
 					data = JSON.parse(json);
 					if(data.err == 'OK'){
-						if(data.mes != 'no_mes'){
+						if(data.mes != 'no_mes' && count == parseInt($('input[id=countMSG]').val())){
 							snd.play();
 							alertify.success('Новое сообщение');
 							$('input[id=countMSG]').val(count+1);

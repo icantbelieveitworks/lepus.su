@@ -51,9 +51,9 @@ $tmpData = lepus_get_dnsAccess($_GET['id'], $user['id']);
 										Для slave можно только просматривать записи.
 										<hr/>
 									</div>
-									<div class="col-lg-11 col-centered">
-										<div class="form-inline">
-											<input class="form-control" id="dnsZone" style="width: 200px;" type="text" name="count" value="" required="" placeholder="test.example.com">
+									<div class="col-lg-12">
+										<div class="form-inline col-centered" style="width: 92%">
+											<input class="form-control" id="dnsZone" style="width: 205px;" type="text" name="count" value="" required="" placeholder="test.example.com">
 												<select class="form-control" id="dnsZoneType" name="type">
 													<option value="A" selected="">A</option>
 													<option value="AAAA">AAAA</option>

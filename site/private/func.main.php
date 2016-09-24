@@ -51,6 +51,7 @@ function lost_passwd($login){
 function login($login, $passwd, $a = 'bad_passwd'){
 	global $db; $login = mb_strtolower($login);
 	if(IsTorExitPoint()) return 'deny_tor';
+	if(lepus_checkBan($login) || lepus_checkBan()) return 'no_access';
 	if(empty($login) || empty($passwd)) return 'empty_post_value';
 	if(!filter_var($login, FILTER_VALIDATE_EMAIL)) return 'bad_email';
 	$is_user = is_lepus_user($login);
@@ -93,6 +94,7 @@ function auth($id, $session){
 		return 'no_auth';
 	}
 	$row = $query->fetch();
+	if(lepus_checkBan($row['login']) || lepus_checkBan()) return 'no_access';
 	return ["id" => $row['id'], "login" => $row['login'], "passwd" => $row['passwd'], "bitcoin" => $row['bitcoin'], "api" => $row['api'], "data" => $row['data']];
 }
 
@@ -167,8 +169,8 @@ function lepus_crypt($input, $do = 'encode'){
 }
 
 function lepus_new_account($login){
-	global $db; $login =  mb_strtolower($login);
-	$allow = ['RU', 'UA', 'BY'];
+	global $db; $login = mb_strtolower($login); $allow = ['RU', 'UA', 'BY'];
+	if(lepus_checkBan($login) || lepus_checkBan()) return 'no_access';
 	if(!in_array(geoip_country_code_by_name($_SERVER['REMOTE_ADDR']), $allow)) return "no_access";
 	if(empty($login)) return 'empty_post_value';
 	if(!filter_var($login, FILTER_VALIDATE_EMAIL)) return 'bad_email';
@@ -1885,3 +1887,16 @@ function lepus_doSendMails(){
 	$update->bindParam(':id', $row['id'], PDO::PARAM_STR);
 	$update->execute();
 }
+
+function lepus_checkBan($val = null){
+	global $db; if(empty($val)) $val = $_SERVER['REMOTE_ADDR'];
+	$query = $db->prepare("SELECT * FROM `ban` WHERE `val` = :val");
+	$query->bindParam(':val', $val, PDO::PARAM_STR);
+	$query->execute();
+	if($query->rowCount() > 0){
+		return true; 
+	}else{
+		return false;
+	}
+}
+

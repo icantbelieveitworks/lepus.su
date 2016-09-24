@@ -168,6 +168,8 @@ function lepus_crypt($input, $do = 'encode'){
 
 function lepus_new_account($login){
 	global $db; $login =  mb_strtolower($login);
+	$allow = ['RU', 'UA', 'BY'];
+	if(!in_array(geoip_country_code_by_name($_SERVER['REMOTE_ADDR']), $allow)) return "no_access";
 	if(empty($login)) return 'empty_post_value';
 	if(!filter_var($login, FILTER_VALIDATE_EMAIL)) return 'bad_email';
 	$is_user = is_lepus_user($login);

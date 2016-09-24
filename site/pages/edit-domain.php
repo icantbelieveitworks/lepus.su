@@ -35,7 +35,7 @@ $tmpData = lepus_get_dnsAccess($_GET['id'], $user['id']);
 		<script src="/js/bootstrap.min.js"></script>
 		<script src="/js/alertify.js"></script>
 		<script src="/js/lepus.js"></script>
-		<?php if(!empty($conf['beard_stats'])){ echo "<script async src=\"https://stats.vboro.de/code/code/{$conf['beard_stats']}/\"></script>"; } ?>
+		<?=$head_code?>
 	</head>
 	<body>
 		<div class="wrapper">

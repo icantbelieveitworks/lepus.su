@@ -27,5 +27,16 @@ switch($_POST['do']){
 	case 'update_msg':
 		$tmpData = error(lepus_get_supportMsg($_POST['tid'], $user['id'], $user['data']['access'], 0, $_POST['count']));
 	break;
+	
+    case 'get_list':
+            $start = $_REQUEST['start'];
+            $length = $_REQUEST['length'];
+            $search = false;
+            if (!empty($_REQUEST['search']['value'])) {
+                $search = filter_var($_REQUEST['search']['value'], FILTER_SANITIZE_STRING);
+            }
+
+            $tmpData = lepus_get_supportListAjax($user['id'], $user['data']['access'], $start, $length, $search);
+    break;
 }
 echo json_encode($tmpData);

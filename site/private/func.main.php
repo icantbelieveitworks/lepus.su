@@ -420,6 +420,53 @@ function lepus_get_supportList($uid, $access, $id = 0){
 	return $data;
 }
 
+function lepus_get_supportListAjax($uid, $access, $start, $length, $search){
+	global $db; $data = [];
+	$binds = [];
+	$where = "";
+	if($access <= 1){
+			$where .= " and `uid` = :uid";
+			$binds[':uid'] = $uid;
+	}
+
+	if(!empty($search)){
+			$where .= " and `title` like :search";
+			$binds[':search'] = "%{$search}%";
+	}
+
+	$counter = $db->prepare("SELECT count(*) as count FROM `support` WHERE 1=1 {$where}");
+	foreach($binds as $key => $value){
+		$counter->bindParam($key, $value, PDO::PARAM_STR);
+	}
+	$counter->execute();
+	$total = $counter->fetch()['count'];
+	$query = $db->prepare("SELECT id, title, open, last, status FROM `support` WHERE 1=1 {$where} LIMIT {$start},{$length}");
+	foreach($binds as $key => $value){
+		$query->bindParam($key, $value, PDO::PARAM_STR);
+	}
+	$query->execute();
+
+	while($row = $query->fetch()){
+		if(!empty($row['open'])) $row['open'] = date("Y-m-d H:i", $row['open']); else $row['open'] = '-';
+		if(!empty($row['last'])) $row['last'] = date("Y-m-d H:i", $row['last']); else $row['last'] = '-';
+		$ldata = lepus_get_tiketLabel($row['status'], $uid, $row['id'], $access);
+		$tmpTitle = $row['title'];
+		if(mb_strlen($row['title'], 'UTF-8') > 23){
+			$row['title'] = mb_substr($row['title'], 0, 23,'utf-8')."...";
+		}
+		$tmp_data = [];
+
+		$tmp_data['link'] = "<a href=\"/pages/tiket.php?id={$row['id']}\" title=\"Открыть\">{$row['id']}</a>";
+		$tmp_data['title'] = "<span title=\"{$tmpTitle}\">{$row['title']}</span>";
+		$tmp_data['open'] = $row['open'];
+		$tmp_data['last'] = $row['last'];
+		$tmp_data['status'] = "<span class=\"label label-pill label-{$ldata['label']} myLabel\">{$ldata['info']}</span>";
+
+		$data[] = array_values($tmp_data);
+	}
+	return ['draw' => $_REQUEST['draw'], 'start' => $_REQUEST['start'], 'length' => $_REQUEST['length'], 'recordsTotal' => $total, 'recordsFiltered' => $total, 'data' => $data];
+}
+
 function support_create($uid, $title, $access){
 	global $db; $title = trim($title);
 	if(strlen($_POST['msg']) < 1) return 'empty_message';

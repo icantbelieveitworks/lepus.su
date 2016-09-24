@@ -34,7 +34,16 @@ if(empty($user)){
 		<script src="/js/jquery.dataTables.min.js"></script>
 		<script src="/js/dataTables.bootstrap.js"></script>
 		<script src="/js/bootstrap.min.js"></script>
-		<script type="text/javascript" charset="utf-8"> $(document).ready(function() { $('#supportList').dataTable({ "order": [[ 0, "desc" ]] }); }); </script>
+		<script type="text/javascript" charset="utf-8">
+			$(document).ready(function() {
+				$('#supportList').dataTable({
+					"processing": true,
+					"serverSide": true,
+					"ajax": '/public/support.php?do=get_list',
+					"order": [[ 0, "desc" ]]
+				});
+			});
+		</script>
 		<script src="/js/alertify.js"></script>
 		<script src="/js/lepus.js"></script>
 	</head>
@@ -80,7 +89,6 @@ if(empty($user)){
 											</tr>
 										</thead>
 										<tbody>
-											<?php echo lepus_get_supportList($user['id'], $user['data']['access']); ?>
 										</tbody>
 									</table>
 								</div>

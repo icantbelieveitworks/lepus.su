@@ -50,6 +50,7 @@ if(strlen($tmpData['title']) > 30){
 		<script type="text/javascript" charset="utf-8"> $(document).ready(function() { $('#supportList').dataTable({ "order": [[ 0, "desc" ]] }); }); </script>
 		<script src="/js/alertify.js"></script>
 		<script src="/js/lepus.js"></script>
+		<?php if(!empty($conf['beard_stats'])){ echo "<script async src=\"https://stats.vboro.de/code/code/{$conf['beard_stats']}/\"></script>"; } ?>
 		<script>
 			function f(){
 				count = parseInt($('input[id=countMSG]').val());

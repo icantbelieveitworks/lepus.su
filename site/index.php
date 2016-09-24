@@ -25,6 +25,7 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/auth.php');
 		<script src="/js/bootstrap.min.js"></script>
 		<script src="/js/alertify.js"></script>
 		<script src="/js/lepus.js"></script>
+		<?php if(!empty($conf['beard_stats'])){ echo "<script async src=\"https://stats.vboro.de/code/code/{$conf['beard_stats']}/\"></script>"; } ?>
 	</head>
 	<body>
 		<div class="wrapper">

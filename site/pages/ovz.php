@@ -31,6 +31,7 @@ for($i=0; $i < 4; $i++){
 		<script src="/js/bootstrap.min.js"></script>
 		<script src="/js/alertify.js"></script>
 		<script src="/js/lepus.js"></script>
+		<?php if(!empty($conf['beard_stats'])){ echo "<script async src=\"https://stats.vboro.de/code/code/{$conf['beard_stats']}/\"></script>"; } ?>
 		<style>
 			td,th { text-align: center; vertical-align: middle; }
 		</style>

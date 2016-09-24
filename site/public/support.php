@@ -6,7 +6,7 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/init/session.php');
 require_once($_SERVER['DOCUMENT_ROOT'].'/private/func.main.php');
 require_once($_SERVER['DOCUMENT_ROOT'].'/private/auth.php');
 if(!is_login()) die("no_login");
-switch($_POST['do']){
+switch($_REQUEST['do']){
 	default: die('wrong do');
 	case 'new':
 		if($user['data']['access'] > 1 && $_POST['user'] != 'no'){

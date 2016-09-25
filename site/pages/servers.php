@@ -29,6 +29,7 @@ function lepus_orderLink(){
 		<script src="/js/bootstrap.min.js"></script>
 		<script src="/js/alertify.js"></script>
 		<script src="/js/lepus.js"></script>
+		<?=$head_code?>
 		<style>
 			td,th { text-align: center; vertical-align: middle; }
 		</style>

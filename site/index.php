@@ -25,6 +25,7 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/auth.php');
 		<script src="/js/bootstrap.min.js"></script>
 		<script src="/js/alertify.js"></script>
 		<script src="/js/lepus.js"></script>
+		<?=$head_code?>
 	</head>
 	<body>
 		<div class="wrapper">

@@ -34,6 +34,7 @@ if($tmpData['err'] != 'OK')	die(lepus_error_page($tmpData['mes']));
 		<script src="/js/bootstrap.min.js"></script>
 		<script src="/js/alertify.js"></script>
 		<script src="/js/lepus.js"></script>
+		<?=$head_code?>
 	<script type="text/javascript" charset="utf-8"> $(document).ready(function() { $('#IPList').dataTable({ "order": [[ 0, "desc" ]] }); }); </script>
 	</head>
 	<body>

@@ -40,6 +40,7 @@ switch(@$_GET['q']){
 		<script src="/js/bootstrap.min.js"></script>
 		<script src="/js/alertify.js"></script>
 		<script src="/js/lepus.js"></script>
+		<?=$head_code?>
 	<script type="text/javascript" charset="utf-8"> $(document).ready(function() { $('#incomeTable').dataTable({ "order": [[ 0, "desc" ]] }); }); </script>
 	</head>
 	<body>

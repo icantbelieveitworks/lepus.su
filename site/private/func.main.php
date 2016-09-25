@@ -49,7 +49,7 @@ function lost_passwd($login){
 }
 
 function login($login, $passwd, $a = 'bad_passwd'){
-	global $db; $login = mb_strtolower($login);
+	global $db, $conf; $login = mb_strtolower($login);
 	if(IsTorExitPoint()) return 'deny_tor';
 	if(lepus_checkBan($login) || lepus_checkBan()) return 'no_access';
 	if(empty($login) || empty($passwd)) return 'empty_post_value';
@@ -71,6 +71,14 @@ function login($login, $passwd, $a = 'bad_passwd'){
 		$query->bindParam(':id', $row['id'], PDO::PARAM_STR);
 		$query->bindParam(':sess', $_SESSION['sess'], PDO::PARAM_STR);
 		$query->execute();
+		
+		$data = json_decode($row['data'], true);
+		if (empty($data['beard']) && !empty($_COOKIE['stat_visitor']) && !empty($conf['beard_stats_api'])) {
+			$data['beard'] = $_COOKIE['stat_visitor'];
+			save_user_data($row['id'], $data);
+			file_get_contents("http://stats.vboro.de/visitor/set?api_key={$conf['beard_stats_api']}&id={$_COOKIE['stat_visitor']}&key=account&value={$row['id']}");
+		}
+
 		lepus_log_ip($row['id'], ip2long($_SERVER["REMOTE_ADDR"]));
 		$a = 'enter';
 	}
@@ -424,6 +432,55 @@ function lepus_get_supportList($uid, $access, $id = 0){
 	return $data;
 }
 
+function lepus_get_supportListAjax($uid, $access, $start, $length, $search){
+	global $db; $data = [];
+	$binds = [];
+	$where = "";
+	$start = (int) $start;
+	$length = (int) $length;
+	if($access <= 1){
+			$where .= " and `uid` = :uid";
+			$binds[':uid'] = $uid;
+	}
+
+	if(!empty($search)){
+			$where .= " and `title` like :search";
+			$binds[':search'] = "%{$search}%";
+	}
+
+	$counter = $db->prepare("SELECT count(*) as count FROM `support` WHERE 1=1 {$where}");
+	foreach($binds as $key => $value){
+		$counter->bindParam($key, $value, PDO::PARAM_STR);
+	}
+	$counter->execute();
+	$total = $counter->fetch()['count'];
+	$query = $db->prepare("SELECT id, title, open, last, status FROM `support` WHERE 1=1 {$where} LIMIT {$start},{$length}");
+	foreach($binds as $key => $value){
+		$query->bindParam($key, $value, PDO::PARAM_STR);
+	}
+	$query->execute();
+
+	while($row = $query->fetch()){
+		if(!empty($row['open'])) $row['open'] = date("Y-m-d H:i", $row['open']); else $row['open'] = '-';
+		if(!empty($row['last'])) $row['last'] = date("Y-m-d H:i", $row['last']); else $row['last'] = '-';
+		$ldata = lepus_get_tiketLabel($row['status'], $uid, $row['id'], $access);
+		$tmpTitle = $row['title'];
+		if(mb_strlen($row['title'], 'UTF-8') > 23){
+			$row['title'] = mb_substr($row['title'], 0, 23,'utf-8')."...";
+		}
+		$tmp_data = [];
+
+		$tmp_data['link'] = "<a href=\"/pages/tiket.php?id={$row['id']}\" title=\"Открыть\">{$row['id']}</a>";
+		$tmp_data['title'] = "<span title=\"{$tmpTitle}\">{$row['title']}</span>";
+		$tmp_data['open'] = $row['open'];
+		$tmp_data['last'] = $row['last'];
+		$tmp_data['status'] = "<span class=\"label label-pill label-{$ldata['label']} myLabel\">{$ldata['info']}</span>";
+
+		$data[] = array_values($tmp_data);
+	}
+	return ['draw' => $_REQUEST['draw'], 'start' => $_REQUEST['start'], 'length' => $_REQUEST['length'], 'recordsTotal' => $total, 'recordsFiltered' => $total, 'data' => $data];
+}
+
 function support_create($uid, $title, $access){
 	global $db; $title = trim($title);
 	if(strlen($_POST['msg']) < 1) return 'empty_message';
@@ -596,7 +653,7 @@ function lepus_change_phone($num, $user){
 }
 
 function lepus_update_balance($pid, $uid, $amount, $system){
-	global $db; $uid = intval($uid); $amount = intval($amount);
+	global $db, $conf; $uid = intval($uid); $amount = intval($amount);
 	if($system != 'lepus'){
 		$query = $db->prepare("SELECT * FROM `log_income` WHERE `payment_id` =:pid AND `system` = :system");
 		$query->bindParam(':pid', $pid, PDO::PARAM_STR);
@@ -625,6 +682,11 @@ function lepus_update_balance($pid, $uid, $amount, $system){
 	$query->bindParam(':system', $system, PDO::PARAM_STR);
 	$query->execute();
 	$tmp['data']['balance'] += $amount;
+	
+	if(!empty($tmp['data']['beard']) && !empty($conf['beard_stats_api'])){
+		 file_get_contents("http://stats.vboro.de/payment?api_key={$conf['beard_stats_api']}&id={$tmp['data']['beard']}&amount={$amount}");
+	}
+	
 	save_user_data($row['id'], $tmp['data']);
 	if($system != 'lepus'){
 		_mail($row['login'], "Пополнение счета", "Дорогой клиент,<br/>ваш баланс увеличен на $amount RUR.<br/>Благодарим за оплату.");

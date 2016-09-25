@@ -6,8 +6,10 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/init/session.php');
 require_once($_SERVER['DOCUMENT_ROOT'].'/private/func.main.php');
 require_once($_SERVER['DOCUMENT_ROOT'].'/private/auth.php');
 if(!is_login()) die("no_login");
-switch($_REQUEST['do']){
-	default: die('wrong do');
+switch($_POST['do']){
+	default:
+		$tmpData = lepus_get_supportList($user['id'], $user['data']['access']);
+    break;
 	case 'new':
 		if($user['data']['access'] > 1 && $_POST['user'] != 'no'){
 			$tmpData = error(support_create(intval($_POST['user']), $_POST['title'], $user['data']['access']));
@@ -27,16 +29,6 @@ switch($_REQUEST['do']){
 	case 'update_msg':
 		$tmpData = error(lepus_get_supportMsg($_POST['tid'], $user['id'], $user['data']['access'], 0, $_POST['count']));
 	break;
-	
-    case 'get_list':
-            $start = $_REQUEST['start'];
-            $length = $_REQUEST['length'];
-            $search = false;
-            if (!empty($_REQUEST['search']['value'])) {
-                $search = filter_var($_REQUEST['search']['value'], FILTER_SANITIZE_STRING);
-            }
-
-            $tmpData = lepus_get_supportListAjax($user['id'], $user['data']['access'], $start, $length, $search);
-    break;
+    
 }
 echo json_encode($tmpData);

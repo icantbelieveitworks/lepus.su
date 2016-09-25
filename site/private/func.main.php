@@ -73,12 +73,6 @@ function login($login, $passwd, $a = 'bad_passwd'){
 		$query->execute();
 		
 		$data = json_decode($row['data'], true);
-		if (empty($data['beard']) && !empty($_COOKIE['stat_visitor']) && !empty($conf['beard_stats_api'])) {
-			$data['beard'] = $_COOKIE['stat_visitor'];
-			save_user_data($row['id'], $data);
-			file_get_contents("http://stats.vboro.de/visitor/set?api_key={$conf['beard_stats_api']}&id={$_COOKIE['stat_visitor']}&key=account&value={$row['id']}");
-		}
-
 		lepus_log_ip($row['id'], ip2long($_SERVER["REMOTE_ADDR"]));
 		$a = 'enter';
 	}
@@ -390,76 +384,44 @@ function lepus_get_tiketLabel($id, $uid, $tid, $access){
 	return  ['info' => $info[$id], 'label' => $label[$id]];
 }
 
-function lepus_get_supportList($uid, $access, $id = 0){
-	global $db; $data = null;
+function lepus_get_supportList($uid, $access){
+	global $db; $data = []; $draw = 1; $start = 0; $length = 10; $search = '';
+	$_POST['draw'] = intval($_POST['draw']); 
+	$_POST['start'] = intval($_POST['start']); 
+	$_POST['length'] = intval($_POST['length']);
+	if(!empty($_POST['draw']) && !empty($_POST['draw']) && !empty($_POST['draw'])){
+		$draw = intval($_POST['draw']);
+		$start = intval($_POST['start']);
+		$length = intval($_POST['length']);
+		if($length > 100) $length = 100;
+	}
 	if($access > 1){
-		if($id == 0){
-			$query = $db->prepare("SELECT * FROM `support`");
+		$query = $db->prepare("SELECT count(*) as count FROM `support`");
+	}else{
+		$query = $db->prepare("SELECT count(*) as count FROM `support` WHERE `uid` = :uid");
+		$query->bindParam(':uid', $uid, PDO::PARAM_STR);
+	}
+	$query->execute();
+	$total = $query->fetch();
+	if(!empty($_POST['search']['value'])) $search = $_POST['search']['value'];
+	if($access > 1){
+		if(empty($search)){
+			$query = $db->prepare("SELECT * FROM `support` LIMIT $start, $length");
 		}else{
-			$query = $db->prepare("SELECT * FROM `support` WHERE `id` = :id");
-			$query->bindParam(':id', $id, PDO::PARAM_STR);
+			$query = $db->prepare("SELECT * FROM `support` WHERE `title` LIKE concat('%', :search, '%') LIMIT $start, $length");
+			$query->bindParam(':search', $search, PDO::PARAM_STR);
 		}
 	}else{
-		if($id == 0){
-			$query = $db->prepare("SELECT * FROM `support` WHERE `uid` = :uid");
+		if(empty($search)){
+			$query = $db->prepare("SELECT * FROM `support` WHERE `uid` = :uid LIMIT $start, $length");
 			$query->bindParam(':uid', $uid, PDO::PARAM_STR);
 		}else{
-			$query = $db->prepare("SELECT * FROM `support` WHERE `uid` = :uid AND `id` = :id");
+			$query = $db->prepare("SELECT * FROM `support` WHERE `uid` = :uid AND `title` LIKE concat('%', :search, '%') LIMIT $start, $length");
 			$query->bindParam(':uid', $uid, PDO::PARAM_STR);
-			$query->bindParam(':id', $id, PDO::PARAM_STR);
+			$query->bindParam(':search', $search, PDO::PARAM_STR);
 		}
 	}
 	$query->execute();
-	while($row = $query->fetch()){
-		if(!empty($row['open'])) $row['open'] = date("Y-m-d H:i", $row['open']); else $row['open'] = '-';
-		if(!empty($row['last'])) $row['last'] = date("Y-m-d H:i", $row['last']); else $row['last'] = '-';
-		$ldata = lepus_get_tiketLabel($row['status'], $uid, $row['id'], $access);
-		if(strlen($row['title']) > 23){
-			$tmpTitle = "title='{$row['title']}'";
-			$row['title'] = mb_substr($row['title'], 0, 23,'utf-8')."...";	 
-		}
-		if($id == 0){
-			$data .= "<tr><td><a href=\"/pages/tiket.php?id={$row['id']}\" title=\"Открыть\">".$row['id']."</a></td><td ".@$tmpTitle.">".$row['title']."</td><td>".$row['open']."</td><td>".$row['last']."</td><td style=\"padding-top: 11px;\"><span class=\"label label-pill label-".$ldata['label']." myLabel\">".$ldata['info']."</span></td></tr>";
-		}else{
-			$data = ['a' => "<a href=\"/pages/tiket.php?id={$row['id']}\" title=\"Открыть\">".$row['id']."</a>",
-					 'b' => $row['title'],
-					 'c' => $row['open'],
-					 'd' => $row['last'],
-					 'e' => "<span class=\"label label-pill label-".$ldata['label']." myLabel\">".$ldata['info']."</span>"];
-		}
-		$tmpTitle = '';
-	}
-	return $data;
-}
-
-function lepus_get_supportListAjax($uid, $access, $start, $length, $search){
-	global $db; $data = [];
-	$binds = [];
-	$where = "";
-	$start = (int) $start;
-	$length = (int) $length;
-	if($access <= 1){
-			$where .= " and `uid` = :uid";
-			$binds[':uid'] = $uid;
-	}
-
-	if(!empty($search)){
-			$where .= " and `title` like :search";
-			$binds[':search'] = "%{$search}%";
-	}
-
-	$counter = $db->prepare("SELECT count(*) as count FROM `support` WHERE 1=1 {$where}");
-	foreach($binds as $key => $value){
-		$counter->bindParam($key, $value, PDO::PARAM_STR);
-	}
-	$counter->execute();
-	$total = $counter->fetch()['count'];
-	$query = $db->prepare("SELECT id, title, open, last, status FROM `support` WHERE 1=1 {$where} LIMIT {$start},{$length}");
-	foreach($binds as $key => $value){
-		$query->bindParam($key, $value, PDO::PARAM_STR);
-	}
-	$query->execute();
-
 	while($row = $query->fetch()){
 		if(!empty($row['open'])) $row['open'] = date("Y-m-d H:i", $row['open']); else $row['open'] = '-';
 		if(!empty($row['last'])) $row['last'] = date("Y-m-d H:i", $row['last']); else $row['last'] = '-';
@@ -468,17 +430,14 @@ function lepus_get_supportListAjax($uid, $access, $start, $length, $search){
 		if(mb_strlen($row['title'], 'UTF-8') > 23){
 			$row['title'] = mb_substr($row['title'], 0, 23,'utf-8')."...";
 		}
-		$tmp_data = [];
-
 		$tmp_data['link'] = "<a href=\"/pages/tiket.php?id={$row['id']}\" title=\"Открыть\">{$row['id']}</a>";
 		$tmp_data['title'] = "<span title=\"{$tmpTitle}\">{$row['title']}</span>";
 		$tmp_data['open'] = $row['open'];
 		$tmp_data['last'] = $row['last'];
 		$tmp_data['status'] = "<span class=\"label label-pill label-{$ldata['label']} myLabel\">{$ldata['info']}</span>";
-
 		$data[] = array_values($tmp_data);
 	}
-	return ['draw' => $_REQUEST['draw'], 'start' => $_REQUEST['start'], 'length' => $_REQUEST['length'], 'recordsTotal' => $total, 'recordsFiltered' => $total, 'data' => $data];
+	return ['draw' => $draw, 'start' => $start, 'length' => $length, 'recordsTotal' => $total['count'], 'recordsFiltered' => $total['count'], 'data' => $data];
 }
 
 function support_create($uid, $title, $access){
@@ -681,12 +640,7 @@ function lepus_update_balance($pid, $uid, $amount, $system){
 	$query->bindParam(':amount', $amount, PDO::PARAM_STR);
 	$query->bindParam(':system', $system, PDO::PARAM_STR);
 	$query->execute();
-	$tmp['data']['balance'] += $amount;
-	
-	if(!empty($tmp['data']['beard']) && !empty($conf['beard_stats_api'])){
-		 file_get_contents("http://stats.vboro.de/payment?api_key={$conf['beard_stats_api']}&id={$tmp['data']['beard']}&amount={$amount}");
-	}
-	
+	$tmp['data']['balance'] += $amount;	
 	save_user_data($row['id'], $tmp['data']);
 	if($system != 'lepus'){
 		_mail($row['login'], "Пополнение счета", "Дорогой клиент,<br/>ваш баланс увеличен на $amount RUR.<br/>Благодарим за оплату.");
@@ -1961,4 +1915,3 @@ function lepus_checkBan($val = null){
 		return false;
 	}
 }
-

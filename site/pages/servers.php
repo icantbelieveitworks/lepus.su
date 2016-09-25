@@ -29,7 +29,6 @@ function lepus_orderLink(){
 		<script src="/js/bootstrap.min.js"></script>
 		<script src="/js/alertify.js"></script>
 		<script src="/js/lepus.js"></script>
-		<?=$head_code?>
 		<style>
 			td,th { text-align: center; vertical-align: middle; }
 		</style>
@@ -56,6 +55,17 @@ function lepus_orderLink(){
 								</tr>
 							</thead>
 							<tbody>
+								<tr>
+									<td>SYS-IP-1</td>
+									<td><a href="http://ark.intel.com/ru/products/39718/Intel-Xeon-Processor-W3520-8M-Cache-2_66-GHz-4_80-GTs-Intel-QPI" target="_blank">W3520</a></td>
+									<td>16 GB</td>
+									<td>2x 2TB SATA</td>
+									<td>250 Mbps</td>
+									<td>OVH</td>
+									<td><img src="https://lepus.su/images/flags/france-flag.png" title="France"></td>
+									<th><?php echo lepus_getTariffPrice(42); ?></th>
+									<td><?php echo lepus_orderLink(); ?></td>
+								</tr>
 								<tr>
 									<td>E3-SAT-1</td>
 									<td><a href="http://ark.intel.com/ru/products/65733/Intel-Xeon-Processor-E3-1225V2-(8M-Cache-3_20-GHz)" target="_blank">E3-1225</a></td>

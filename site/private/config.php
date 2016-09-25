@@ -30,11 +30,4 @@ $conf['telegram'] = 'bot1:xxxx';
 $conf['billmgr_user'] = 'xxxx';
 $conf['billmgr_pass'] = 'xxxx';
 
-$conf['beard_stats'] = 0;
-$conf['beard_stats_api'] = "";
-
 $head_code = "";
-if(!empty($conf['beard_stats']))
-{ 
-	$head_code .= "<script async src=\"https://stats.vboro.de/code/code/{$conf['beard_stats']}/\"></script>"; 
-} 

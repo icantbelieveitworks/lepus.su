@@ -386,9 +386,20 @@ function lepus_get_tiketLabel($id, $uid, $tid, $access){
 
 function lepus_get_supportList($uid, $access){
 	global $db; $data = []; $draw = 1; $start = 0; $length = 10; $search = '';
-	$_POST['draw'] = intval($_POST['draw']); 
-	$_POST['start'] = intval($_POST['start']); 
-	$_POST['length'] = intval($_POST['length']);
+	$_POST['draw'] = intval(@$_POST['draw']); 
+	$_POST['start'] = intval(@$_POST['start']); 
+	$_POST['length'] = intval(@$_POST['length']);
+	switch(@$_POST['order'][0]['dir']){
+		default: $x = 'DESC'; break;
+		case 'asc': $x = 'ASC'; break;
+	}
+	switch(@$_POST['order'][0]['column']){
+		default: $column = 'id'; break;
+		case '1': $column = 'title'; break;
+		case '2': $column = 'open'; break;
+		case '3': $column = 'last'; break;
+		case '4': $column = 'status'; break;
+	}
 	if(!empty($_POST['draw']) && !empty($_POST['draw']) && !empty($_POST['draw'])){
 		$draw = intval($_POST['draw']);
 		$start = intval($_POST['start']);
@@ -406,17 +417,17 @@ function lepus_get_supportList($uid, $access){
 	if(!empty($_POST['search']['value'])) $search = $_POST['search']['value'];
 	if($access > 1){
 		if(empty($search)){
-			$query = $db->prepare("SELECT * FROM `support` LIMIT $start, $length");
+			$query = $db->prepare("SELECT * FROM `support` ORDER BY `$column` $x LIMIT $start, $length");
 		}else{
-			$query = $db->prepare("SELECT * FROM `support` WHERE `title` LIKE concat('%', :search, '%') LIMIT $start, $length");
+			$query = $db->prepare("SELECT * FROM `support` WHERE `title` LIKE concat('%', :search, '%') ORDER BY `$column` $x LIMIT $start, $length");
 			$query->bindParam(':search', $search, PDO::PARAM_STR);
 		}
 	}else{
 		if(empty($search)){
-			$query = $db->prepare("SELECT * FROM `support` WHERE `uid` = :uid LIMIT $start, $length");
+			$query = $db->prepare("SELECT * FROM `support` WHERE `uid` = :uid ORDER BY `$column` $x LIMIT $start, $length");
 			$query->bindParam(':uid', $uid, PDO::PARAM_STR);
 		}else{
-			$query = $db->prepare("SELECT * FROM `support` WHERE `uid` = :uid AND `title` LIKE concat('%', :search, '%') LIMIT $start, $length");
+			$query = $db->prepare("SELECT * FROM `support` WHERE `uid` = :uid AND `title` LIKE concat('%', :search, '%') ORDER BY `$column` $x LIMIT $start, $length");
 			$query->bindParam(':uid', $uid, PDO::PARAM_STR);
 			$query->bindParam(':search', $search, PDO::PARAM_STR);
 		}
@@ -428,7 +439,7 @@ function lepus_get_supportList($uid, $access){
 		$ldata = lepus_get_tiketLabel($row['status'], $uid, $row['id'], $access);
 		$tmpTitle = $row['title'];
 		if(mb_strlen($row['title'], 'UTF-8') > 23){
-			$row['title'] = mb_substr($row['title'], 0, 23,'utf-8')."...";
+			$row['title'] = mb_substr($row['title'], 0, 18,'utf-8')."...";
 		}
 		$tmp_data['link'] = "<a href=\"/pages/tiket.php?id={$row['id']}\" title=\"Открыть\">{$row['id']}</a>";
 		$tmp_data['title'] = "<span title=\"{$tmpTitle}\">{$row['title']}</span>";

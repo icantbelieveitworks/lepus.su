@@ -39,7 +39,7 @@ if(empty($user)){
 				$('#supportList').dataTable({
 					"processing": true,
 					"serverSide": true,
-					"ajax": { "url":"/public/support.php?do=get_list", "type":"POST" },
+					"ajax": { "url":"/public/support.php", "type":"POST" },
 					"order": [[ 0, "desc" ]]
 				});
 			});

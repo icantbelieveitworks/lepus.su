@@ -16,8 +16,9 @@ for($i=0; $i < 5; $i++){
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 	<head>
-		<title>KVM VPS</title>
-		<meta name="description" content="Заказать быстрый KVM VPS на SSD дисках" />
+		<title>VPS хостинг: купить виртуальный сервер VDS/VPS, аренда VDS от Lepus</title>
+		<meta name="description" content="Аренда виртуального выделенного сервера. Низкие цены. Виртуализация KVM. SSD диски."/>
+		<meta name="keywords" content="vps, vds, kvm" />
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 		<meta name="yandex-verification" content="6940b644b3235f76" />
 		<link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
@@ -31,7 +32,6 @@ for($i=0; $i < 5; $i++){
 		<script src="/js/bootstrap.min.js"></script>
 		<script src="/js/alertify.js"></script>
 		<script src="/js/lepus.js"></script>
-		<?=$head_code?>
 		<style>
 			td,th { text-align: center; vertical-align: middle; }
 		</style>

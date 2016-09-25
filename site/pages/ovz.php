@@ -31,7 +31,6 @@ for($i=0; $i < 4; $i++){
 		<script src="/js/bootstrap.min.js"></script>
 		<script src="/js/alertify.js"></script>
 		<script src="/js/lepus.js"></script>
-		<?=$head_code?>
 		<style>
 			td,th { text-align: center; vertical-align: middle; }
 		</style>
@@ -63,20 +62,20 @@ for($i=0; $i < 4; $i++){
 									</tr>
 									<tr>
 										<td>CPU (MHz)</td>
-										<td>600</td>
-										<td>840</td>
-										<td>1260</td>
-										<td>1680</td>
+										<td>1000</td>
+										<td>1000</td>
+										<td>1500</td>
+										<td>1500</td>
 									</tr>
 									<tr>
-										<td>RAM (Мб)</td>
+										<td>RAM (Mb)</td>
 										<td>512</td>
 										<td>1024</td>
 										<td>1536</td>
 										<td>2048</td>
 									</tr>
 									<tr>
-										<td>Диск (Мб)</td>
+										<td>Диск (Mb)</td>
 										<td>3000</td>
 										<td>6000</td>
 										<td>9000</td>
@@ -97,7 +96,7 @@ for($i=0; $i < 4; $i++){
 										<td>+</td>
 									</tr>
 									<tr>
-										<td>SSH (root)</td>
+										<td>SSH</td>
 										<td>+</td>
 										<td>+</td>
 										<td>+</td>
@@ -111,7 +110,7 @@ for($i=0; $i < 4; $i++){
 										<td>+</td>
 									</tr>
 									<tr>
-										<td>PHP (5.6)</td>
+										<td>PHP</td>
 										<td>+</td>
 										<td>+</td>
 										<td>+</td>
@@ -152,12 +151,12 @@ for($i=0; $i < 4; $i++){
 							</table>
 							Предлагаем решение на базе OpenVZ контейнеров. Бесплатно <a href="https://github.com/poiuty/lepus.su/wiki/%D0%9F%D0%B5%D1%80%D0%B5%D0%BD%D0%BE%D1%81-%D1%81%D0%B0%D0%B9%D1%82%D0%BE%D0%B2" target="_blank">перенесем ваши сайты</a>. <u><i>Новым клиентам 50% скидка!</i></u><br/>
 							Уникальный IP, хорошая изоляция от соседей, SSD диск, Anti-DDoS (tcp/udp) на уровне дата-центра, и полный root доступ.<br/><br/>
-							Вы сможете легко разместить ваш сайт (<a href="https://wiki.lepus.su/index.php?title=%D0%A0%D0%B0%D0%B7%D0%BC%D0%B5%D1%81%D1%82%D0%B8%D0%BC_%D1%81%D0%B0%D0%B9%D1%82_%D0%BD%D0%B0_%D0%B2%D0%B8%D1%80%D1%82%D1%83%D0%B0%D0%BB%D1%8C%D0%BD%D0%BE%D0%BC_%D1%85%D0%BE%D1%81%D1%82%D0%B8%D0%BD%D0%B3%D0%B5" target="_blank">подробная инструкция</a> + <a href="https://github.com/poiuty/lepus.su/wiki/%D0%92%D0%B8%D1%80%D1%82%D1%83%D0%B0%D0%BB%D1%8C%D0%BD%D1%8B%D0%B9-%D1%85%D0%BE%D1%81%D1%82%D0%B8%D0%BD%D0%B3" target="_blank">ответы на вопросы</a>).<br/>
-							1. Делегируем домен на наши NS + создаем записи.<br/>
-							2. Заходим на FTP, создаем папку (название домен, например lepus.su) и загружаем в нее файлы сайта.<br/>
-							3. Заходим в phpmyadmin, создаем базу+пользователя и загружаем дамп базы.<br/><br/>
+							Чтобы разместить сайт на хостинге (<a href="https://wiki.lepus.su/index.php?title=%D0%A0%D0%B0%D0%B7%D0%BC%D0%B5%D1%81%D1%82%D0%B8%D0%BC_%D1%81%D0%B0%D0%B9%D1%82_%D0%BD%D0%B0_%D0%B2%D0%B8%D1%80%D1%82%D1%83%D0%B0%D0%BB%D1%8C%D0%BD%D0%BE%D0%BC_%D1%85%D0%BE%D1%81%D1%82%D0%B8%D0%BD%D0%B3%D0%B5" target="_blank">подробная инструкция</a> + <a href="https://github.com/poiuty/lepus.su/wiki/%D0%92%D0%B8%D1%80%D1%82%D1%83%D0%B0%D0%BB%D1%8C%D0%BD%D1%8B%D0%B9-%D1%85%D0%BE%D1%81%D1%82%D0%B8%D0%BD%D0%B3" target="_blank">ответы на вопросы</a>).<br/>
+							1. Делегируйте домен на наши NS + создаем записи.<br/>
+							2. Зайдите на FTP, создайте папку (название домена, например lepus.su) и загрузите в нее файлы сайта.<br/>
+							3. Зайдите в phpmyadmin, создайте базу+пользователя и загрузите дамп базы.<br/><br/>
 
-							В стандартной поставке => это виртуальный хостинг: apache24-event + apache mod_vhost_alias, php56-fpm, proftpd, mysql.<br/>
+							В стандартной поставке => это виртуальный хостинг: apache24 + apache mod_vhost_alias, php56-fpm, proftpd, mysql.<br/>
 							Если же вы умеете работать с linux, то для вас => это еще и недорогая VPS (где вы можете запустить любое приложение).
 							<hr/>
 						</div>

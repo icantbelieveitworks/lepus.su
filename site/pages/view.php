@@ -34,7 +34,6 @@ if($tmpData['err'] != 'OK')	die(lepus_error_page($tmpData['mes']));
 		<script src="/js/bootstrap.min.js"></script>
 		<script src="/js/alertify.js"></script>
 		<script src="/js/lepus.js"></script>
-		<?=$head_code?>
 	<script type="text/javascript" charset="utf-8"> $(document).ready(function() { $('#IPList').dataTable({ "order": [[ 0, "desc" ]] }); }); </script>
 	</head>
 	<body>
@@ -51,6 +50,7 @@ if($tmpData['err'] != 'OK')	die(lepus_error_page($tmpData['mes']));
 										<hr/>
 										Услуга оплачена до: <?php echo $tmpData['mes']['time'];?>.<br/>
 										Стоимость: тариф <?php if(!empty($tmpData['mes']['extra'])) echo "+ доп услуги"; ?> = <?php echo $tmpData['mes']['price'];?> рублей.<br/>
+										Документация: <a href="https://github.com/poiuty/lepus.su/wiki/%D0%92%D0%B8%D1%80%D1%82%D1%83%D0%B0%D0%BB%D1%8C%D0%BD%D1%8B%D0%B9-%D1%85%D0%BE%D1%81%D1%82%D0%B8%D0%BD%D0%B3" target="_blank">виртуальный хостинг</a>, <a href="https://github.com/poiuty/lepus.su/wiki/KVM-VPS" target="_blank">vps</a>.<br/>
 										<?php if(!empty($tmpData['mes']['extra'])) echo "Дополнительные услуги: {$tmpData['mes']['extra']}.<br/>"; ?>
 										<?php if(!empty($tmpData['mes']['top'])) echo $tmpData['mes']['top']."<br/>"; ?>
 										<?php if($tmpData['mes']['gid'] != 3 && $tmpData['mes']['gid'] != 4){ ?>

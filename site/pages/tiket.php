@@ -50,7 +50,6 @@ if(strlen($tmpData['title']) > 100){
 		<script type="text/javascript" charset="utf-8"> $(document).ready(function() { $('#supportList').dataTable({ "order": [[ 0, "desc" ]] }); }); </script>
 		<script src="/js/alertify.js"></script>
 		<script src="/js/lepus.js"></script>
-		<?=$head_code?>
 		<script>
 			function f(){
 				var count = parseInt($('input[id=countMSG]').val());

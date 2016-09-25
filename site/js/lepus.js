@@ -197,7 +197,7 @@ $(document).on("click", "[data-open-new-tiket]", function(e) {
 		data = JSON.parse(json);
 		if(data.err == 'OK'){
 			$('input[id=tiketTitle]').val('');
-            $('textarea[id=tiketMsg]').val('');
+			$('textarea[id=tiketMsg]').val('');
 			alertify.success("Тикет создан");
 			table.row.add({
 				0:     data.mes.a,

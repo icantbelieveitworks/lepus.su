@@ -9,17 +9,12 @@ if(!is_login()) die("no_login");
 switch(@$_POST['do']){
 	default:
 		$tmpData = lepus_get_supportList($user['id'], $user['data']['access']);
-    break;
+	break;
 	case 'new':
-		if($user['data']['access'] > 1 && $_POST['user'] != 'no'){
+		if($user['data']['access'] > 1 && $_POST['user'] != 'no')
 			$tmpData = error(support_create(intval($_POST['user']), $_POST['title'], $user['data']['access']));
-		}else{
+		else
 			$tmpData = error(support_create($user['id'], $_POST['title'], $user['data']['access']));
-		}
-		if($tmpData['err'] == 'OK')
-			$tmpData = error(support_msg($user['id'], $tmpData['mes'], $user['data']['access'], 1));
-		if($tmpData['err'] == 'OK')
-			$tmpData = error(lepus_get_supportList($user['id'], $user['data']['access'], $tmpData['mes']['tid']));
 	break;
 	case 'send_msg':
 		$tmpData = error(support_msg($user['id'], $_POST['tid'], $user['data']['access']));

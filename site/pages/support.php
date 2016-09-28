@@ -27,8 +27,8 @@ if(empty($user)){
 		<link rel="stylesheet" type="text/css" href="/css/chosen.css">
 		<link rel="stylesheet" href="/css/dataTables.bootstrap.css">
 		<style>
-			td,th { text-align: center; vertical-align: middle; }
 			.myLabel { font-size: 85%; }
+			td,th { text-align: center; vertical-align: middle !important; }
 		</style>
 		<script src="/js/jquery.min.js"></script>
 		<script src="/js/jquery.dataTables.min.js"></script>
@@ -43,6 +43,7 @@ if(empty($user)){
 					"order": [[ 0, "desc" ]]
 				});
 			});
+			setInterval( function () { $('#supportList').DataTable().ajax.reload( null, false ); }, 30000 );
 		</script>
 		<script src="/js/alertify.js"></script>
 		<script src="/js/lepus.js"></script>

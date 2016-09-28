@@ -974,7 +974,7 @@ function lepus_getLogSpend($id, $i = 0){
 }
 
 function lepus_getPageNavi(){
-	$navi = ''; $pages = ['/' => 'Главная', '/pages/ovz.php' => 'Хостинг', '/pages/vps.php' => 'VPS', '/pages/servers.php' => 'Серверы', '/pages/domains.php' => 'Домены', '/pages/license.php' => 'Лицензии', '/pages/doc.php' => 'Документы', '/pages/contacts.php' => 'Контакты'];
+	$navi = ''; $pages = ['/' => 'Главная', '/pages/ovz.php' => 'Хостинг', '/pages/vps.php' => 'VPS', '/pages/servers.php' => 'Серверы',  '/pages/ssl.php' => 'SSL', '/pages/domains.php' => 'Домены', '/pages/license.php' => 'Лицензии', '/pages/contacts.php' => 'Контакты'];
 	foreach($pages as $key => $val){
 		if($_SERVER["REQUEST_URI"] == $key)
 			$navi .= "<li class=\"active\"><a href=\"$key\">$val</a></li>";
@@ -1804,6 +1804,9 @@ function lepus_getBillprice($id, $period, $j = 0){
 		$ctx = stream_context_create(['http'=> ['timeout' => 30]]);
 		$arr = json_decode(@file_get_contents("https://my.lepus.su/billmgr?authinfo={$conf['billmgr_user']}:{$conf['billmgr_pass']}&out=json&func=pricelist.export&onlyavailable=on&pricelist=$id", false, $ctx), true);
 		$price = $arr["doc"]["pricelist"]["price"]["period"][$period]['$cost'];
+		if($price == NULL){
+			$price = $arr["doc"]["pricelist"]["price"]["period"]['$cost'];	
+		}
 		$cache->set("billprice.$id.$period", $price, MEMCACHE_COMPRESSED, 3600);
 	}
 	return intval($price);

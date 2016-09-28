@@ -199,13 +199,7 @@ $(document).on("click", "[data-open-new-tiket]", function(e) {
 			$('input[id=tiketTitle]').val('');
 			$('textarea[id=tiketMsg]').val('');
 			alertify.success("Тикет создан");
-			table.row.add({
-				0:     data.mes.a,
-				1:     data.mes.b,
-				2:     data.mes.c,
-				3:     data.mes.d,
-				4:     data.mes.e,
-			}).draw( false );
+			table.ajax.reload( null, false );
 		}else{
 			alertify.error(data.mes);
 		}

@@ -1803,9 +1803,9 @@ function lepus_getBillprice($id, $period, $j = 0){
 	if($price === FALSE || $j == 1){
 		$ctx = stream_context_create(['http'=> ['timeout' => 30]]);
 		$arr = json_decode(@file_get_contents("https://my.lepus.su/billmgr?authinfo={$conf['billmgr_user']}:{$conf['billmgr_pass']}&out=json&func=pricelist.export&onlyavailable=on&pricelist=$id", false, $ctx), true);
-		$price = $arr["doc"]["pricelist"]["price"]["period"][$period]['$cost'];
+		$price = $arr["doc"]["pricelist"][0]["price"]["period"][$period]['$cost'];
 		if($price == NULL){
-			$price = $arr["doc"]["pricelist"]["price"]["period"]['$cost'];	
+			$price = $arr["doc"]["pricelist"][0]["price"]["period"]['$cost'];	
 		}
 		$cache->set("billprice.$id.$period", $price, MEMCACHE_COMPRESSED, 3600);
 	}

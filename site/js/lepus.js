@@ -548,3 +548,18 @@ $(document).on("click", "[data-admin-send-emails]", function(e) {
 		}
 	});
 });
+
+$(document).on("click", "[data-promised-pay]", function(e) {
+	$(this).blur();
+	e.preventDefault();
+	id = $('input[id=service_id]').val();
+	$.post("//"+document.domain+"/public/promised_payment.php", {id: id}, function(json){
+		data = JSON.parse(json);
+		if(data.err == 'OK'){
+			alertify.success("Обещанный платеж до "+data.mes);			
+			$("#xxx").html("<font color='green'>"+data.mes+"</font>");
+		}else{
+			alertify.error(data.mes);
+		}
+	});
+});

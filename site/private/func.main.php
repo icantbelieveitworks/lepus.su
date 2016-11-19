@@ -439,7 +439,7 @@ function lepus_get_supportList($uid, $access){
 		$ldata = lepus_get_tiketLabel($row['status'], $uid, $row['id'], $access);
 		$tmpTitle = $row['title'];
 		if(mb_strlen($row['title'], 'UTF-8') > 23){
-			$row['title'] = mb_substr($row['title'], 0, 18,'utf-8')."...";
+			$row['title'] = mb_substr($row['title'], 0, 22,'utf-8')."...";
 		}
 		$tmp_data['link'] = "<a href=\"/pages/tiket.php?id={$row['id']}\" title=\"Открыть\">{$row['id']}</a>";
 		$tmp_data['title'] = "<span title=\"{$tmpTitle}\">{$row['title']}</span>";
@@ -533,7 +533,11 @@ function support_msg($uid, $tid, $access, $no_last = 0){
 	$tiket = lepus_get_supportAccess($tid);
 	if($tiket['uid'] != $uid && $access < 2) return 'no_access';
 	if(strlen($_POST['msg']) < 1) return 'empty_message';
-	if($access > 1 && $_POST['msg'] != 'END' && $_POST['msg'] != 'OPEN') $_POST['msg'] .= "\n\n\n[i]С уважением, команда технической поддержки.\nДокументация: [url=https://github.com/poiuty/lepus.su/wiki/%D0%92%D0%B8%D1%80%D1%82%D1%83%D0%B0%D0%BB%D1%8C%D0%BD%D1%8B%D0%B9-%D1%85%D0%BE%D1%81%D1%82%D0%B8%D0%BD%D0%B3]виртуальный хостинг[/url], [url=https://github.com/poiuty/lepus.su/wiki/KVM-VPS]vps[/url].[/i]";
+	if($access > 1 && $_POST['msg'] != 'END' && $_POST['msg'] != 'OPEN') $_POST['msg'] .= "\n\n[i]С уважением, команда технической поддержки.\nДокументация: [url=https://github.com/poiuty/lepus.su/wiki/%D0%92%D0%B8%D1%80%D1%82%D1%83%D0%B0%D0%BB%D1%8C%D0%BD%D1%8B%D0%B9-%D1%85%D0%BE%D1%81%D1%82%D0%B8%D0%BD%D0%B3]виртуальный хостинг[/url], [url=https://github.com/poiuty/lepus.su/wiki/KVM-VPS]vps[/url].[/i]";
+	$_POST['msg'] = preg_replace('/\n(\s*\n){2,}/', "\n\n", $_POST['msg']);
+	$xx = $_POST['msg']; $j = strlen($xx);
+	if($xx{$j-1}.$xx{$j} == "\n"){ $xx{$j-1} = $xx{$j} = ''; }
+	$_POST['msg'] = $xx;
 	if($tiket['status'] == 2 && $_POST['msg'] != 'OPEN') return 'close_tiket'; // if tiket close => we need first open it
 	if($tiket['status'] == 1 && $_POST['msg'] == 'OPEN') return 'already_open'; // dont open - open tiket
 	$msg = parse_bb_code(nl2br(htmlentities($_POST['msg'], ENT_QUOTES, 'UTF-8')));
@@ -758,6 +762,7 @@ function lepus_addCron($uid, $time, $url, $do, $id = 0){
 function telegram_send($msg){
 	global $conf;
 	file_get_contents("https://api.telegram.org/{$conf['telegram']}/sendMessage?chat_id=160138276&text=".urlencode($msg));
+	//file_get_contents("https://api.telegram.org/{$conf['telegram']}/sendMessage?chat_id=157056398&text=".urlencode($msg));	
 }
 
 function admin_lepus_getIPlist(){
@@ -1162,7 +1167,7 @@ function lepus_getService($id){
 			$bottom = "<hr/><table id=\"IPList\" class=\"table table-striped table-bordered\" cellspacing=\"0\" width=\"100%\"><thead><tr><th>ID</th><th>IP</th><th>Domain</th><th>MAC</th></tr></thead>".lepus_getListIP($id)."<tbody></tbody></table>";
 		break;
 	}
-	return ['id' => $row['id'], 'gid' => $tmpRow['gid'], 'sid' => $row['sid'], 'name' => $tmpRow['name'], 'time' => date("Y-m-d", $row['time2']), 'price' => $price, 'extra' => $arr['extra_text'], 'top' => $top, 'bottom' => $bottom];
+	return ['id' => $row['id'], 'gid' => $tmpRow['gid'], 'sid' => $row['sid'], 'name' => $tmpRow['name'], 'time' => date("Y-m-d", $row['time2']), 'price' => $price, 'extra' => $arr['extra_text'], 'top' => $top, 'bottom' => $bottom, 'promised' => date("Y-m-d", $row['time3'])];
 }
 
 function lepus_moneyback($id, $sid){
@@ -1800,9 +1805,9 @@ function lepus_closeTikets(){
 function lepus_getBillprice($id, $period, $j = 0){
 	global $conf, $cache;
 	$price = $cache->get("billprice.$id.$period");
-	if($price === FALSE || $j == 1){
+	if($price === FALSE || $price == 0 || $j == 1){
 		$ctx = stream_context_create(['http'=> ['timeout' => 30]]);
-		$arr = json_decode(@file_get_contents("https://my.lepus.su/billmgr?authinfo={$conf['billmgr_user']}:{$conf['billmgr_pass']}&out=json&func=pricelist.export&onlyavailable=on&pricelist=$id", false, $ctx), true);
+		$arr = json_decode(file_get_contents("https://my.lepus.su/billmgr?authinfo={$conf['billmgr_user']}:{$conf['billmgr_pass']}&out=json&func=pricelist.export&onlyavailable=on&pricelist=$id", false, $ctx), true);
 		$price = $arr["doc"]["pricelist"][0]["price"]["period"][$period]['$cost'];
 		if($price == NULL){
 			$price = $arr["doc"]["pricelist"][0]["price"]["period"]['$cost'];	
@@ -1928,4 +1933,21 @@ function lepus_checkBan($val = null){
 	}else{
 		return false;
 	}
+}
+
+function lepus_promisedPayment($id){
+	global $db;
+	$info = lepus_getServiceAccess($id);
+	if(!is_array($info)) return 'no_access';
+	$query = $db->prepare("SELECT * FROM `tariff` WHERE `id` = :id");
+	$query->bindParam(':id', $info['sid'], PDO::PARAM_STR);
+	$query->execute();
+	$row = $query->fetch();
+	if($row["gid"] != 1 && $row["gid"] != 2) return "different_handler";
+	$time = $info['time2']+60*60*24*5;
+	$update = $db->prepare("UPDATE `services` SET `time3` = :time WHERE `id` = :id");
+	$update->bindParam(':time', $time, PDO::PARAM_STR);
+	$update->bindParam(':id', $info['id'], PDO::PARAM_STR);
+	$update->execute();
+	return date("Y-m-d", $time);
 }

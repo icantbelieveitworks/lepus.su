@@ -1,0 +1,6 @@
+SHELL=/bin/sh
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+MAILTO=""
+HOME=/
+
+01 12 * * * root cd /root/lepus && ./hdd.bash > /root/lepus/hdd.log

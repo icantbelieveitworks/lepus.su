@@ -24,10 +24,13 @@ fi
 re='^[a-z/]+$'
 ls /dev/sd*| while read DISK; do
 	if [[ $DISK =~ $re ]] ; then
-		SMARTCTL=$(smartctl --all $DISK | grep "No Errors Logged")
+		SMARTCTL=$(smartctl --all $DISK | grep "SMART Error Log not supported")
 		if [[  -z  "$SMARTCTL"  ]] ; then
-			echo "SMART $DISK"
-			lepusHelpMe
+			SMARTCTL=$(smartctl --all $DISK | grep "No Errors Logged")
+			if [[  -z  "$SMARTCTL"  ]] ; then
+				echo "SMART $DISK"
+				lepusHelpMe
+			fi
 		fi
 		
 		SMARTCTL=$(smartctl --all $DISK | grep Reallocated_Sector_Ct | awk '{print $10}')

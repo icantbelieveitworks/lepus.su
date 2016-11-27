@@ -1,5 +1,6 @@
 #!/bin/bash
 # apt-get install smartmontools hdparm curl -y
+# yum install smartmontools hdparm curl -y
 # SHELL=/bin/sh
 # PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 # MAILTO=""
@@ -19,7 +20,7 @@ SYSATA=$(cat /var/log/syslog | grep "ATA")
 re='^[a-z/]+$'
 while read -r DISK; do
 	if [[ $DISK =~ $re ]] ; then
-		SerialNo=$(hdparm -i /dev/sda | grep SerialNo | awk '{print $3}')
+		SerialNo=$(hdparm -i $DISK | grep SerialNo | awk '{print $NF}')
 		SerialNo=${SerialNo//=/ }
 		LINE="\n================ $DISK $SerialNo ================\n\n"
 		SMART="$SMART$LINE$LINE2$(smartctl -A $DISK)\n"
@@ -32,7 +33,7 @@ LOG1=$(cat /proc/mdstat | grep _)
 LOG2=$(cat /var/log/messages | grep "EH complete")
 LOG3=$(cat /var/log/syslog | grep "EH complete")
 
-if [[ !  -z  "$LOG1"  ]] || [[ !  -z  "$LOG2"  ]] || [[ !  -z  "LOG3"  ]] ; then
+if [[ !  -z  "$LOG1"  ]] || [[ !  -z  "$LOG2"  ]] || [[ !  -z  "$LOG3"  ]] ; then
 	lepusHelpMe
 	echo "log or mdstat"
 	exit 1

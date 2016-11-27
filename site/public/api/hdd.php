@@ -16,4 +16,6 @@ if($query->rowCount() != 1){
 	if($query->rowCount() != 1) die;
 }
 
-telegram_send("[HDD monitoring] проверьте сервер ".$_SERVER['REMOTE_ADDR']);
+$pastebin = lepus_pastbinSend(lepus_pastbinLogin(), "Server {$_SERVER['REMOTE_ADDR']} (".date("Y-m-d", time()).")\n\n{$_POST['info']}", "1M");
+telegram_send("[HDD monitoring] сервер {$_SERVER['REMOTE_ADDR']}\n$pastebin");
+

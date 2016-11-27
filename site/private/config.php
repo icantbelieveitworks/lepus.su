@@ -30,4 +30,6 @@ $conf['telegram'] = 'bot1:xxxx';
 $conf['billmgr_user'] = 'xxxx';
 $conf['billmgr_pass'] = 'xxxx';
 
-$head_code = "";
+$conf['pastbin_user'] = 'xxxx';
+$conf['pastbin_pass'] = 'xxxx';
+$conf['pastbin_key'] = 'xxxx';

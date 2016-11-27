@@ -1945,9 +1945,48 @@ function lepus_promisedPayment($id){
 	$row = $query->fetch();
 	if($row["gid"] != 1 && $row["gid"] != 2) return "different_handler";
 	$time = $info['time2']+60*60*24*5;
+	if($info['time3'] > $time) return "different_handler";
 	$update = $db->prepare("UPDATE `services` SET `time3` = :time WHERE `id` = :id");
 	$update->bindParam(':time', $time, PDO::PARAM_STR);
 	$update->bindParam(':id', $info['id'], PDO::PARAM_STR);
 	$update->execute();
 	return date("Y-m-d", $time);
+}
+
+function lepus_pastbinLogin(){
+	global $conf;
+	$api_dev_key 		= $conf['pastbin_key'];
+	$api_user_name 		= $conf['pastbin_user'];
+	$api_user_password 	= $conf['pastbin_pass'];
+	$api_user_name 		= urlencode($api_user_name);
+	$api_user_password 	= urlencode($api_user_password);
+	$url				= 'https://pastebin.com/api/api_login.php';
+	$ch					= curl_init($url);
+	curl_setopt($ch, CURLOPT_POST, true);
+	curl_setopt($ch, CURLOPT_POSTFIELDS, 'api_dev_key='.$api_dev_key.'&api_user_name='.$api_user_name.'&api_user_password='.$api_user_password.'');
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+	curl_setopt($ch, CURLOPT_VERBOSE, 1);
+	curl_setopt($ch, CURLOPT_NOBODY, 0);
+	return curl_exec($ch);
+}
+
+function lepus_pastbinSend($api_user_key = '', $api_paste_code = 'I can\'t believe it works!', $api_paste_expire_date = '10M', $api_paste_private = '0', $api_paste_format = 'text', $output = 'raw'){
+	global $conf;
+	$api_dev_key 			= $conf['pastbin_key'];
+	$api_paste_name			= 'lepuslog';
+	$api_paste_name			= urlencode($api_paste_name);
+	$api_paste_code			= urlencode($api_paste_code);
+	$url 					= 'https://pastebin.com/api/api_post.php';
+	$ch						= curl_init($url);
+	curl_setopt($ch, CURLOPT_POST, true);
+	curl_setopt($ch, CURLOPT_POSTFIELDS, 'api_option=paste&api_user_key='.$api_user_key.'&api_paste_private='.$api_paste_private.'&api_paste_name='.$api_paste_name.'&api_paste_expire_date='.$api_paste_expire_date.'&api_paste_format='.$api_paste_format.'&api_dev_key='.$api_dev_key.'&api_paste_code='.$api_paste_code.'');
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+	curl_setopt($ch, CURLOPT_VERBOSE, 1);
+	curl_setopt($ch, CURLOPT_NOBODY, 0);
+	$i = curl_exec($ch);
+	if($output == 'raw'){
+		$i = explode("/", $i);
+		$i = "https://pastebin.com/raw/$i[3]";
+	}
+	return $i;
 }

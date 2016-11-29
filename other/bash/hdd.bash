@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 # apt-get install smartmontools hdparm curl -y
 # yum install smartmontools hdparm curl -y
 # SHELL=/bin/sh
@@ -12,10 +12,11 @@ lepusHelpMe() {
 	exit 1
 }
 
-
 MDSTAT=$(cat /proc/mdstat)
 MESATA=$(cat /var/log/messages | grep "ATA")
 SYSATA=$(cat /var/log/syslog | grep "ATA")
+ZFSLIST=$(zpool list)
+ZFSRAID=$(zpool status)
 
 re='^[a-z/]+$'
 while read -r DISK; do
@@ -27,7 +28,7 @@ while read -r DISK; do
 	fi
 done < <(ls /dev/sd* )
 
-INFO=$(echo -e "$MDSTAT\n\n $SMART $MESATA\n\n $SYSATA\n\n")
+INFO=$(echo -e "$MDSTAT\n\n $SMART $MESATA\n\n $SYSATA\n\n $ZFSRAID\n\n $ZFSLIST\n\n")
 
 LOG1=$(cat /proc/mdstat | grep _)
 LOG2=$(cat /var/log/messages | grep "EH complete")
@@ -52,8 +53,30 @@ ls /dev/sd*| while read DISK; do
 		
 		SMARTCTL=$(smartctl --all $DISK | grep Reallocated_Sector_Ct | awk '{print $10}')
 		if [[ "$SMARTCTL" > "50" ]] ; then
-			echo "Reallocated $DISK "
+			echo "Reallocated $DISK"
 			lepusHelpMe
 		fi
+	fi
+done
+
+# thx https://gist.github.com/petervanderdoes/bd6660302404ed5b094d
+zfs_state=$(zpool status | egrep -i '(DEGRADED|FAULTED|OFFLINE|UNAVAIL|REMOVED|FAIL|DESTROYED|corrupt|cannot|unrecover)')
+if [ "${condition}" ]; then
+	echo "ZFS $zfs_state"
+	lepusHelpMe
+fi
+
+errors=$(zpool status | grep ONLINE | grep -v state | awk '{print $3 $4 $5}' | grep -v 000)
+if [ "${errors}" ]; then
+	echo "ZFS errors $errors"
+	lepusHelpMe
+fi
+
+capacity=$(zpool list -H -o capacity)
+for line in ${capacity//%/}
+	do
+	if [ $line -ge 90 ]; then
+		echo "ZFS capacity $line"
+		lepusHelpMe
 	fi
 done

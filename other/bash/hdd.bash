@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 # apt-get install smartmontools hdparm curl -y
 # yum install smartmontools hdparm curl -y
 # SHELL=/bin/sh

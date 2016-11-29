@@ -36,4 +36,5 @@ cp -r /etc/libvirt/qemu/ $BACKUP_DIR/$DATE/
 echo 'done' > $BACKUP_DIR/$DATE/done.txt
 find $BACKUP_DIR/* -mtime +5 -delete
 find $BACKUP_DIR/ -type d -empty -delete
+chmod -R 700 /backup
 rm /tmp/backup

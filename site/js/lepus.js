@@ -539,7 +539,8 @@ $(document).on("click", "[data-admin-send-emails]", function(e) {
 	e.preventDefault();
 	text = $('textarea[id=email_text]').val();
 	title = $('input[id=email_title]').val();
-	$.post("//"+document.domain+"/public/admin/send.php", {title: title, text: text}, function(json){
+	server = $('select[id=sendServer]').val();
+	$.post("//"+document.domain+"/public/admin/send.php", {title: title, text: text, server: server}, function(json){
 		data = JSON.parse(json);
 		if(data.err == 'OK'){
 			alertify.success(data.mes);

@@ -1383,7 +1383,7 @@ function lepus_getPayLink($system, $val, $uid){
 	switch($system){
 		case 'paypal':
 			$i .= "<center>
-				<form method=\"post\" action= \"http://www.paypal.com/cgi-bin/webscr\" id=\"gotopay\"> 
+				<form method=\"post\" action= \"https://www.paypal.com/cgi-bin/webscr\" id=\"gotopay\"> 
 				<input type=\"hidden\" name=\"cmd\" value=\"_xclick\"> 
 				<input type=\"hidden\" name=\"business\" value=\"poiuty@lepus.su\"> 
 				<input type=\"hidden\" name=\"item_name\" value=\"Account replenishment\"> 

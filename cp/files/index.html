@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+	<link rel="stylesheet" type="text/css" href="https:/lepus.su/css/alertify.core.css" />
+	<link rel="stylesheet" type="text/css" href="https:/lepus.su/css/alertify.bootstrap.css" />
+
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+	
+	<script src="https:/lepus.su/js/alertify.js"></script>
+	<style>
+		body{min-width:1025px; height:100%; font:13px 'Arial';background:#EFEFEF;}
+		.main{width:300px; height:200px; position:absolute; left:50%; top:50%; margin:-100px 0 0 -150px;}
+	</style>
+</head>
+<body>
+	<div class="main">
+		<input class="form-control" id="login" placeholder="login" name="login" type="text" value="" autofocus="">
+		<input class="form-control" style="margin-top: 3px;" id="password" placeholder="password" name="password" type="password" value="" autofocus="">
+		<input id="check_auth" type="submit" name="login" class="btn btn-sm btn-success btn-block" style="margin-top: 12px;" data-do-login="" value="Войти">
+	</div>
+	<script>
+		$(document).keypress(function(e) {
+			if(e.which == 13 && document.getElementById("check_auth") !== null) lepus_login();
+		});
+
+		$(document).on("click", "[data-do-login]", function(e) {
+			$(this).blur();
+			e.preventDefault();
+			lepus_login();
+		});
+		
+		var lepus_login = function() {
+			login = $('input[id=login]').val();
+			passwd = $('input[id=password]').val();
+			$.post("//"+document.domain+":"+location.port+"/api/test", {login: login, passwd: passwd}, function(json){
+				data = JSON.parse(json);
+				if(data.Err == 'OK'){
+					//location.reload();
+					alertify.error(data.Mes);
+				}else{
+					alertify.error(data.Mes);
+				}
+				return;
+			});
+		};
+	</script>
+</body>
+</html>

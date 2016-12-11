@@ -37,6 +37,7 @@ func main() {
 	
 	mux.HandleFunc("/api/login", lepusLoginAPI)
 	mux.HandleFunc("/api/exit", lepusExitAPI)
+	mux.HandleFunc("/api/get", lepusGetAPI)
 	mux.HandleFunc("/api/test", lepusTestAPI)
 	
 	log.Println("Start server on port "+lepusConf["port"])
@@ -175,6 +176,26 @@ func lepusLog(val string) {
 	}
 }
 
+func lepusGetAPI(w http.ResponseWriter, r *http.Request) {
+	session, _ := store.Get(r, "lepuscp")
+	x := lepusAuth(w, r)
+	if x == false {
+		b := lepusMessage("Err", "Wrong auth")
+		w.Write(b)
+		return 
+	}
+	
+	r.ParseForm()
+	fmt.Println(r.Form)
+	
+	b := lepusMessage("Err", "empty post")	
+	switch strings.Join(r.Form["val"], "") {
+		case "login":
+			b = lepusMessage("OK", session.Values["user"].(string))
+	}
+	w.Write(b)
+}
+
 func lepusTestAPI(w http.ResponseWriter, r *http.Request) {
 	//ret := r.URL.Query()
 	//fmt.Println(ret)
@@ -188,9 +209,19 @@ func lepusTestAPI(w http.ResponseWriter, r *http.Request) {
 	//fmt.Println(x1)
 	//fmt.Println(x2)
 	
-	lepusLog("test!")
+	//lepusLog("test!")
+	//b := lepusMessage("err", "123123123")
 	
-	b := lepusMessage("err", "123123123")
-	
-	w.Write([]byte(b))
+	x := ""
+	files, _ := ioutil.ReadDir("/var/www/public")
+    for _, f := range files {
+		dir, _ := os.Stat("/var/www/public/"+f.Name())
+		if dir.IsDir() {
+			x += f.Name()+":"
+		}
+    }
+    
+    b := lepusMessage("OK", x)
+    
+	w.Write(b)
 }

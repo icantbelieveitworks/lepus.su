@@ -6,27 +6,89 @@
 
 	<link rel="stylesheet" type="text/css" href="https://lepus.su/css/alertify.core.css" />
 	<link rel="stylesheet" type="text/css" href="https://lepus.su/css/alertify.bootstrap.css" />
-
+	
+	<link rel="stylesheet" type="text/css" href="https://lepus.su/css/reset.css" />
+	
 	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 	
 	<script src="https://lepus.su/js/alertify.js"></script>
 	<style>
 		body{min-width:1025px; height:100%; font:13px 'Arial';background:#EFEFEF;}
-		.main{width:300px; height:200px; position:absolute; left:50%; top:50%; margin:-100px 0 0 -150px;}
+		.main{width:800px; height:200px; position:absolute; left:35%; top:35%; margin:-100px 0 0 -150px;}
+		
+		.content-box { width:75%; float:left; }
+		.content-info { min-height:245px; margin:0px auto; background: #FFF; border-radius: 8px; }
+		.content-text {  padding:10px 15px; }
+		.page-title { color:#333333; font:15pt 'Times New Roman'; padding-bottom:5px; }
+		.box-shadow--2dp { box-shadow: 0 2px 2px 0 rgba(0, 0, 0, .14), 0 2px 1px -2px rgba(0, 0, 0, .2), 0 1px 5px 0 rgba(0, 0, 0, .12) }
+		.blocks { float:left; width: 176px; margin-left:1%; }
+		.block-body { width:160px; margin-left: 8px; padding-top: 12px; }
+		.block-login { min-height:140px; background: #FFF; border-radius: 8px; }
 	</style>
 </head>
 <body>
-	<div class="main">
-		<input id="check_auth" type="submit" class="btn btn-sm btn-success btn-block" data-do-logout="" value="Выход">
+<div class="main">
+	<div class="content-box">
+		<div class="content-info box-shadow--2dp">
+			<div class="content-text">
+				<div class="page-title">LepusCP - панель управления</div>
+				
+				<hr>
+			</div>
+		</div>
 	</div>
-	<script>
-		$(document).on("click", "[data-do-logout]", function(e) {
-			$(this).blur();
-			e.preventDefault();
-			$.get("//"+document.domain+":"+location.port+"/api/exit");
-			location.reload();
+	<div class="blocks">
+		<div class="block-login box-shadow--2dp">
+			<center style="padding-top:15px;">
+				<b><a href="#" data-do-logout="" title="Выход" id="user"></a></b>
+			</center>
+			<div class="block-body" style="margin-left: 15px; padding-top: 0px;">
+				<ul>
+					<hr>
+					<li><a href="/page/cp">WWW домены</a></li>
+					<hr>
+				</ul>
+			</div>
+		</div>
+	</div>
+</div>
+<script>
+	$(document).on("click", "[data-do-logout]", function(e) {
+		$(this).blur();
+		e.preventDefault();
+		$.get("//"+document.domain+":"+location.port+"/api/exit");
+		location.reload();
+	});
+
+	$(document).ready(function(){
+		$.post("//"+document.domain+":"+location.port+"/api/get", {val: "login"}, function(json){
+			data = JSON.parse(json);
+			if(data.Err == 'OK'){
+				$("a#user").html(data.Mes);
+			}else{
+				console.log(data.Mes)
+			}
+			return;
 		});
-	</script>
+		
+		$.post("//"+document.domain+":"+location.port+"/api/test", {val: "www-sites"}, function(json){
+			data = JSON.parse(json);
+			if(data.Err == 'OK'){
+				list = data.Mes.split(":");
+				for(var i in list){
+					if(list[i] != ""){
+						$("div.content-text" ).append(list[i]+"<br/>");
+						console.log(list[i])
+					}
+				}
+			}else{
+				console.log(data.Mes)
+			}
+			return;
+		});
+		
+	});
+</script>
 </body>
 </html>

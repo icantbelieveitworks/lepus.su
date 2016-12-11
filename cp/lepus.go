@@ -4,6 +4,7 @@ import "io"
 import "os"
 import "log"
 import "fmt"
+import "time"
 import "bufio"
 import "strings"
 import "net/http"
@@ -14,7 +15,8 @@ import "encoding/json"
 import "github.com/gorilla/sessions"
 import "github.com/kless/osutil/user/crypt/sha512_crypt"
 
-var store = sessions.NewFilesystemStore("sess",[]byte("something-very-secret"))
+var lepusConf = make(map[string]string)
+var store = sessions.NewFilesystemStore("sess", []byte("something-very-secret"))
 
 type lepusMes struct {
     Err string
@@ -22,51 +24,71 @@ type lepusMes struct {
 }
 
 func main() {
+	lepusConf["port"] = ":8085"
+	lepusConf["ip"] = "151.80.209.161"
+	lepusConf["dir"] = "/root/lepuscp"
+	lepusConf["log"] = lepusConf["dir"]+"/lepuscp.log"
+	lepusConf["pages"] = lepusConf["dir"]+"/files"
+	
 	mux := http.NewServeMux()
 	
 	mux.HandleFunc("/", lepusMainPage)
+	mux.HandleFunc("/page/cp", lepusControlPage)
 	
-	mux.HandleFunc("/api", lepusAPI)
 	mux.HandleFunc("/api/login", lepusLoginAPI)
 	mux.HandleFunc("/api/exit", lepusExitAPI)
 	mux.HandleFunc("/api/test", lepusTestAPI)
 	
-	log.Println("Start server on port :8085")
-	log.Fatal(http.ListenAndServe(":8085", mux))
+	log.Println("Start server on port "+lepusConf["port"])
+	log.Fatal(http.ListenAndServeTLS(lepusConf["port"], lepusConf["dir"]+"/server.crt", lepusConf["dir"]+"/server.key", mux))
 }
 
 func lepusMainPage(w http.ResponseWriter, r *http.Request) {
-	file, _ := ioutil.ReadFile("/root/lepuscp/files/index.html")
+	x := lepusAuth(w, r)
+	if x != false {
+		http.Redirect(w, r, "https://"+lepusConf["ip"]+lepusConf["port"]+"/page/cp", 301)
+		return 
+	}
+	file, _ := ioutil.ReadFile(lepusConf["pages"]+"/index.html")
 	io.WriteString(w, string(file))
 }
 
-
-func lepusAPI(w http.ResponseWriter, r *http.Request) {
-	session, _ := store.Get(r, "lepuscp")
-	session.Save(r, w)
-	
+func lepusControlPage(w http.ResponseWriter, r *http.Request) {
 	x := lepusAuth(w, r)
-	
-	if x ==false {
-		w.Write([]byte("not auth"))
-	}else{
-		w.Write([]byte("hash: "+session.Values["hash"].(string)))
+	if x == false {
+		http.Redirect(w, r, "https://"+lepusConf["ip"]+lepusConf["port"], 301)
+		return 
 	}
+	
+	file, _ := ioutil.ReadFile(lepusConf["pages"]+"/cp.html")
+	io.WriteString(w, string(file))
 }
 
 func lepusLoginAPI(w http.ResponseWriter, r *http.Request) {
 	session, _ := store.Get(r, "lepuscp")
+	ip := strings.Split(r.RemoteAddr,":")[0]
 	
-	ip := strings.Split(r.RemoteAddr,":")[0] 
-	i := lepusLogin("root", "xxx")
+	r.ParseForm()
+	fmt.Println(r.Form)
+	if r.Form["login"] == nil || r.Form["passwd"] == nil{
+		b := lepusMessage("Err", "empty post")
+		w.Write(b)
+		return
+	}
+	
+	i := lepusLogin(strings.Join(r.Form["login"], ""), strings.Join(r.Form["passwd"], ""))
 	
 	if i[0] == "right" {
-		session.Values["user"] = "root"
+		session.Values["user"] = strings.Join(r.Form["login"], "")
 		session.Values["hash"] = lepusSHA256(ip+i[1])
 		session.Save(r, w)
-		w.Write([]byte("sess: "+session.ID+"\nhash: "+session.Values["hash"].(string)+"\nip: "+ip))
+		fmt.Println("sess: "+session.ID+"\nhash: "+session.Values["hash"].(string)+"\nip: "+ip)
+		b := lepusMessage("OK", "Sucsess login")
+		w.Write(b)
 	}else{
-		w.Write([]byte("wrong login"))
+		lepusLog("auth error from ip "+ip)
+		b := lepusMessage("Err", "Wrong login or passwd")
+		w.Write(b)
 	}
 }
 
@@ -75,31 +97,13 @@ func lepusExitAPI(w http.ResponseWriter, r *http.Request) {
 	session.Values["user"] = nil
 	session.Values["hash"] = nil
 	session.Save(r, w)
-	w.Write([]byte("logout"))
-}
-
-func lepusTestAPI(w http.ResponseWriter, r *http.Request) {
-	//ret := r.URL.Query()
-	//fmt.Println(ret)
-	// http://x.x.x.x:8085/api/test?id=123&name=test
-	// map[id:[123] name:[test]]
-	
-	//r.ParseForm()
-	//fmt.Println()
-	//x1 := strings.Join(r.Form["login"], "")
-	//x2 := strings.Join(r.Form["passwd"], "")
-	
-	m := lepusMes{"x2", "x"}
-	b, _ := json.Marshal(m)
-	
-	w.Write([]byte(b))
 }
 
 func lepusLogin(user, passwd string) []string{
 	x := lepusFindUser(user)
 	if len(x) != 4 {
 		fmt.Println("No hash passwd from /etc/shadow")
-		os.Exit(0)
+		return []string{"wrong", "no_hash"}
 	}
 	
 	salt := "$"+x[1]+"$"+x[2]+"$"
@@ -134,12 +138,14 @@ func lepusFindUser(user string) []string {
 func lepusAuth(w http.ResponseWriter, r *http.Request) bool {
 	session, _ := store.Get(r, "lepuscp")
 	if session.Values["user"] == nil || session.Values["hash"] == nil {
+		lepusExitAPI(w, r)
 		return false
 	}
 	x := lepusLogin(session.Values["user"].(string), "no")	
 	if session.Values["hash"].(string) == lepusSHA256(strings.Split(r.RemoteAddr,":")[0]+x[1]) {
 		return true
 	}else{
+		lepusExitAPI(w, r)
 		return false
 	}
 }
@@ -148,4 +154,43 @@ func lepusSHA256(val string) string {
 	h := sha256.New()
 	h.Write([]byte(val))
 	return hex.EncodeToString(h.Sum(nil))
+}
+
+func lepusMessage(Err, Mes string) []byte {
+	m := lepusMes{Err, Mes}
+	b, _ := json.Marshal(m)
+	return b
+}
+
+func lepusLog(val string) {
+	t := time.Now()
+	if _, err := os.Stat(lepusConf["log"]); os.IsNotExist(err) {
+		os.Create(lepusConf["log"])
+	}
+	if _, err := os.Stat(lepusConf["log"]); err == nil {
+		file, _ := os.OpenFile(lepusConf["log"], os.O_APPEND|os.O_RDWR, 0644)
+		defer file.Close()
+		file.WriteString(t.Format("[2006-01-02 15:04:05]")+" "+val+"\n")
+		file.Sync()
+	}
+}
+
+func lepusTestAPI(w http.ResponseWriter, r *http.Request) {
+	//ret := r.URL.Query()
+	//fmt.Println(ret)
+	// http://x.x.x.x:8085/api/test?id=123&name=test
+	// map[id:[123] name:[test]]
+	
+	//r.ParseForm()
+	//fmt.Println(r.Form)
+	//x1 := strings.Join(r.Form["login"], "")
+	//x2 := strings.Join(r.Form["passwd"], "")
+	//fmt.Println(x1)
+	//fmt.Println(x2)
+	
+	lepusLog("test!")
+	
+	b := lepusMessage("err", "123123123")
+	
+	w.Write([]byte(b))
 }

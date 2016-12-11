@@ -18,35 +18,15 @@
 </head>
 <body>
 	<div class="main">
-		<input class="form-control" id="login" placeholder="login" name="login" type="text" value="" autofocus="">
-		<input class="form-control" style="margin-top: 3px;" id="password" placeholder="password" name="password" type="password" value="" autofocus="">
-		<input id="check_auth" type="submit" name="login" class="btn btn-sm btn-success btn-block" style="margin-top: 12px;" data-do-login="" value="Войти">
+		<input id="check_auth" type="submit" class="btn btn-sm btn-success btn-block" data-do-logout="" value="Выход">
 	</div>
 	<script>
-		$(document).keypress(function(e) {
-			if(e.which == 13 && document.getElementById("check_auth") !== null) lepus_login();
-		});
-
-		$(document).on("click", "[data-do-login]", function(e) {
+		$(document).on("click", "[data-do-logout]", function(e) {
 			$(this).blur();
 			e.preventDefault();
-			lepus_login();
+			$.get("//"+document.domain+":"+location.port+"/api/exit");
+			location.reload();
 		});
-		
-		var lepus_login = function() {
-			login = $('input[id=login]').val();
-			passwd = $('input[id=password]').val();
-			$.post("//"+document.domain+":"+location.port+"/api/login", {login: login, passwd: passwd}, function(json){
-				data = JSON.parse(json);
-				if(data.Err == 'OK'){
-					location.reload();
-					//alertify.success(data.Mes);
-				}else{
-					alertify.error(data.Mes);
-				}
-				return;
-			});
-		};
 	</script>
 </body>
 </html>

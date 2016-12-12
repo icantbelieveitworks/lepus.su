@@ -192,6 +192,17 @@ func lepusGetAPI(w http.ResponseWriter, r *http.Request) {
 	switch strings.Join(r.Form["val"], "") {
 		case "login":
 			b = lepusMessage("OK", session.Values["user"].(string))
+			
+		case "wwwlist":
+			x := ""
+			files, _ := ioutil.ReadDir("/var/www/public")
+				for _, f := range files {
+				dir, _ := os.Stat("/var/www/public/"+f.Name())
+				if dir.IsDir() {
+					x += f.Name()+":"
+				}
+			}
+			b = lepusMessage("OK", x)
 	}
 	w.Write(b)
 }
@@ -212,16 +223,5 @@ func lepusTestAPI(w http.ResponseWriter, r *http.Request) {
 	//lepusLog("test!")
 	//b := lepusMessage("err", "123123123")
 	
-	x := ""
-	files, _ := ioutil.ReadDir("/var/www/public")
-    for _, f := range files {
-		dir, _ := os.Stat("/var/www/public/"+f.Name())
-		if dir.IsDir() {
-			x += f.Name()+":"
-		}
-    }
-    
-    b := lepusMessage("OK", x)
-    
-	w.Write(b)
+	w.Write([]byte("test"))
 }

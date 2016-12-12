@@ -7,10 +7,16 @@
 	<link rel="stylesheet" type="text/css" href="https://lepus.su/css/alertify.core.css" />
 	<link rel="stylesheet" type="text/css" href="https://lepus.su/css/alertify.bootstrap.css" />
 	
+	<link rel="stylesheet" href="//cdn.datatables.net/plug-ins/1.10.10/integration/bootstrap/3/dataTables.bootstrap.css">
+	
 	<link rel="stylesheet" type="text/css" href="https://lepus.su/css/reset.css" />
 	
 	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+	
+	<script src="//cdn.datatables.net/1.10.10/js/jquery.dataTables.min.js"></script>
+	<script src="//cdn.datatables.net/plug-ins/1.10.10/integration/bootstrap/3/dataTables.bootstrap.js"></script>
+	<script type="text/javascript" charset="utf-8"> $(document).ready(function() { $('#wwwList').dataTable({ "order": [[ 0, "desc" ]] }); }); </script>
 	
 	<script src="https://lepus.su/js/alertify.js"></script>
 	<style>
@@ -25,6 +31,7 @@
 		.blocks { float:left; width: 176px; margin-left:1%; }
 		.block-body { width:160px; margin-left: 8px; padding-top: 12px; }
 		.block-login { min-height:140px; background: #FFF; border-radius: 8px; }
+		td,th { text-align: center; vertical-align: middle; }
 	</style>
 </head>
 <body>
@@ -32,8 +39,21 @@
 	<div class="content-box">
 		<div class="content-info box-shadow--2dp">
 			<div class="content-text">
-				<div class="page-title">LepusCP - панель управления</div>
-				
+				<div class="page-title">WWW домены</div>
+				<hr/>
+				<table id="wwwList" class="table table-striped table-bordered" cellspacing="0" width="100%">
+					<thead>
+						<tr>
+							<th>ID</th>
+							<th style="width: 30%;">Домен</th>
+							<th style="width: 30%;">IP</th>
+							<th>Статус</th>
+							<th>Действия</th>
+						</tr>
+					</thead>
+					<tbody>
+					</tbody>
+				</table>
 				<hr>
 			</div>
 		</div>
@@ -46,6 +66,7 @@
 			<div class="block-body" style="margin-left: 15px; padding-top: 0px;">
 				<ul>
 					<hr>
+					<li><a href="/page/cp">Добавить сайт</a></li>
 					<li><a href="/page/cp">WWW домены</a></li>
 					<hr>
 				</ul>
@@ -72,14 +93,25 @@
 			return;
 		});
 		
-		$.post("//"+document.domain+":"+location.port+"/api/test", {val: "www-sites"}, function(json){
+		
+		var table = $('#wwwList').DataTable();
+		
+		$.post("//"+document.domain+":"+location.port+"/api/get", {val: "wwwlist"}, function(json){
 			data = JSON.parse(json);
 			if(data.Err == 'OK'){
 				list = data.Mes.split(":");
 				for(var i in list){
 					if(list[i] != ""){
-						$("div.content-text" ).append(list[i]+"<br/>");
+						//$("div.content-text" ).append(list[i]+"<br/>");
 						console.log(list[i])
+						table.row.add({
+							DT_RowId: data,
+							0:     parseInt(i)+1,
+							1:     list[i],
+							2:     "127.0.0.1",
+							3:     "work",
+							4:     "удалить",
+						}).draw( false );
 					}
 				}
 			}else{

@@ -43,6 +43,7 @@ func main() {
 	mux.HandleFunc("/api/get", lepusGetAPI)
 	mux.HandleFunc("/api/test", lepusTestAPI)
 	mux.HandleFunc("/api/addwebdir", lepusAddWebDirAPI)
+	mux.HandleFunc("/api/delwebdir", lepusDelWebDirAPI)
 	
 	log.Println("Start server on port "+lepusConf["port"])
 	log.Fatal(http.ListenAndServeTLS(lepusConf["port"], lepusConf["dir"]+"/server.crt", lepusConf["dir"]+"/server.key", mux))
@@ -76,6 +77,12 @@ func lepusLoginAPI(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(r.Form)
 	if r.Form["login"] == nil || r.Form["passwd"] == nil{
 		b := lepusMessage("Err", "empty post")
+		w.Write(b)
+		return
+	}
+	
+	if strings.Join(r.Form["login"], "") != "lepus" { // only lepus can login (for this version)
+		b := lepusMessage("Err", "Wrong login")
 		w.Write(b)
 		return
 	}
@@ -115,7 +122,7 @@ func lepusLogin(user, passwd string) []string{
 	
 	c := sha512_crypt.New()
     new_hash, _ := c.Generate([]byte(passwd), []byte(salt))
-    fmt.Println(new_hash+"\n"+hash)
+    //fmt.Println(new_hash+"\n"+hash)
     if hash != new_hash {
 		return []string{"wrong", hash} 
 	}else{
@@ -242,7 +249,7 @@ func lepusAddWebDirAPI(w http.ResponseWriter, r *http.Request) {
 			os.Mkdir("/var/www/public/"+strings.Join(r.Form["val"], ""), 0755)
 			os.Chown("/var/www/public/"+strings.Join(r.Form["val"], ""), uid, gid)
 			
-			if strings.Join(r.Form["symlink"], "") != "yes" {
+			if strings.Join(r.Form["symlink"], "") == "yes" {
 				os.Symlink("/var/www/public/"+strings.Join(r.Form["val"], ""), "/var/www/public/www."+strings.Join(r.Form["val"], ""))
 				// os.Chown("/var/www/public/symlink", 1000, 1000) not work for symlink
 				// If the file is a symbolic link, it changes the uid and gid of the link's target.
@@ -256,6 +263,33 @@ func lepusAddWebDirAPI(w http.ResponseWriter, r *http.Request) {
 	}
 	
 	w.Write(b)
+}
+
+func lepusDelWebDirAPI(w http.ResponseWriter, r *http.Request) {
+	x := lepusAuth(w, r)
+	if x == false {
+		b := lepusMessage("Err", "Wrong auth")
+		w.Write(b)
+		return 
+	}
+	
+	//x := "/var/www/public/"+strings.Join(r.Form["val"], "")
+	i := "/var/www/public/test.ru"
+	files, _ := ioutil.ReadDir("/var/www/public")
+	for _, f := range files {		
+		dir, _ := os.Stat("/var/www/public/"+f.Name())
+		if dir.IsDir() {
+			real, err := os.Readlink("/var/www/public/"+f.Name())
+			if err != nil {
+				continue
+			}
+			if i == real {
+				fmt.Println("/var/www/public/"+f.Name()+" => "+real)
+				os.RemoveAll("/var/www/public/"+f.Name())
+			}
+		}
+	}
+	//os.RemoveAll(i)
 }
 
 func lepusTestAPI(w http.ResponseWriter, r *http.Request) {
@@ -274,7 +308,7 @@ func lepusTestAPI(w http.ResponseWriter, r *http.Request) {
 	//lepusLog("test!")
 	//b := lepusMessage("err", "123123123")
 	
-	// https://golang.org/src/os/user/user.go?s=684:820#L14	
+	// https://golang.org/src/os/user/user.go?s=684:820#L14
 	
-	w.Write([]byte("test"))
+	//w.Write([]byte(x))
 }

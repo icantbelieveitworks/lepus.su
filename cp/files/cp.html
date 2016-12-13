@@ -134,7 +134,7 @@
 		e.preventDefault();
 		site = $('input[id=site]').val();
 		var table = $('#wwwList').DataTable();
-		$.post("//"+document.domain+":"+location.port+"/api/addwebdir", {val: punycode.toASCII(site)}, function(json){
+		$.post("//"+document.domain+":"+location.port+"/api/addwebdir", {val: punycode.toASCII(site), symlink: "yes"}, function(json){
 			data = JSON.parse(json);
 			if(data.Err == 'OK'){
 				table.row.add({

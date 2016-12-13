@@ -108,21 +108,22 @@
 		var table = $('#wwwList').DataTable();
 		$.post("//"+document.domain+":"+location.port+"/api/get", {val: "wwwlist"}, function(json){
 			data = JSON.parse(json);
-			console.log(data.Mes)
+			//console.log(data.Mes)
 			if(data.Err == 'OK'){
-				list = data.Mes.split(":");
-				for(var i in list){
-					if(list[i] != ""){
-						console.log(list[i])
-						table.row.add({
-							DT_RowId: i,
-							0:     parseInt(i)+1,
-							1:     punycode.toUnicode(list[i]),
-							2:     "127.0.0.1",
-							3:     "work",
-							4:     '<a href="nourl" data-delete-site='+list[i]+' title="Удалить"><i class="glyphicon glyphicon-remove"></i></a>'
-						}).draw(false);
-					}
+				j = JSON.parse(data.Mes);
+				 var i = 0;
+				console.log(j);
+				for (var key in j) {
+					if(!j.hasOwnProperty(key)) continue;
+					i++;
+					table.row.add({
+						DT_RowId: key,
+						0:     i,
+						1:     punycode.toUnicode(key),
+						2:     j[key].ip,
+						3:     j[key].status,
+						4:     '<a href="nourl" data-delete-site='+key+' title="Удалить"><i class="glyphicon glyphicon-remove"></i></a>'
+					}).draw(false);
 				}
 			}
 			return;

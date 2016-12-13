@@ -4,6 +4,7 @@ import "io"
 import "os"
 import "log"
 import "fmt"
+import "net"
 import "time"
 import "bufio"
 import "regexp"
@@ -29,7 +30,7 @@ type lepusMes struct {
 
 func main() {
 	lepusConf["port"] = ":8085"
-	lepusConf["ip"] = "151.80.209.161"
+	lepusConf["ip"] = lepusGetIP()
 	lepusConf["dir"] = "/root/lepuscp"
 	lepusConf["log"] = lepusConf["dir"]+"/lepuscp.log"
 	lepusConf["pages"] = lepusConf["dir"]+"/files"
@@ -204,7 +205,9 @@ func lepusGetAPI(w http.ResponseWriter, r *http.Request) {
 			b = lepusMessage("OK", session.Values["user"].(string))
 			
 		case "wwwlist":
-			x := ""
+			ip := lepusGetIP()
+			x := make(map[string]interface{})
+			item := make(map[string]string)
 			files, _ := ioutil.ReadDir("/var/www/public")
 				for _, f := range files {
 				dir, _ := os.Stat("/var/www/public/"+f.Name())
@@ -212,11 +215,15 @@ func lepusGetAPI(w http.ResponseWriter, r *http.Request) {
 				if err == nil {
 					continue
 				}
-				if dir.IsDir() {
-					x += f.Name()+":"
+				if dir.IsDir() {					
+					item["ip"] = ip
+					item["status"] = "work"
+					x[f.Name()] = item
+					item = make(map[string]string)
 				}
 			}
-			b = lepusMessage("OK", x)
+			z, _ := json.Marshal(x)
+			b = lepusMessage("OK", string(z))
 	}
 	w.Write(b)
 }
@@ -305,23 +312,20 @@ func lepusDelWebDirAPI(w http.ResponseWriter, r *http.Request) {
 	w.Write(b)
 }
 
+func lepusGetIP() string{
+	x := "0.0.0.0"
+	addrs, _ := net.InterfaceAddrs()
+	for _, a := range addrs {
+		if ipnet, ok := a.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
+			if ipnet.IP.To4() != nil {
+				x = ipnet.IP.String()
+				break
+			}
+		}
+	}
+	return x
+}
+
 func lepusTestAPI(w http.ResponseWriter, r *http.Request) {
-	//ret := r.URL.Query()
-	//fmt.Println(ret)
-	// http://x.x.x.x:8085/api/test?id=123&name=test
-	// map[id:[123] name:[test]]
-	
-	//r.ParseForm()
-	//fmt.Println(r.Form)
-	//x1 := strings.Join(r.Form["login"], "")
-	//x2 := strings.Join(r.Form["passwd"], "")
-	//fmt.Println(x1)
-	//fmt.Println(x2)
-	
-	//lepusLog("test!")
-	//b := lepusMessage("err", "123123123")
-	
-	// https://golang.org/src/os/user/user.go?s=684:820#L14
-	
-	//w.Write([]byte(x))
+	w.Write([]byte("test!"))
 }

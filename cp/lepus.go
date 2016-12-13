@@ -272,11 +272,22 @@ func lepusDelWebDirAPI(w http.ResponseWriter, r *http.Request) {
 		w.Write(b)
 		return 
 	}
-	
-	//x := "/var/www/public/"+strings.Join(r.Form["val"], "")
-	i := "/var/www/public/test.ru"
+	r.ParseForm()
+	b := lepusMessage("Err", "Empty post")
+	re := regexp.MustCompile("^[a-z0-9.-]*$")
+		if(re.MatchString(strings.Join(r.Form["val"], "")) == false){
+			b = lepusMessage("Err", "Wrong website")
+			w.Write(b)
+			return
+	}
+	i := "/var/www/public/"+strings.Join(r.Form["val"], "")
+	if _, err := os.Stat(i); os.IsNotExist(err) {
+		b = lepusMessage("Err", "No dir")
+		w.Write(b)
+		return
+	}
 	files, _ := ioutil.ReadDir("/var/www/public")
-	for _, f := range files {		
+	for _, f := range files {
 		dir, _ := os.Stat("/var/www/public/"+f.Name())
 		if dir.IsDir() {
 			real, err := os.Readlink("/var/www/public/"+f.Name())
@@ -289,7 +300,9 @@ func lepusDelWebDirAPI(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
-	//os.RemoveAll(i)
+	os.RemoveAll(i)
+	b = lepusMessage("OK", "Done")
+	w.Write(b)
 }
 
 func lepusTestAPI(w http.ResponseWriter, r *http.Request) {

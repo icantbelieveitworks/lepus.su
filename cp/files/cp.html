@@ -18,6 +18,7 @@
 	<script src="//cdn.datatables.net/plug-ins/1.10.10/integration/bootstrap/3/dataTables.bootstrap.js"></script>
 	<script type="text/javascript" charset="utf-8"> $(document).ready(function() { $('#wwwList').dataTable({ "order": [[ 0, "desc" ]] }); }); </script>
 	
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/punycode/1.4.1/punycode.js"></script>
 	<script src="https://lepus.su/js/alertify.js"></script>
 	<style>
 		body{min-width:1025px; height:100%; font:13px 'Arial';background:#EFEFEF;}
@@ -40,6 +41,9 @@
 		<div class="content-info box-shadow--2dp">
 			<div class="content-text">
 				<div class="page-title">WWW домены</div>
+				<hr/>
+				<input class="form-control" id="site" placeholder="site.ru" name="site" type="text" value="" autofocus="">
+				<input id="check_auth" type="submit" name="login" class="btn btn-sm btn-success btn-block" style="margin-top: 10px;" data-do-addwww="" value="Добавить">
 				<hr/>
 				<table id="wwwList" class="table table-striped table-bordered" cellspacing="0" width="100%">
 					<thead>
@@ -64,12 +68,7 @@
 				<b><a href="#" data-do-logout="" title="Выход" id="user"></a></b>
 			</center>
 			<div class="block-body" style="margin-left: 15px; padding-top: 0px;">
-				<ul>
-					<hr>
-					<li><a href="/page/cp">Добавить сайт</a></li>
-					<li><a href="/page/cp">WWW домены</a></li>
-					<hr>
-				</ul>
+				<ul></ul>
 			</div>
 		</div>
 	</div>
@@ -83,6 +82,14 @@
 	});
 
 	$(document).ready(function(){
+		
+		var menu = {};
+		menu.hr = '<hr/>'
+		menu.www = '<li><a href="/?page=cp">WWW домены</a></li>'
+		menu.phpmyadmin = '<li><a href="http://'+document.domain+'/phpmyadmin" target="_blank">phpMyAdmin</a></li>'
+		 
+		$("ul").append(menu.hr+menu.phpmyadmin+menu.www+menu.hr);
+		
 		$.post("//"+document.domain+":"+location.port+"/api/get", {val: "login"}, function(json){
 			data = JSON.parse(json);
 			if(data.Err == 'OK'){
@@ -93,33 +100,52 @@
 			return;
 		});
 		
-		
 		var table = $('#wwwList').DataTable();
-		
 		$.post("//"+document.domain+":"+location.port+"/api/get", {val: "wwwlist"}, function(json){
 			data = JSON.parse(json);
+			console.log(data.Mes)
 			if(data.Err == 'OK'){
 				list = data.Mes.split(":");
 				for(var i in list){
 					if(list[i] != ""){
-						//$("div.content-text" ).append(list[i]+"<br/>");
 						console.log(list[i])
 						table.row.add({
 							DT_RowId: data,
 							0:     parseInt(i)+1,
-							1:     list[i],
+							1:     punycode.toUnicode(list[i]),
 							2:     "127.0.0.1",
 							3:     "work",
 							4:     "удалить",
 						}).draw( false );
 					}
 				}
-			}else{
-				console.log(data.Mes)
 			}
 			return;
 		});
-		
+	});
+	
+	$(document).on("click", "[data-do-addwww]", function(e) {
+		$(this).blur();
+		e.preventDefault();
+		site = $('input[id=site]').val();
+		var table = $('#wwwList').DataTable();
+		$.post("//"+document.domain+":"+location.port+"/api/addwebdir", {val: punycode.toASCII(site)}, function(json){
+			data = JSON.parse(json);
+			if(data.Err == 'OK'){
+				table.row.add({
+					DT_RowId: data,
+					0:     table.page.info().recordsTotal+1,
+					1:     site,
+					2:     "127.0.0.1",
+					3:     "work",
+					4:     "удалить",
+				}).draw( false );
+				alertify.success(data.Mes);
+			}else{
+				alertify.error(data.Mes);
+			}
+			return;
+		});
 	});
 </script>
 </body>

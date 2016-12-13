@@ -40,7 +40,6 @@
 				data = JSON.parse(json);
 				if(data.Err == 'OK'){
 					location.reload();
-					//alertify.success(data.Mes);
 				}else{
 					alertify.error(data.Mes);
 				}

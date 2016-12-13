@@ -6,7 +6,10 @@ import "log"
 import "fmt"
 import "time"
 import "bufio"
+import "regexp"
+import "strconv"
 import "strings"
+import "os/user"
 import "net/http"
 import "io/ioutil"
 import "encoding/hex"
@@ -32,36 +35,35 @@ func main() {
 	
 	mux := http.NewServeMux()
 	
-	mux.HandleFunc("/", lepusMainPage)
-	mux.HandleFunc("/page/cp", lepusControlPage)
+	mux.HandleFunc("/", lepusPage)
 	
 	mux.HandleFunc("/api/login", lepusLoginAPI)
 	mux.HandleFunc("/api/exit", lepusExitAPI)
 	mux.HandleFunc("/api/get", lepusGetAPI)
 	mux.HandleFunc("/api/test", lepusTestAPI)
+	mux.HandleFunc("/api/addwebdir", lepusAddWebDirAPI)
 	
 	log.Println("Start server on port "+lepusConf["port"])
 	log.Fatal(http.ListenAndServeTLS(lepusConf["port"], lepusConf["dir"]+"/server.crt", lepusConf["dir"]+"/server.key", mux))
 }
 
-func lepusMainPage(w http.ResponseWriter, r *http.Request) {
+func lepusPage(w http.ResponseWriter, r *http.Request) {
+	ret := r.URL.Query()
+	page := lepusConf["pages"]+"/index.html"
+	switch strings.Join(ret["page"], "") {
+	case "cp":
+		page = lepusConf["pages"]+"/cp.html"
+	}
 	x := lepusAuth(w, r)
-	if x != false {
-		http.Redirect(w, r, "https://"+lepusConf["ip"]+lepusConf["port"]+"/page/cp", 301)
+	if x != false && page == lepusConf["pages"]+"/index.html" {
+		http.Redirect(w, r, "https://"+lepusConf["ip"]+lepusConf["port"]+"/?page=cp", 301)
 		return 
 	}
-	file, _ := ioutil.ReadFile(lepusConf["pages"]+"/index.html")
-	io.WriteString(w, string(file))
-}
-
-func lepusControlPage(w http.ResponseWriter, r *http.Request) {
-	x := lepusAuth(w, r)
-	if x == false {
+	if x == false && ret["page"] != nil {
 		http.Redirect(w, r, "https://"+lepusConf["ip"]+lepusConf["port"], 301)
 		return 
 	}
-	
-	file, _ := ioutil.ReadFile(lepusConf["pages"]+"/cp.html")
+	file, _ := ioutil.ReadFile(page)
 	io.WriteString(w, string(file))
 }
 
@@ -207,6 +209,40 @@ func lepusGetAPI(w http.ResponseWriter, r *http.Request) {
 	w.Write(b)
 }
 
+func lepusAddWebDirAPI(w http.ResponseWriter, r *http.Request) {
+	session, _ := store.Get(r, "lepuscp")
+	x := lepusAuth(w, r)
+	if x == false {
+		b := lepusMessage("Err", "Wrong auth")
+		w.Write(b)
+		return 
+	}
+	
+	r.ParseForm()
+	fmt.Println(r.Form)
+	
+	b := lepusMessage("Err", "Empty post")
+	
+	if strings.Join(r.Form["val"], "") != "" {
+		re := regexp.MustCompile("^[a-z0-9.-]*$")
+		if(re.MatchString(strings.Join(r.Form["val"], "")) == false){
+			b = lepusMessage("Err", "Wrong website")
+			w.Write(b)
+			return
+		}
+		if _, err := os.Stat("/var/www/public/"+strings.Join(r.Form["val"], "")); os.IsNotExist(err) {
+			a, _ :=user.Lookup(session.Values["user"].(string))
+			uid, _ := strconv.Atoi(a.Uid)
+			gid, _ := strconv.Atoi(a.Gid)
+			os.Mkdir("/var/www/public/"+strings.Join(r.Form["val"], ""), 0700)
+			os.Chown("/var/www/public/"+strings.Join(r.Form["val"], ""), uid, gid)
+		}
+		b = lepusMessage("OK", "Done")
+	}
+	
+	w.Write(b)
+}
+
 func lepusTestAPI(w http.ResponseWriter, r *http.Request) {
 	//ret := r.URL.Query()
 	//fmt.Println(ret)
@@ -222,6 +258,8 @@ func lepusTestAPI(w http.ResponseWriter, r *http.Request) {
 	
 	//lepusLog("test!")
 	//b := lepusMessage("err", "123123123")
+	
+	// https://golang.org/src/os/user/user.go?s=684:820#L14
 	
 	w.Write([]byte("test"))
 }

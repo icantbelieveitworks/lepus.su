@@ -10,6 +10,7 @@ import "regexp"
 import "strconv"
 import "strings"
 import "os/user"
+import "os/exec"
 import "net/http"
 import "io/ioutil"
 import "encoding/hex"
@@ -200,6 +201,10 @@ func lepusGetAPI(w http.ResponseWriter, r *http.Request) {
 			files, _ := ioutil.ReadDir("/var/www/public")
 				for _, f := range files {
 				dir, _ := os.Stat("/var/www/public/"+f.Name())
+				_, err := os.Readlink("/var/www/public/"+f.Name())
+				if err == nil {
+					continue
+				}
 				if dir.IsDir() {
 					x += f.Name()+":"
 				}
@@ -234,8 +239,18 @@ func lepusAddWebDirAPI(w http.ResponseWriter, r *http.Request) {
 			a, _ :=user.Lookup(session.Values["user"].(string))
 			uid, _ := strconv.Atoi(a.Uid)
 			gid, _ := strconv.Atoi(a.Gid)
-			os.Mkdir("/var/www/public/"+strings.Join(r.Form["val"], ""), 0700)
+			os.Mkdir("/var/www/public/"+strings.Join(r.Form["val"], ""), 0755)
 			os.Chown("/var/www/public/"+strings.Join(r.Form["val"], ""), uid, gid)
+			
+			if strings.Join(r.Form["symlink"], "") != "yes" {
+				os.Symlink("/var/www/public/"+strings.Join(r.Form["val"], ""), "/var/www/public/www."+strings.Join(r.Form["val"], ""))
+				// os.Chown("/var/www/public/symlink", 1000, 1000) not work for symlink
+				// If the file is a symbolic link, it changes the uid and gid of the link's target.
+				// https://golang.org/src/os/file_posix.go
+				// so use exec
+				//p := a.Uid+":"+a.Gid
+				exec.Command("chown","-h", a.Uid+":"+a.Gid, "/var/www/public/www."+strings.Join(r.Form["val"], "")).Output()
+			}
 		}
 		b = lepusMessage("OK", "Done")
 	}
@@ -259,7 +274,7 @@ func lepusTestAPI(w http.ResponseWriter, r *http.Request) {
 	//lepusLog("test!")
 	//b := lepusMessage("err", "123123123")
 	
-	// https://golang.org/src/os/user/user.go?s=684:820#L14
+	// https://golang.org/src/os/user/user.go?s=684:820#L14	
 	
 	w.Write([]byte("test"))
 }

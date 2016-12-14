@@ -45,6 +45,7 @@ func main() {
 	mux.HandleFunc("/api/test", lepusTestAPI)
 	mux.HandleFunc("/api/addwebdir", lepusAddWebDirAPI)
 	mux.HandleFunc("/api/delwebdir", lepusDelWebDirAPI)
+	mux.HandleFunc("/api/chwebdir", lepusChWebDirAPI)
 	
 	log.Println("Start server on port "+lepusConf["port"])
 	log.Fatal(http.ListenAndServeTLS(lepusConf["port"], lepusConf["dir"]+"/server.crt", lepusConf["dir"]+"/server.key", mux))
@@ -55,7 +56,9 @@ func lepusPage(w http.ResponseWriter, r *http.Request) {
 	page := lepusConf["pages"]+"/index.html"
 	switch strings.Join(ret["page"], "") {
 	case "cp":
-		page = lepusConf["pages"]+"/cp.html"
+		page = lepusConf["pages"]+"/cp.html"	
+	case "wwwedit":
+		page = lepusConf["pages"]+"/wwwedit.html"
 	}
 	x := lepusAuth(w, r)
 	if x != false && page == lepusConf["pages"]+"/index.html" {
@@ -94,6 +97,7 @@ func lepusLoginAPI(w http.ResponseWriter, r *http.Request) {
 		session.Values["user"] = strings.Join(r.Form["login"], "")
 		session.Values["hash"] = lepusSHA256(ip+i[1])
 		session.Save(r, w)
+		lepusLog("auth sucsess from ip "+ip+" user "+session.Values["user"].(string))
 		fmt.Println("sess: "+session.ID+"\nhash: "+session.Values["hash"].(string)+"\nip: "+ip)
 		b := lepusMessage("OK", "Sucsess login")
 		w.Write(b)
@@ -217,7 +221,12 @@ func lepusGetAPI(w http.ResponseWriter, r *http.Request) {
 				}
 				if dir.IsDir() {					
 					item["ip"] = ip
-					item["status"] = "work"
+					mode := dir.Mode()
+					if mode.String()  != "d---------" {
+						item["status"] = "online"
+					}else{
+						item["status"] = "disable"
+					}
 					x[f.Name()] = item
 					item = make(map[string]string)
 				}
@@ -326,6 +335,47 @@ func lepusGetIP() string{
 	return x
 }
 
-func lepusTestAPI(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("test!"))
+func lepusChWebDirAPI(w http.ResponseWriter, r *http.Request) {
+	x := lepusAuth(w, r)
+	if x == false {
+		b := lepusMessage("Err", "Wrong auth")
+		w.Write(b)
+		return 
+	}
+	r.ParseForm()
+	b := lepusMessage("Err", "Empty post")
+	re := regexp.MustCompile("^[a-z0-9.-]*$")
+	if(re.MatchString(strings.Join(r.Form["val"], "")) == false){
+		b = lepusMessage("Err", "Wrong website")
+		w.Write(b)
+		return
+	}
+	dir, err := os.Stat("/var/www/public/"+strings.Join(r.Form["val"], ""));
+	if os.IsNotExist(err) {
+		b = lepusMessage("Err", "Not found")
+		w.Write(b)
+		return;
+	}
+	_, err = os.Readlink("/var/www/public/"+strings.Join(r.Form["val"], ""))
+	if err == nil {
+		b = lepusMessage("Err", "It`s symlink")
+		w.Write(b)
+		return;
+	}
+	b = lepusMessage("Err", "It isn`t dir")
+	if dir.IsDir() {
+		mode := dir.Mode()			
+		if mode.String()  == "d---------" {
+			 os.Chmod("/var/www/public/"+strings.Join(r.Form["val"], ""), 0755)
+			 b = lepusMessage("OK", "online")
+		}else{
+			os.Chmod("/var/www/public/"+strings.Join(r.Form["val"], ""), 0000)
+			b = lepusMessage("OK", "disable")
+		}
+	}
+	w.Write(b)
+}
+
+func lepusTestAPI(w http.ResponseWriter, r *http.Request) {	
+	w.Write([]byte("test"))
 }

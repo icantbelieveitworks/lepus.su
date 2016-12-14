@@ -33,6 +33,7 @@
 		.block-body { width:160px; margin-left: 8px; padding-top: 12px; }
 		.block-login { min-height:140px; background: #FFF; border-radius: 8px; }
 		td,th { text-align: center; vertical-align: middle; }
+		span { display: inline-block; vertical-align: middle; }
 	</style>
 </head>
 <body>
@@ -40,7 +41,10 @@
 	<div class="content-box">
 		<div class="content-info box-shadow--2dp">
 			<div class="content-text">
-				<div class="page-title">WWW домены</div>
+				<div class="page-title"><span id="title"></span></div>
+				<hr/>
+				Status: online <br/>
+				WebDir: /var/www/public/xxxx
 				<hr/>
 				<input class="form-control" id="site" placeholder="site.ru" name="site" type="text" value="" autofocus="">
 				<!--<select class="form-control" style="margin-top: 3px;" name="type">
@@ -87,6 +91,22 @@
 		return i;
 	}
 	
+	var getUrlParameter = function getUrlParameter(sParam) {
+		var sPageURL = decodeURIComponent(window.location.search.substring(1)),
+			sURLVariables = sPageURL.split('&'),
+			sParameterName,
+			i;
+	
+		for (i = 0; i < sURLVariables.length; i++) {
+			sParameterName = sURLVariables[i].split('=');
+
+			if (sParameterName[0] === sParam) {
+				return sParameterName[1] === undefined ? true : sParameterName[1];
+			}
+		}
+	};
+	
+	
 	$(document).on("click", "[data-do-logout]", function(e) {
 		$(this).blur();
 		e.preventDefault();
@@ -95,6 +115,18 @@
 	});
 
 	$(document).ready(function(){
+		if(lepusCheck(getUrlParameter('www'))){
+			window.location = "/";
+			return;
+		}
+		
+		tmpSite = punycode.toUnicode(getUrlParameter('www'));
+		
+		tmpIcon = ' <a href="nourl" data-change-perm-site='+getUrlParameter('www')+' title="Выключить"><i id="permStatus" class="glyphicon glyphicon-pause" style="vertical-align:middle;"></i></a>';
+		
+		
+		$("#title").append(tmpSite);
+		$(".page-title").append(tmpIcon);
 		
 		var menu = {};
 		menu.hr = '<hr/>'
@@ -134,7 +166,7 @@
 						1:     punycode.toUnicode(key),
 						2:     j[key].ip,
 						3:     j[key].status,
-						4:     '<a href="/?page=wwwedit&www='+key+'" title="Редактировать"><i class="glyphicon glyphicon-pencil"></i></a> &nbsp; <a href="nourl" data-delete-site='+key+' title="Удалить"><i class="glyphicon glyphicon-remove"></i></a>'
+						4:     '<a href="nourl" title="Редактировать"><i class="glyphicon glyphicon-pencil"></i></a> &nbsp; <a href="nourl" data-delete-site='+key+' title="Удалить"><i class="glyphicon glyphicon-remove"></i></a>'
 					}).draw(false);
 				}
 			}
@@ -158,6 +190,29 @@
 					3:     "work",
 					4:     '<a href="nourl" title="Редактировать"><i class="glyphicon glyphicon-pencil"></i></a> &nbsp; <a href="nourl" data-delete-site='+punycode.toASCII(site)+' title="Удалить"><i class="glyphicon glyphicon-remove"></i></a>',
 				}).draw( false );
+				alertify.success(data.Mes);
+			}else{
+				alertify.error(data.Mes);
+			}
+			return;
+		});
+	});
+	
+	
+	$(document).on("click", "[data-change-perm-site]", function(e) {
+		$(this).blur();
+		e.preventDefault();
+		site = $(this).data("change-perm-site");
+		$.post("//"+document.domain+":"+location.port+"/api/chwebdir", {val: site}, function(json){
+			data = JSON.parse(json);
+			if(data.Err == 'OK'){
+				if(data.Mes == 'online'){
+					$("#permStatus").removeClass("glyphicon-pause");
+					$("#permStatus").addClass("glyphicon-play");
+				}else{
+					$("#permStatus").removeClass("glyphicon-play");
+					$("#permStatus").addClass("glyphicon-pause");
+				}
 				alertify.success(data.Mes);
 			}else{
 				alertify.error(data.Mes);

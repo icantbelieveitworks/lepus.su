@@ -387,9 +387,7 @@ func lepusPathInfo(val string) map[string]int {
 			info["isDir"] = 1
 			mode := dir.Mode()
 			j := mode.String()
-			x := strconv.Itoa(lepusPermToInt(j[1:4]))
-			x += strconv.Itoa(lepusPermToInt(j[4:7]))
-			x += strconv.Itoa(lepusPermToInt(j[7:10]))
+			x := fmt.Sprintf("%d%d%d", lepusPermToInt(j[1:4]), lepusPermToInt(j[4:7]), lepusPermToInt(j[7:10]))
 			info["Perm"], _ = strconv.Atoi(x)
 		}
 		_, err = os.Readlink(val)
@@ -422,7 +420,5 @@ func lepusPermToInt(val string) int {
 }
 
 func lepusTestAPI(w http.ResponseWriter, r *http.Request) {
-	i := lepusPathInfo("xn--e1aybc.xn--p1ai")
-	fmt.Println(i)
 	w.Write([]byte("test"))
 }

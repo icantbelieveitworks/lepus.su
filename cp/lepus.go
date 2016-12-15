@@ -207,6 +207,8 @@ func lepusGetAPI(w http.ResponseWriter, r *http.Request) {
 	switch strings.Join(r.Form["val"], "") {
 		case "login":
 			b = lepusMessage("OK", session.Values["user"].(string))
+					
+		//case "dirperm":
 			
 		case "wwwlist":
 			ip := lepusGetIP()
@@ -290,33 +292,32 @@ func lepusDelWebDirAPI(w http.ResponseWriter, r *http.Request) {
 	}
 	r.ParseForm()
 	b := lepusMessage("Err", "Empty post")
-	re := regexp.MustCompile("^[a-z0-9.-]*$")
-		if(re.MatchString(strings.Join(r.Form["val"], "")) == false){
-			b = lepusMessage("Err", "Wrong website")
-			w.Write(b)
-			return
-	}
-	i := "/var/www/public/"+strings.Join(r.Form["val"], "")
-	if _, err := os.Stat(i); os.IsNotExist(err) {
-		b = lepusMessage("Err", "No dir")
+	val := strings.Join(r.Form["val"], "")
+	if lepusRegexp(val, "") == false {
+		b = lepusMessage("Err", "Wrong website")
 		w.Write(b)
 		return
 	}
+	path := "/var/www/public/"+val
+	i := lepusPathInfo(path)
+	if i["IsNotExist"] == 1 {
+		b = lepusMessage("Err", "Not found")
+		w.Write(b)
+		return;
+	}
 	files, _ := ioutil.ReadDir("/var/www/public")
 	for _, f := range files {
-		dir, _ := os.Stat("/var/www/public/"+f.Name())
-		if dir.IsDir() {
-			real, err := os.Readlink("/var/www/public/"+f.Name())
-			if err != nil {
-				continue
-			}
-			if i == real {
-				fmt.Println("/var/www/public/"+f.Name()+" => "+real)
-				os.RemoveAll("/var/www/public/"+f.Name())
-			}
+		i = lepusPathInfo("/var/www/public/"+f.Name())
+		if i["Readlink"] == 0 || i["isDir"] == 0 || i["IsNotExist"] == 1 {
+			continue
+		}
+		real, _ := os.Readlink("/var/www/public/"+f.Name())
+		if real == path {
+			fmt.Println("/var/www/public/"+f.Name()+" => "+real)
+			os.RemoveAll("/var/www/public/"+f.Name())
 		}
 	}
-	os.RemoveAll(i)
+	os.RemoveAll(path)
 	b = lepusMessage("OK", "Done")
 	w.Write(b)
 }
@@ -344,38 +345,97 @@ func lepusChWebDirAPI(w http.ResponseWriter, r *http.Request) {
 	}
 	r.ParseForm()
 	b := lepusMessage("Err", "Empty post")
-	re := regexp.MustCompile("^[a-z0-9.-]*$")
-	if(re.MatchString(strings.Join(r.Form["val"], "")) == false){
+	val := strings.Join(r.Form["val"], "")
+	if lepusRegexp(val, "") == false {
 		b = lepusMessage("Err", "Wrong website")
 		w.Write(b)
 		return
 	}
-	dir, err := os.Stat("/var/www/public/"+strings.Join(r.Form["val"], ""));
-	if os.IsNotExist(err) {
+	path := "/var/www/public/"+val
+	i := lepusPathInfo(path)
+	if i["IsNotExist"] == 1 {
 		b = lepusMessage("Err", "Not found")
 		w.Write(b)
 		return;
 	}
-	_, err = os.Readlink("/var/www/public/"+strings.Join(r.Form["val"], ""))
-	if err == nil {
+	if i["Readlink"] == 1 {
 		b = lepusMessage("Err", "It`s symlink")
 		w.Write(b)
 		return;
 	}
 	b = lepusMessage("Err", "It isn`t dir")
-	if dir.IsDir() {
-		mode := dir.Mode()			
-		if mode.String()  == "d---------" {
-			 os.Chmod("/var/www/public/"+strings.Join(r.Form["val"], ""), 0755)
+	if i["isDir"] == 1 {
+		if i["Perm"]  == 000 {
+			 os.Chmod(path, 0755)
 			 b = lepusMessage("OK", "online")
 		}else{
-			os.Chmod("/var/www/public/"+strings.Join(r.Form["val"], ""), 0000)
+			os.Chmod(path, 0000)
 			b = lepusMessage("OK", "disable")
 		}
 	}
 	w.Write(b)
 }
 
-func lepusTestAPI(w http.ResponseWriter, r *http.Request) {	
+func lepusRegexp(data, val  string) bool {
+	re := regexp.MustCompile("^[a-z0-9.-]*$")
+	switch val {
+		case "09":
+			re = regexp.MustCompile("^[0-9]*$")
+		case "az":
+			re = regexp.MustCompile("^[a-z]*$")
+	}
+	return re.MatchString(data)
+}
+
+func lepusPathInfo(val string) map[string]int {
+	info := make(map[string]int)
+	info["IsNotExist"] = 0
+	info["isDir"] = 0
+	info["Readlink"] = 0
+	dir, err := os.Stat(val);
+	if os.IsNotExist(err) {
+		info["IsNotExist"] = 1
+	}else{
+		if dir.IsDir() {
+			info["isDir"] = 1
+			mode := dir.Mode()
+			j := mode.String()
+			x := strconv.Itoa(lepusPermToInt(j[1:4]))
+			x += strconv.Itoa(lepusPermToInt(j[4:7]))
+			x += strconv.Itoa(lepusPermToInt(j[7:10]))
+			info["Perm"], _ = strconv.Atoi(x)
+		}
+		_, err = os.Readlink(val)
+		if err == nil {
+			info["Readlink"] = 1
+		}
+	}
+	return info
+}
+
+func lepusPermToInt(val string) int {
+	x := 0;
+	switch val {
+		case "rwx":
+			x = 7
+		case "rw-":
+			x = 6
+		case "r-x":
+			x = 5
+		case "r--":
+			x = 4
+		case "-wx":
+			x = 3
+		case "-w-":
+			x = 2
+		case "--x":
+			x = 1
+	}
+	return x
+}
+
+func lepusTestAPI(w http.ResponseWriter, r *http.Request) {
+	i := lepusPathInfo("xn--e1aybc.xn--p1ai")
+	fmt.Println(i)
 	w.Write([]byte("test"))
 }

@@ -22,30 +22,6 @@
 		<input class="form-control" style="margin-top: 3px;" id="password" placeholder="password" name="password" type="password" value="" autofocus="">
 		<input id="check_auth" type="submit" name="login" class="btn btn-sm btn-success btn-block" style="margin-top: 12px;" data-do-login="" value="Войти">
 	</div>
-	<script>
-		$(document).keypress(function(e) {
-			if(e.which == 13 && document.getElementById("check_auth") !== null) lepus_login();
-		});
-
-		$(document).on("click", "[data-do-login]", function(e) {
-			$(this).blur();
-			e.preventDefault();
-			lepus_login();
-		});
-		
-		var lepus_login = function() {
-			login = $('input[id=login]').val();
-			passwd = $('input[id=password]').val();
-			$.post("//"+document.domain+":"+location.port+"/api/login", {login: login, passwd: passwd}, function(json){
-				data = JSON.parse(json);
-				if(data.Err == 'OK'){
-					location.reload();
-				}else{
-					alertify.error(data.Mes);
-				}
-				return;
-			});
-		};
-	</script>
+	<script src="/?page=js"></script>
 </body>
 </html>

@@ -54,7 +54,10 @@ func main() {
 func lepusPage(w http.ResponseWriter, r *http.Request) {
 	ret := r.URL.Query()
 	page := lepusConf["pages"] + "/index.html"
-	switch strings.Join(ret["page"], "") {
+	val := strings.Join(ret["page"], "")
+	switch val {
+	case "js":
+		page = lepusConf["pages"] + "/lepus.js"
 	case "cp":
 		page = lepusConf["pages"] + "/cp.html"
 	case "wwwedit":
@@ -65,7 +68,7 @@ func lepusPage(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "https://"+lepusConf["ip"]+lepusConf["port"]+"/?page=cp", 301)
 		return
 	}
-	if x == false && ret["page"] != nil {
+	if x == false && ret["page"] != nil && val != "js" {
 		http.Redirect(w, r, "https://"+lepusConf["ip"]+lepusConf["port"], 301)
 		return
 	}
@@ -264,7 +267,7 @@ func lepusAddWebDirAPI(w http.ResponseWriter, r *http.Request) {
 				os.Symlink(path, "/var/www/public/www."+val)
 				exec.Command("chown", "-h", a.Uid+":"+a.Gid, "/var/www/public/www."+val).Output()
 			}
-			b = lepusMessage("OK", "Done")
+			b = lepusMessage("OK", lepusGetIP())
 		}
 	}
 	w.Write(b)

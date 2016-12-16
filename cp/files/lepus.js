@@ -104,10 +104,20 @@
 				window.location = "/";
 				return;
 			}
-			tmpSite = punycode.toUnicode(getUrlParameter('www'));
-			tmpIcon = ' <a href="nourl" data-change-perm-site='+getUrlParameter('www')+' title="Вкл/ выкл"><i id="permStatus" class="glyphicon glyphicon-pause" style="vertical-align:middle;"></i></a>';
-			$("#title").append(tmpSite);
-			$(".page-title").append(tmpIcon);
+			$("#title").append(punycode.toUnicode(getUrlParameter('www')));
+			$.post("//"+document.domain+":"+location.port+"/api/get", {val: "perm", site: getUrlParameter('www')}, function(json){
+				data = JSON.parse(json);
+				console.log(json);
+				if(data.Err == 'OK'){
+					if(data.Mes == 'disable'){
+						glyphicon = "glyphicon glyphicon-pause";
+					}else{
+						glyphicon ="glyphicon glyphicon-play";
+					}
+					tmpIcon = ' <a href="nourl" data-change-perm-site='+getUrlParameter('www')+' title="Вкл/ выкл"><i id="permStatus" class="'+glyphicon+'" style="vertical-align:middle;"></i></a>';
+					$(".page-title").append(tmpIcon);
+				}
+			});
 		}
 	});
 

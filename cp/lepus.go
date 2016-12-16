@@ -212,6 +212,22 @@ func lepusGetAPI(w http.ResponseWriter, r *http.Request) {
 	case "login":
 		b = lepusMessage("OK", session.Values["user"].(string))
 
+	case "perm":
+		site := strings.Join(r.Form["site"], "")
+		if lepusRegexp(site, "") == false {
+			b = lepusMessage("Err", "Wrong website")
+			w.Write(b)
+			return
+		}
+		i := lepusPathInfo("/var/www/public/" + site)
+		b = lepusMessage("Err", "Not exist")
+		if i["IsNotExist"] == 0 {
+			b = lepusMessage("OK", "online")
+			if i["Perm"] == 000 {
+				b = lepusMessage("OK", "disable")
+			}
+		}
+
 	case "wwwlist":
 		ip := lepusGetIP()
 		x := make(map[string]interface{})

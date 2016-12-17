@@ -73,7 +73,7 @@
 		}
 		if(page == "cp"){
 			var table = $('#wwwList').DataTable();
-			$.post("//"+document.domain+":"+location.port+"/api/get", {val: "wwwlist"}, function(json){
+			$.post("//"+document.domain+":"+location.port+"/api/get", {val: "www"}, function(json){
 				data = JSON.parse(json);
 				//console.log(data.Mes)
 				if(data.Err == 'OK'){
@@ -118,6 +118,31 @@
 					$(".page-title").append(tmpIcon);
 				}
 			});
+		
+			var table = $('#symList').DataTable();
+			$.post("//"+document.domain+":"+location.port+"/api/get", {val: "www", symlink: getUrlParameter('www')}, function(json){
+				data = JSON.parse(json);
+				if(data.Err == 'OK'){
+					j = JSON.parse(data.Mes);
+					console.log(j);
+					var i = 0;
+					for (var key in j) {
+						if(!j.hasOwnProperty(key)) continue;
+						if(lepusCheck(key) || lepusCheck(j[key].ip) || lepusCheck(j[key].status)) {
+							continue;
+						}
+						i++;
+						table.row.add({
+							DT_RowId: key,
+							0:     i,
+							1:     punycode.toUnicode(key),
+							2:     '<a href="nourl" data-delete-site='+key+' title="Удалить"><i class="glyphicon glyphicon-remove"></i></a>'
+						}).draw(false);
+					}
+				}
+				return;
+			});	
+		
 		}
 	});
 

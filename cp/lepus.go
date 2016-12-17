@@ -228,15 +228,27 @@ func lepusGetAPI(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
-	case "wwwlist":
+	case "www":
 		ip := lepusGetIP()
 		x := make(map[string]interface{})
 		item := make(map[string]string)
 		files, _ := ioutil.ReadDir("/var/www/public")
 		for _, f := range files {
 			i := lepusPathInfo("/var/www/public/" + f.Name())
-			if i["Readlink"] == 1 || i["isDir"] == 0 || i["IsNotExist"] == 1 {
+			if i["isDir"] == 0 || i["IsNotExist"] == 1 {
 				continue
+			}
+			if r.Form["symlink"] == nil && i["Readlink"] == 1 {
+				fmt.Println("1")
+				continue
+			}
+			if r.Form["symlink"] != nil && i["Readlink"] == 0 {
+				fmt.Println("2")
+				path := "/var/www/public/" + strings.Join(r.Form["symlink"], "")
+				real, _ := os.Readlink(path)
+				if real != path {
+					continue
+				}
 			}
 			item["ip"] = ip
 			if i["Perm"] != 000 {

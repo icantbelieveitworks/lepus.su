@@ -72,7 +72,7 @@
 			});
 		}
 		if(page == "cp"){
-			var table = $('#wwwList').DataTable();
+			var table = $('#mainList').DataTable();
 			$.post("//"+document.domain+":"+location.port+"/api/get", {val: "www"}, function(json){
 				data = JSON.parse(json);
 				//console.log(data.Mes)
@@ -92,7 +92,7 @@
 							1:     punycode.toUnicode(key),
 							2:     j[key].ip,
 							3:     j[key].status,
-							4:     '<a href="/?page=wwwedit&www='+key+'" title="Редактировать"><i class="glyphicon glyphicon-pencil"></i></a> &nbsp; <a href="nourl" data-delete-site='+key+' title="Удалить"><i class="glyphicon glyphicon-remove"></i></a>'
+							4:     '<a href="/?page=wwwedit&www='+key+'" title="Редактировать"><i class="glyphicon glyphicon-pencil"></i></a> &nbsp; <a href="#" data-delete-site='+key+' title="Удалить"><i class="glyphicon glyphicon-remove"></i></a>'
 						}).draw(false);
 					}
 				}
@@ -114,12 +114,12 @@
 					}else{
 						glyphicon ="glyphicon glyphicon-play";
 					}
-					tmpIcon = ' <a href="nourl" data-change-perm-site='+getUrlParameter('www')+' title="Вкл/ выкл"><i id="permStatus" class="'+glyphicon+'" style="vertical-align:middle;"></i></a>';
+					tmpIcon = ' <a href="#" data-change-perm-site='+getUrlParameter('www')+' title="Вкл/ выкл"><i id="permStatus" class="'+glyphicon+'" style="vertical-align:middle;"></i></a>';
 					$(".page-title").append(tmpIcon);
 				}
 			});
 		
-			var table = $('#symList').DataTable();
+			var table = $('#mainList').DataTable();
 			$.post("//"+document.domain+":"+location.port+"/api/get", {val: "www", symlink: getUrlParameter('www')}, function(json){
 				data = JSON.parse(json);
 				if(data.Err == 'OK'){
@@ -136,7 +136,7 @@
 							DT_RowId: key,
 							0:     i,
 							1:     punycode.toUnicode(key),
-							2:     '<a href="nourl" data-delete-site='+key+' title="Удалить"><i class="glyphicon glyphicon-remove"></i></a>'
+							2:     '<a href="#" data-delete-site='+key+' title="Удалить"><i class="glyphicon glyphicon-remove"></i></a>',
 						}).draw(false);
 					}
 				}
@@ -150,21 +150,38 @@
 		$(this).blur();
 		e.preventDefault();
 		site = $('input[id=site]').val();
-		var table = $('#wwwList').DataTable();
-		$.post("//"+document.domain+":"+location.port+"/api/addwebdir", {val: punycode.toASCII(site), symlink: "yes"}, function(json){
+		var table = $('#mainList').DataTable();
+		if(getUrlParameter("www")){
+			site = getUrlParameter("www");
+			var dir = $('input[id=site]').val();
+		}
+		if((punycode.toASCII(site).split(".").length - 1) > 1)
+			symlink = "no";
+		else
+			symlink = "yes";
+		$.post("//"+document.domain+":"+location.port+"/api/addwebdir", {val: punycode.toASCII(site), symlink: symlink, dir: dir}, function(json){
 			data = JSON.parse(json);
 			if(data.Err == 'OK'){
 				if(lepusCheck(data.Mes)) {
 					return;
 				}
-				table.row.add({
-					DT_RowId: data,
-					0:     table.page.info().recordsTotal+1,
-					1:     site,
-					2:     data.Mes,
-					3:     "online",
-					4:     '<a href="nourl" title="Редактировать"><i class="glyphicon glyphicon-pencil"></i></a> &nbsp; <a href="nourl" data-delete-site='+punycode.toASCII(site)+' title="Удалить"><i class="glyphicon glyphicon-remove"></i></a>',
-				}).draw( false );
+				if(!dir){
+					table.row.add({
+						DT_RowId: data,
+						0:     table.page.info().recordsTotal+1,
+						1:     site,
+						2:     data.Mes,
+						3:     "online",
+						4:     '<a href="/?page=wwwedit&www='+punycode.toASCII(site)+'" title="Редактировать"><i class="glyphicon glyphicon-pencil"></i></a> &nbsp; <a href="/" data-delete-site='+punycode.toASCII(site)+' title="Удалить"><i class="glyphicon glyphicon-remove"></i></a>',
+					}).draw( false );
+				}else{
+					table.row.add({
+						DT_RowId: data,
+						0:     table.page.info().recordsTotal+1,
+						1:     dir,
+						2:     '<a href="#" data-delete-site='+punycode.toASCII(site)+' title="Удалить"><i class="glyphicon glyphicon-remove"></i></a>',
+					}).draw( false );
+				}
 				alertify.success("Done");
 			}else{
 				alertify.error(data.Mes);
@@ -179,7 +196,7 @@
 		var id = this.id;
 		site = $(this).data("delete-site");
         var row = $(this).closest("tr").get(0);
-        var table = $('#wwwList').dataTable();
+        var table = $('#mainList').dataTable();
 		if(!confirm("Вы подтверждаете удаление?")) return;
 		$.post("//"+document.domain+":"+location.port+"/api/delwebdir", {val: site}, function(json){
 		data = JSON.parse(json);

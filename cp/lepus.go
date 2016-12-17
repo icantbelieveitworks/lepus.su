@@ -233,22 +233,23 @@ func lepusGetAPI(w http.ResponseWriter, r *http.Request) {
 		x := make(map[string]interface{})
 		item := make(map[string]string)
 		files, _ := ioutil.ReadDir("/var/www/public")
+		fmt.Println(r.Form)
 		for _, f := range files {
 			i := lepusPathInfo("/var/www/public/" + f.Name())
 			if i["isDir"] == 0 || i["IsNotExist"] == 1 {
 				continue
 			}
-			if r.Form["symlink"] == nil && i["Readlink"] == 1 {
-				fmt.Println("1")
-				continue
-			}
-			if r.Form["symlink"] != nil && i["Readlink"] == 0 {
-				fmt.Println("2")
+			if r.Form["symlink"] != nil {
 				path := "/var/www/public/" + strings.Join(r.Form["symlink"], "")
-				real, _ := os.Readlink(path)
+				real, _ := os.Readlink("/var/www/public/" + f.Name())
+				fmt.Println("2")
 				if real != path {
+					fmt.Println(real + " != " + path)
 					continue
 				}
+			} else if i["Readlink"] == 1 {
+				fmt.Println("1")
+				continue
 			}
 			item["ip"] = ip
 			if i["Perm"] != 000 {
@@ -278,25 +279,40 @@ func lepusAddWebDirAPI(w http.ResponseWriter, r *http.Request) {
 	val := strings.Join(r.Form["val"], "")
 	path := "/var/www/public/" + val
 	if val != "" {
-		if lepusRegexp(val, "") == false {
+		link := ""
+		if r.Form["dir"] != nil {
+			link = strings.Join(r.Form["dir"], "")
+		}
+		if lepusRegexp(val, "") == false || lepusRegexp(link, "") == false {
 			b = lepusMessage("Err", "Wrong website")
 			w.Write(b)
 			return
 		}
 		i := lepusPathInfo(path)
 		b = lepusMessage("Err", "Dir exist")
-		if i["IsNotExist"] == 1 {
-			a, _ := user.Lookup(session.Values["user"].(string))
-			uid, _ := strconv.Atoi(a.Uid)
-			gid, _ := strconv.Atoi(a.Gid)
-			os.Mkdir(path, 0755)
-			os.Chown(path, uid, gid)
-			if strings.Join(r.Form["symlink"], "") == "yes" {
-				os.Symlink(path, "/var/www/public/www."+val)
-				exec.Command("chown", "-h", a.Uid+":"+a.Gid, "/var/www/public/www."+val).Output()
-			}
-			b = lepusMessage("OK", lepusGetIP())
+		a, _ := user.Lookup(session.Values["user"].(string))
+		uid, _ := strconv.Atoi(a.Uid)
+		gid, _ := strconv.Atoi(a.Gid)
+		if i["IsNotExist"] == 0 && r.Form["dir"] == nil {
+			w.Write(b)
+			return
 		}
+		if strings.Join(r.Form["symlink"], "") == "yes" {
+			tmpLink := "/var/www/public/www." + val
+			if r.Form["dir"] != nil {
+				tmpLink = "/var/www/public/" + link
+			}
+			q := lepusPathInfo(tmpLink)
+			if q["IsNotExist"] == 0 {
+				w.Write(b)
+				return
+			}
+			os.Symlink(path, tmpLink)
+			exec.Command("chown", "-h", a.Uid+":"+a.Gid, tmpLink).Output()
+		}
+		os.Mkdir(path, 0755)
+		os.Chown(path, uid, gid)
+		b = lepusMessage("OK", lepusGetIP())
 	}
 	w.Write(b)
 }

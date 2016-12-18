@@ -1733,7 +1733,7 @@ function lepus_userAddTask($id, $command){
 	global $db, $user; $i = 'error_task';
 	$info = lepus_getServiceAccess($id);
 	if(!is_array($info)) return $info;
-	if(time() > $info['time2']) return 'not_paid';
+	if(time() > $info['time2'] && time() > $info['time3']) return 'not_paid';
 	$query = $db->prepare("SELECT * FROM `tariff` WHERE `id` = :id");
 	$query->bindParam(':id', $info['sid'], PDO::PARAM_STR);
 	$query->execute();

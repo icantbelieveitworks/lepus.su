@@ -374,28 +374,65 @@ func lepusDelWebDirAPI(w http.ResponseWriter, r *http.Request) {
 		w.Write(b)
 		return
 	}
-	path := "/var/www/public/" + val
-	i := lepusPathInfo(path)
-	if i["IsNotExist"] == 1 {
-		b = lepusMessage("Err", "Not found")
+	site := strings.Join(r.Form["site"], "")
+	if lepusRegexp(site, "") == false {
+		b = lepusMessage("Err", "Wrong website")
 		w.Write(b)
 		return
 	}
-	files, _ := ioutil.ReadDir("/var/www/public")
-	for _, f := range files {
-		i = lepusPathInfo("/var/www/public/" + f.Name())
-		if i["Readlink"] == 0 || i["isDir"] == 0 || i["IsNotExist"] == 1 {
-			continue
+	confPath := "/etc/apache2/sites-enabled/" + site + ".conf"
+	i := lepusPathInfo(confPath)
+	if site != "" && (i["Readlink"] != 0 || i["isDir"] != 0 || i["IsNotExist"] != 1) {
+		w.Write(lepusDelApacheAlias(site, val, confPath))
+		return
+	} else {
+		path := "/var/www/public/" + val
+		i := lepusPathInfo(path)
+		if i["IsNotExist"] == 1 {
+			b = lepusMessage("Err", "Not found")
+			w.Write(b)
+			return
 		}
-		real, _ := os.Readlink("/var/www/public/" + f.Name())
-		if real == path {
-			fmt.Println("/var/www/public/" + f.Name() + " => " + real)
-			os.RemoveAll("/var/www/public/" + f.Name())
+		files, _ := ioutil.ReadDir("/var/www/public")
+		for _, f := range files {
+			i = lepusPathInfo("/var/www/public/" + f.Name())
+			if i["Readlink"] == 0 || i["isDir"] == 0 || i["IsNotExist"] == 1 {
+				continue
+			}
+			real, _ := os.Readlink("/var/www/public/" + f.Name())
+			if real == path {
+				fmt.Println("/var/www/public/" + f.Name() + " => " + real)
+				os.RemoveAll("/var/www/public/" + f.Name())
+			}
 		}
+		os.RemoveAll(path)
 	}
-	os.RemoveAll(path)
 	b = lepusMessage("OK", "Done")
 	w.Write(b)
+}
+
+func lepusDelApacheAlias(site, alias, confPath string) []byte {
+	val := ""
+	file, _ := os.Open(confPath)
+	defer file.Close()
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		o := strings.Split(scanner.Text(), " ")
+		if o[0] == "ServerAlias" {
+			val = strings.Join(o, " ")
+		}
+	}
+	if val != "" {
+		new := strings.Replace(val, alias, "", -1)
+		if strings.Trim(new, " ") == "ServerAlias" {
+			new = ""
+		}
+		text, _ := ioutil.ReadFile(confPath)
+		regex, _ := regexp.Compile("\n\n")
+		result := regex.ReplaceAllString(strings.Replace(string(text), val, new, -1), "\n")
+		ioutil.WriteFile(confPath, []byte(result), 0755)
+	}
+	return lepusMessage("OK", "Done")
 }
 
 func lepusGetIP() string {
@@ -513,14 +550,6 @@ func lepusPermToInt(val string) int {
 //}
 
 func lepusTestAPI(w http.ResponseWriter, r *http.Request) {
-
-	//if x[0] == user {
-	//	userdata = strings.Split(x[1], "$")
-	//	break
-	//}
-	//}
-	//return userdata
-
 	/*value, _ := ioutil.ReadFile("/root/lepuscp/files/apache.tmp")
 		x := strings.NewReplacer("%domain%", "dog", "%alias%", "cat")
 	    result := x.Replace(string(value))

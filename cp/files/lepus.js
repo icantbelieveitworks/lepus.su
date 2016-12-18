@@ -142,14 +142,14 @@
 						if(key.includes("ServerAlias")){
 							arr = key.split(" ");
 							for (var x in arr){
-								if(arr[x] == "ServerAlias" || lepusCheck(arr[x])){
+								if(arr[x] == "ServerAlias" || lepusCheck(arr[x]) || arr[x] == getUrlParameter("www")){
 									continue;
 								}
 								i++;
 								lepusAddLink(arr[x], i);
 							}
 						}else{
-							if(lepusCheck(key) || lepusCheck(j[key].ip) || lepusCheck(j[key].status)) {
+							if(lepusCheck(key) || lepusCheck(j[key].ip) || lepusCheck(j[key].status) || key == getUrlParameter("www")) {
 								continue;
 							}
 							i++;
@@ -158,8 +158,7 @@
 					}
 				}
 				return;
-			});	
-		
+			});
 		}
 	});
 	
@@ -198,8 +197,9 @@
 						0:     table.page.info().recordsTotal+1,
 						1:     site,
 						2:     data.Mes,
-						3:     "online",
-						4:     '<a href="/?page=wwwedit&www='+punycode.toASCII(site)+'" title="Редактировать"><i class="glyphicon glyphicon-pencil"></i></a> &nbsp; <a href="/" data-delete-site='+punycode.toASCII(site)+' title="Удалить"><i class="glyphicon glyphicon-remove"></i></a>',
+						3:     'mod_alias',
+						4:     'online',
+						5:     '<a href="/?page=wwwedit&www='+punycode.toASCII(site)+'" title="Редактировать"><i class="glyphicon glyphicon-pencil"></i></a> &nbsp; <a href="/" data-delete-site='+punycode.toASCII(site)+' title="Удалить"><i class="glyphicon glyphicon-remove"></i></a>',
 					}).draw( false );
 				}else{
 					table.row.add({
@@ -225,7 +225,7 @@
         var row = $(this).closest("tr").get(0);
         var table = $('#mainList').dataTable();
 		if(!confirm("Вы подтверждаете удаление?")) return;
-		$.post("//"+document.domain+":"+location.port+"/api/delwebdir", {val: site}, function(json){
+		$.post("//"+document.domain+":"+location.port+"/api/delwebdir", {val: site, site: getUrlParameter("www")}, function(json){
 		data = JSON.parse(json);
 			if(data.Err == 'OK'){
 				table.fnDeleteRow(table.fnGetPosition(row));

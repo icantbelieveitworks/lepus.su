@@ -1,7 +1,7 @@
 	function lepusCheck(val, filter) {
 		switch (filter) {
 			default:
-				i = /[^0-9a-zA-Z.-]/i.test(val);
+				i = /[^0-9a-zA-Z._-]/i.test(val);
 		}
 		return i;
 	}
@@ -82,7 +82,7 @@
 					var i = 0;
 					for (var key in j) {
 						if(!j.hasOwnProperty(key)) continue;
-						if(lepusCheck(key) || lepusCheck(j[key].ip) || lepusCheck(j[key].status)) {
+						if(lepusCheck(key) || lepusCheck(j[key].http) || lepusCheck(j[key].status)) {
 							continue;
 						}
 						i++;
@@ -91,8 +91,9 @@
 							0:     i,
 							1:     punycode.toUnicode(key),
 							2:     j[key].ip,
-							3:     j[key].status,
-							4:     '<a href="/?page=wwwedit&www='+key+'" title="Редактировать"><i class="glyphicon glyphicon-pencil"></i></a> &nbsp; <a href="#" data-delete-site='+key+' title="Удалить"><i class="glyphicon glyphicon-remove"></i></a>'
+							3:     j[key].http,
+							4:     j[key].status,
+							5:     '<a href="/?page=wwwedit&www='+key+'" title="Редактировать"><i class="glyphicon glyphicon-pencil"></i></a> &nbsp; <a href="#" data-delete-site='+key+' title="Удалить"><i class="glyphicon glyphicon-remove"></i></a>'
 						}).draw(false);
 					}
 				}
@@ -104,6 +105,15 @@
 				window.location = "/";
 				return;
 			}
+			
+			$.post("//"+document.domain+":"+location.port+"/api/get", {val: "type", site: getUrlParameter('www')}, function(json){
+				data = JSON.parse(json);
+				if(data.Err == 'OK'){
+					alertify.error(data.Mes);
+					$('select option[value="'+data.Mes+'"]').attr("selected",true);
+				}
+			});
+			
 			$("#title").append(punycode.toUnicode(getUrlParameter('www')));
 			$.post("//"+document.domain+":"+location.port+"/api/get", {val: "perm", site: getUrlParameter('www')}, function(json){
 				data = JSON.parse(json);
@@ -121,6 +131,7 @@
 		
 			var table = $('#mainList').DataTable();
 			$.post("//"+document.domain+":"+location.port+"/api/get", {val: "www", symlink: getUrlParameter('www')}, function(json){
+				console.log(json);
 				data = JSON.parse(json);
 				if(data.Err == 'OK'){
 					j = JSON.parse(data.Mes);
@@ -128,16 +139,22 @@
 					var i = 0;
 					for (var key in j) {
 						if(!j.hasOwnProperty(key)) continue;
-						if(lepusCheck(key) || lepusCheck(j[key].ip) || lepusCheck(j[key].status)) {
-							continue;
+						if(key.includes("ServerAlias")){
+							arr = key.split(" ");
+							for (var x in arr){
+								if(arr[x] == "ServerAlias" || lepusCheck(arr[x])){
+									continue;
+								}
+								i++;
+								lepusAddLink(arr[x], i);
+							}
+						}else{
+							if(lepusCheck(key) || lepusCheck(j[key].ip) || lepusCheck(j[key].status)) {
+								continue;
+							}
+							i++;
+							lepusAddLink(key, i)
 						}
-						i++;
-						table.row.add({
-							DT_RowId: key,
-							0:     i,
-							1:     punycode.toUnicode(key),
-							2:     '<a href="#" data-delete-site='+key+' title="Удалить"><i class="glyphicon glyphicon-remove"></i></a>',
-						}).draw(false);
 					}
 				}
 				return;
@@ -145,6 +162,16 @@
 		
 		}
 	});
+	
+	function lepusAddLink(site, num){
+		var table = $('#mainList').DataTable();
+		table.row.add({
+							DT_RowId: site,
+							0:     num,
+							1:     punycode.toUnicode(site),
+							2:     '<a href="#" data-delete-site='+site+' title="Удалить"><i class="glyphicon glyphicon-remove"></i></a>',
+						}).draw(false);
+	}
 
 	$(document).on("click", "[data-do-addwww]", function(e) {
 		$(this).blur();

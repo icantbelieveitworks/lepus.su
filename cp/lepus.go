@@ -212,6 +212,18 @@ func lepusGetAPI(w http.ResponseWriter, r *http.Request) {
 	case "login":
 		b = lepusMessage("OK", session.Values["user"].(string))
 
+	case "type":
+		site := strings.Join(r.Form["site"], "")
+		if lepusRegexp(site, "") == false {
+			b = lepusMessage("Err", "Wrong website")
+			w.Write(b)
+			return
+		}
+		b = lepusMessage("OK", "vhost")
+		if _, err := os.Stat("/etc/apache2/sites-enabled/" + site + ".conf"); os.IsNotExist(err) {
+			b = lepusMessage("OK", "mod_alias")
+		}
+
 	case "perm":
 		site := strings.Join(r.Form["site"], "")
 		if lepusRegexp(site, "") == false {
@@ -235,29 +247,59 @@ func lepusGetAPI(w http.ResponseWriter, r *http.Request) {
 		files, _ := ioutil.ReadDir("/var/www/public")
 		fmt.Println(r.Form)
 		for _, f := range files {
+
+			key := f.Name()
+
 			i := lepusPathInfo("/var/www/public/" + f.Name())
 			if i["isDir"] == 0 || i["IsNotExist"] == 1 {
 				continue
 			}
+
+			vh := "vhost"
+			if _, err := os.Stat("/etc/apache2/sites-enabled/" + f.Name() + ".conf"); os.IsNotExist(err) {
+				vh = "mod_alias"
+			}
+
+			fmt.Println(vh + " => " + f.Name())
+
 			if r.Form["symlink"] != nil {
-				path := "/var/www/public/" + strings.Join(r.Form["symlink"], "")
-				real, _ := os.Readlink("/var/www/public/" + f.Name())
-				fmt.Println("2")
-				if real != path {
-					fmt.Println(real + " != " + path)
-					continue
+				if vh == "mod_alias" {
+					path := "/var/www/public/" + strings.Join(r.Form["symlink"], "")
+					real, _ := os.Readlink("/var/www/public/" + f.Name())
+					fmt.Println("2")
+					if real != path {
+						fmt.Println(real + " != " + path)
+						continue
+					}
+				} else {
+					if strings.Join(r.Form["symlink"], "") != f.Name() {
+						continue
+					}
+					file, _ := os.Open("/etc/apache2/sites-enabled/" + f.Name() + ".conf")
+					defer file.Close()
+
+					scanner := bufio.NewScanner(file)
+
+					for scanner.Scan() {
+						o := strings.Split(scanner.Text(), " ")
+						if o[0] == "ServerAlias" {
+							key = strings.Join(o, " ")
+						}
+					}
 				}
 			} else if i["Readlink"] == 1 {
 				fmt.Println("1")
 				continue
 			}
+
 			item["ip"] = ip
+			item["http"] = vh
 			if i["Perm"] != 000 {
 				item["status"] = "online"
 			} else {
 				item["status"] = "disable"
 			}
-			x[f.Name()] = item
+			x[key] = item
 			item = make(map[string]string)
 		}
 		z, _ := json.Marshal(x)
@@ -466,6 +508,35 @@ func lepusPermToInt(val string) int {
 	return x
 }
 
+//func lepusApacheConf(domain) {
+//	tmp := ioutil.ReadFile("/root/lepuscp/files/apache.tmp")
+//}
+
 func lepusTestAPI(w http.ResponseWriter, r *http.Request) {
+
+	//if x[0] == user {
+	//	userdata = strings.Split(x[1], "$")
+	//	break
+	//}
+	//}
+	//return userdata
+
+	/*value, _ := ioutil.ReadFile("/root/lepuscp/files/apache.tmp")
+		x := strings.NewReplacer("%domain%", "dog", "%alias%", "cat")
+	    result := x.Replace(string(value))
+	    fmt.Println(result)
+
+		file := "/etc/apache2/sites-enabled/test.ru.conf"
+		if _, err := os.Stat(file); os.IsNotExist(err) {
+			os.Create(file)
+		}
+
+		if _, err := os.Stat(file); err == nil {
+			file, _ := os.OpenFile(file, os.O_RDWR, 0755)
+			defer file.Close()
+			file.WriteString(result)
+			file.Sync()
+		}*/
+
 	w.Write([]byte("test"))
 }

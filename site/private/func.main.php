@@ -34,7 +34,7 @@ function lost_passwd_change($arr){
 	if($data[1] != $real_hash) return 'wrong_hash';
 	if(time() > $data[2]) return 'lost_passwd_time';
 	$new_passwd = change_passwd($is_user['1']['id']);
-	_mail($is_user['1']['login'], "Новый пароль", "Дорогой клиент,<br/>по-вашему запросу, мы поменяли пароль.<br/>Ваш новый пароль: $new_passwd");
+	_mail($is_user['1']['login'], "Новый пароль", "Дорогой клиент,<br/>по вашему запросу, мы поменяли пароль.<br/>Ваш новый пароль: $new_passwd");
 	return 'Мы отправили новый пароль на ваш email';
 }
 

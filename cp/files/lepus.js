@@ -172,20 +172,46 @@
 						}).draw(false);
 	}
 
+
+	$(document).on("click", "[data-do-addLinkWWW]", function(e) {
+		$(this).blur();
+		e.preventDefault();
+		var table = $('#mainList').DataTable();
+		site = punycode.toASCII(getUrlParameter("www"));
+		var link = punycode.toASCII($('input[id=link]').val());
+		$.post("//"+document.domain+":"+location.port+"/api/addweblink", {val: site, link: link}, function(json){
+			data = JSON.parse(json);
+			if(data.Err == 'OK'){
+				table.row.add({
+					DT_RowId: data,
+					0:     table.page.info().recordsTotal+1,
+					1:     punycode.toUnicode(link),
+					2:     '<a href="#" data-delete-site='+link+' title="Удалить"><i class="glyphicon glyphicon-remove"></i></a>',
+				}).draw( false );
+				alertify.success(data.Mes);
+			}else{
+				alertify.error(data.Mes);
+			}
+			return;
+		});
+	});
+
 	$(document).on("click", "[data-do-addwww]", function(e) {
 		$(this).blur();
 		e.preventDefault();
 		site = $('input[id=site]').val();
+		mode = $('select[id=mode]').val();
 		var table = $('#mainList').DataTable();
 		if(getUrlParameter("www")){
 			site = getUrlParameter("www");
 			var dir = $('input[id=site]').val();
+			return;
 		}
 		if((punycode.toASCII(site).split(".").length - 1) > 1)
 			symlink = "no";
 		else
 			symlink = "yes";
-		$.post("//"+document.domain+":"+location.port+"/api/addwebdir", {val: punycode.toASCII(site), symlink: symlink, dir: dir}, function(json){
+		$.post("//"+document.domain+":"+location.port+"/api/addwebdir", {val: punycode.toASCII(site), symlink: symlink, dir: dir, mode: mode}, function(json){
 			data = JSON.parse(json);
 			if(data.Err == 'OK'){
 				if(lepusCheck(data.Mes)) {

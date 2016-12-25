@@ -46,6 +46,8 @@ func main() {
 	mux.HandleFunc("/api/addwebdir", lepusAddWebDirAPI)
 	mux.HandleFunc("/api/delwebdir", lepusDelWebDirAPI)
 	mux.HandleFunc("/api/chwebdir", lepusChWebDirAPI)
+	mux.HandleFunc("/api/addweblink", lepusAddWebLinkAPI)
+	
 
 	log.Println("Start server on port " + lepusConf["port"])
 	log.Fatal(http.ListenAndServeTLS(lepusConf["port"], lepusConf["dir"]+"/server.crt", lepusConf["dir"]+"/server.key", mux))
@@ -308,6 +310,49 @@ func lepusGetAPI(w http.ResponseWriter, r *http.Request) {
 	w.Write(b)
 }
 
+
+func lepusAddWebLinkAPI(w http.ResponseWriter, r *http.Request) {
+	session, _ := store.Get(r, "lepuscp")
+	x := lepusAuth(w, r)
+	if x == false {
+		w.Write(lepusMessage("Err", "Wrong auth"))
+		return
+	}
+	r.ParseForm()
+	b := lepusMessage("Err", "Empty post")
+	if r.Form["val"] == nil || r.Form["link"] == nil {
+		w.Write(b)
+		return
+	}
+	val := strings.Join(r.Form["val"], "")
+	link := strings.Join(r.Form["link"], "")
+	
+	if lepusRegexp(val, "") == false || lepusRegexp(link, "") == false {
+		w.Write(lepusMessage("Err", "Wrong data"))
+		return
+	}
+	mode := lepusGetTypeWWW(val)
+	switch mode {
+		case "mod_alias":
+			pathSite := "/var/www/public/" + val
+			pathLink := "/var/www/public/" + link
+			i := lepusPathInfo(pathSite)
+			if i["IsNotExist"] == 1 || i["isDir"] == 0 || i["Readlink"] == 1 {
+				w.Write(lepusMessage("Err", "Site is not exist"))
+				return
+			}
+			i = lepusPathInfo(pathLink)
+			if i["IsNotExist"] == 0 {
+				w.Write(lepusMessage("Err", "Link already exist"))
+				return
+			}
+			a, _ := user.Lookup(session.Values["user"].(string))
+			os.Symlink(pathSite, pathLink)
+			exec.Command("chown", "-h", a.Uid+":"+a.Gid, pathLink).Output()
+			w.Write(lepusMessage("OK", "Done"))
+	}
+}
+
 func lepusAddWebDirAPI(w http.ResponseWriter, r *http.Request) {
 	session, _ := store.Get(r, "lepuscp")
 	x := lepusAuth(w, r)
@@ -318,45 +363,56 @@ func lepusAddWebDirAPI(w http.ResponseWriter, r *http.Request) {
 	}
 	r.ParseForm()
 	b := lepusMessage("Err", "Empty post")
+	if r.Form["val"] == nil {
+		w.Write(b)
+		return
+	}
+	
 	val := strings.Join(r.Form["val"], "")
-	path := "/var/www/public/" + val
-	if val != "" {
-		link := ""
-		if r.Form["dir"] != nil {
-			link = strings.Join(r.Form["dir"], "")
-		}
-		if lepusRegexp(val, "") == false || lepusRegexp(link, "") == false {
-			b = lepusMessage("Err", "Wrong website")
-			w.Write(b)
-			return
-		}
-		i := lepusPathInfo(path)
-		b = lepusMessage("Err", "Dir exist")
-		a, _ := user.Lookup(session.Values["user"].(string))
-		uid, _ := strconv.Atoi(a.Uid)
-		gid, _ := strconv.Atoi(a.Gid)
-		if i["IsNotExist"] == 0 && r.Form["dir"] == nil {
-			w.Write(b)
-			return
-		}
-		if strings.Join(r.Form["symlink"], "") == "yes" {
-			tmpLink := "/var/www/public/www." + val
+	mode := lepusGetTypeWWW(val)
+	switch mode {
+		case "mod_alias":
+			path := "/var/www/public/" + val
+			link := ""
 			if r.Form["dir"] != nil {
-				tmpLink = "/var/www/public/" + link
+				link = strings.Join(r.Form["dir"], "")
 			}
-			q := lepusPathInfo(tmpLink)
-			if q["IsNotExist"] == 0 {
+			if lepusRegexp(val, "") == false || lepusRegexp(link, "") == false {
+				b = lepusMessage("Err", "Wrong website")
 				w.Write(b)
 				return
 			}
-			os.Symlink(path, tmpLink)
-			exec.Command("chown", "-h", a.Uid+":"+a.Gid, tmpLink).Output()
-		}
-		os.Mkdir(path, 0755)
-		os.Chown(path, uid, gid)
-		b = lepusMessage("OK", lepusGetIP())
+			i := lepusPathInfo(path)
+			b = lepusMessage("Err", "Dir exist")
+			a, _ := user.Lookup(session.Values["user"].(string))
+			uid, _ := strconv.Atoi(a.Uid)
+			gid, _ := strconv.Atoi(a.Gid)
+			if i["IsNotExist"] == 0 && r.Form["dir"] == nil {
+				w.Write(b)
+				return
+			}
+			if strings.Join(r.Form["symlink"], "") == "yes" {
+				tmpLink := "/var/www/public/www." + val
+				if r.Form["dir"] != nil {
+					tmpLink = "/var/www/public/" + link
+				}
+				q := lepusPathInfo(tmpLink)
+				if q["IsNotExist"] == 0 {
+					w.Write(b)
+					return
+				}
+				os.Symlink(path, tmpLink)
+				exec.Command("chown", "-h", a.Uid+":"+a.Gid, tmpLink).Output()
+			}
+			os.Mkdir(path, 0755)
+			os.Chown(path, uid, gid)
+			b = lepusMessage("OK", lepusGetIP())
+			w.Write(b)
+			
+		case "vhost":
+			b = lepusMessage("OK", lepusGetIP())
+			w.Write(b)
 	}
-	w.Write(b)
 }
 
 func lepusDelWebDirAPI(w http.ResponseWriter, r *http.Request) {
@@ -545,6 +601,14 @@ func lepusPermToInt(val string) int {
 	return x
 }
 
+func lepusGetTypeWWW(val string) string {
+	i := lepusPathInfo("/etc/apache2/sites-enabled/" + val + ".conf")
+	if i["IsNotExist"] == 0 && i["isDir"] == 0 && i["Readlink"] == 0 {
+		return "vhost"
+	}
+	return "mod_alias"
+}
+
 //func lepusApacheConf(domain) {
 //	tmp := ioutil.ReadFile("/root/lepuscp/files/apache.tmp")
 //}
@@ -566,6 +630,8 @@ func lepusTestAPI(w http.ResponseWriter, r *http.Request) {
 			file.WriteString(result)
 			file.Sync()
 		}*/
+		
+	fmt.Println(lepusGetTypeWWW("poiuty.ru"))
 
 	w.Write([]byte("test"))
 }

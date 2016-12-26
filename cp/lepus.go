@@ -390,56 +390,33 @@ func lepusAddWebDirAPI(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	r.ParseForm()
-	b := lepusMessage("Err", "Empty post")
-	if r.Form["val"] == nil {
-		w.Write(b)
+	if r.Form["val"] == nil || r.Form["mode"] == nil  {
+		w.Write(lepusMessage("Err", "Empty post"))
 		return
 	}
-	
 	val := strings.Join(r.Form["val"], "")
 	mode := lepusGetTypeWWW(val)
+	if lepusRegexp(val, "") == false {
+		w.Write(lepusMessage("Err", "Wrong data"))
+		return
+	}
 	switch mode {
 		case "mod_alias":
 			path := "/var/www/public/" + val
-			link := ""
-			if r.Form["dir"] != nil {
-				link = strings.Join(r.Form["dir"], "")
-			}
-			if lepusRegexp(val, "") == false || lepusRegexp(link, "") == false {
-				b = lepusMessage("Err", "Wrong website")
-				w.Write(b)
+			i := lepusPathInfo(path)
+			if i["IsNotExist"] == 0{
+				w.Write(lepusMessage("Err", "Dir exist"))
 				return
 			}
-			i := lepusPathInfo(path)
-			b = lepusMessage("Err", "Dir exist")
 			a, _ := user.Lookup(session.Values["user"].(string))
 			uid, _ := strconv.Atoi(a.Uid)
 			gid, _ := strconv.Atoi(a.Gid)
-			if i["IsNotExist"] == 0 && r.Form["dir"] == nil {
-				w.Write(b)
-				return
-			}
-			if strings.Join(r.Form["symlink"], "") == "yes" {
-				tmpLink := "/var/www/public/www." + val
-				if r.Form["dir"] != nil {
-					tmpLink = "/var/www/public/" + link
-				}
-				q := lepusPathInfo(tmpLink)
-				if q["IsNotExist"] == 0 {
-					w.Write(b)
-					return
-				}
-				os.Symlink(path, tmpLink)
-				exec.Command("chown", "-h", a.Uid+":"+a.Gid, tmpLink).Output()
-			}
 			os.Mkdir(path, 0755)
 			os.Chown(path, uid, gid)
-			b = lepusMessage("OK", lepusGetIP())
-			w.Write(b)
+			w.Write(lepusMessage("OK", lepusGetIP()))
 			
 		case "vhost":
-			b = lepusMessage("OK", lepusGetIP())
-			w.Write(b)
+			w.Write(lepusMessage("OK", lepusGetIP()))
 	}
 }
 
@@ -523,18 +500,11 @@ func lepusApacheAlias(command, alias, confPath string) []byte {
 				new = val + " " + alias
 			}
 		case "del":
-		fmt.Println(command)
 			new = strings.Replace(val, alias, "", -1)
 			if strings.Trim(new, " ") == "ServerAlias" {
 				new = ""
 			}
 	}
-	
-	fmt.Println(alias)
-	fmt.Println(val)
-	fmt.Println(new)
-	
-
 	if val != "" && new != "" {
 		regex, _ := regexp.Compile("\\s+")
 		new = regex.ReplaceAllString(new, " ")
@@ -696,36 +666,5 @@ func lepusTestAPI(w http.ResponseWriter, r *http.Request) {
 			file.Sync()
 		}  */
 		
-		str := "sdsdfsdf sdfsdfsdf     sdfsdfsdfsd    f "
-		regex, _ := regexp.Compile("\\s+")
-		str = regex.ReplaceAllString(str, " ")
-		
-		fmt.Println(str)
-		
-		/*length := len(str)
-		j := 0
-		for i := 0; i < length; i++ {
-			if string(str[i]) == " " {
-				j++
-			}
-			
-			if j >= 1 && string(str[i+1]) == "" {
-				j = 0
-				continue
-			}
-			
-			if i == length && string(str[i]) == " " {
-				continue
-			}
-			fmt.Println(string(str[i]))
-		}*/
-		
-		//new := ""
-		//for key, val := range str {
-			
-		//	fmt.Println(i, string(val))
-		//}
-		//fmt.Println(new)
-	
 	w.Write([]byte("test"))
 }

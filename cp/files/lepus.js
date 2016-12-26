@@ -198,43 +198,28 @@
 	$(document).on("click", "[data-do-addwww]", function(e) {
 		$(this).blur();
 		e.preventDefault();
-		site = $('input[id=site]').val();
+		var site = $('input[id=site]').val();
 		mode = $('select[id=mode]').val();
 		var table = $('#mainList').DataTable();
-		if(getUrlParameter("www")){
-			site = getUrlParameter("www");
-			var dir = $('input[id=site]').val();
-			return;
-		}
-		if((punycode.toASCII(site).split(".").length - 1) > 1)
-			symlink = "no";
-		else
-			symlink = "yes";
-		$.post("//"+document.domain+":"+location.port+"/api/addwebdir", {val: punycode.toASCII(site), symlink: symlink, dir: dir, mode: mode}, function(json){
+		$.post("//"+document.domain+":"+location.port+"/api/addwebdir", {val: punycode.toASCII(site), mode: mode}, function(json){
 			data = JSON.parse(json);
 			if(data.Err == 'OK'){
 				if(lepusCheck(data.Mes)) {
 					return;
 				}
-				if(!dir){
-					table.row.add({
-						DT_RowId: data,
-						0:     table.page.info().recordsTotal+1,
-						1:     site,
-						2:     data.Mes,
-						3:     'mod_alias',
-						4:     'online',
-						5:     '<a href="/?page=wwwedit&www='+punycode.toASCII(site)+'" title="Редактировать"><i class="glyphicon glyphicon-pencil"></i></a> &nbsp; <a href="/" data-delete-site='+punycode.toASCII(site)+' title="Удалить"><i class="glyphicon glyphicon-remove"></i></a>',
-					}).draw( false );
-				}else{
-					table.row.add({
-						DT_RowId: data,
-						0:     table.page.info().recordsTotal+1,
-						1:     dir,
-						2:     '<a href="#" data-delete-site='+punycode.toASCII(site)+' title="Удалить"><i class="glyphicon glyphicon-remove"></i></a>',
-					}).draw( false );
-				}
+				table.row.add({
+					DT_RowId: data,
+					0:     table.page.info().recordsTotal+1,
+					1:     site,
+					2:     data.Mes,
+					3:     'mod_alias',
+					4:     'online',
+					5:     '<a href="/?page=wwwedit&www='+punycode.toASCII(site)+'" title="Редактировать"><i class="glyphicon glyphicon-pencil"></i></a> &nbsp; <a href="/" data-delete-site='+punycode.toASCII(site)+' title="Удалить"><i class="glyphicon glyphicon-remove"></i></a>',
+				}).draw( false );
 				alertify.success("Done");
+				if((punycode.toASCII(site).split(".").length - 1) == 1) {
+					$.post("//"+document.domain+":"+location.port+"/api/weblink", {command: "add", val: site, link: "www."+site});
+				}
 			}else{
 				alertify.error(data.Mes);
 			}

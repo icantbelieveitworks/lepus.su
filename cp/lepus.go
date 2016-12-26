@@ -47,6 +47,7 @@ func main() {
 	mux.HandleFunc("/api/delwebdir", lepusDelWebDirAPI)
 	mux.HandleFunc("/api/chwebdir", lepusChWebDirAPI)
 	mux.HandleFunc("/api/weblink", lepusAddWebLinkAPI)
+	mux.HandleFunc("/api/chwebmode", lepusChWebModeAPI)
 
 	log.Println("Start server on port " + lepusConf["port"])
 	log.Fatal(http.ListenAndServeTLS(lepusConf["port"], lepusConf["dir"]+"/server.crt", lepusConf["dir"]+"/server.key", mux))
@@ -437,6 +438,10 @@ func lepusDelWebDirAPI(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	r.ParseForm()
+	if r.Form["val"] == nil {
+		w.Write(lepusMessage("Err", "Empty post"))
+		return
+	}
 	val := strings.Join(r.Form["val"], "")
 	if lepusRegexp(val, "") == false {
 		w.Write(lepusMessage("Err", "Wrong website"))
@@ -569,7 +574,7 @@ func lepusChWebDirAPI(w http.ResponseWriter, r *http.Request) {
 }
 
 func lepusRegexp(data, val string) bool {
-	re := regexp.MustCompile("^[a-z0-9.-]*$")
+	re := regexp.MustCompile("^[a-z0-9._-]*$")
 	switch val {
 	case "09":
 		re = regexp.MustCompile("^[0-9]*$")
@@ -632,10 +637,6 @@ func lepusGetTypeWWW(val string) string {
 	return "mod_alias"
 }
 
-//func lepusApacheConf(domain) {
-//	tmp := ioutil.ReadFile("/root/lepuscp/files/apache.tmp")
-//}
-
 func stringInSlice(a string, list []string) bool {
 	for _, b := range list {
 		if b == a {
@@ -645,23 +646,106 @@ func stringInSlice(a string, list []string) bool {
 	return false
 }
 
-func lepusTestAPI(w http.ResponseWriter, r *http.Request) {
-	/*value, _ := ioutil.ReadFile("/root/lepuscp/files/apache.tmp")
-		x := strings.NewReplacer("%domain%", "dog", "%alias%", "cat")
-	    result := x.Replace(string(value))
-	    fmt.Println(result)
+func lepusChWebModeAPI(w http.ResponseWriter, r *http.Request) {
+	session, _ := store.Get(r, "lepuscp")
+	x := lepusAuth(w, r)
+	if x == false {
+		w.Write(lepusMessage("Err", "Wrong auth"))
+		return
+	}
+	r.ParseForm()
+	if r.Form["val"] == nil || r.Form["mode"] == nil {
+		w.Write(lepusMessage("Err", "Empty post"))
+		return
+	}
+	val := strings.Join(r.Form["val"], "")
+	mode := strings.Join(r.Form["mode"], "")
+	if lepusRegexp(val, "") == false || lepusRegexp(mode, "") == false {
+		w.Write(lepusMessage("Err", "Wrong website"))
+		return
+	}
 
-		file := "/etc/apache2/sites-enabled/test.ru.conf"
-		if _, err := os.Stat(file); os.IsNotExist(err) {
-			os.Create(file)
+	if mode == lepusGetTypeWWW(val) {
+		w.Write(lepusMessage("Err", "Same mode"))
+		return
+	}
+	pathSite := "/var/www/public/" + val
+	i := lepusPathInfo(pathSite)
+	if i["IsNotExist"] == 1 || i["isDir"] == 0 || i["Readlink"] == 1 {
+		w.Write(lepusMessage("Err", "Not found"))
+		return
+	}
+	switch mode {
+	case "mod_alias":
+		confPath := "/etc/apache2/sites-enabled/" + val + ".conf"
+		str := ""
+		file, _ := os.Open(confPath)
+		defer file.Close()
+		scanner := bufio.NewScanner(file)
+		for scanner.Scan() {
+			o := strings.Split(scanner.Text(), " ")
+			if o[0] == "ServerAlias" {
+				str = strings.Join(o, " ")
+			}
+		}
+		os.RemoveAll(confPath)
+		if str != "" {
+			regex, _ := regexp.Compile("\\s+")
+			str = regex.ReplaceAllString(str, " ")
+			result := strings.Split(str, " ")
+			for key := range result {
+				if result[key] == "" || result[key] == "ServerAlias" || lepusRegexp(result[key], "") == false {
+					continue
+				}
+				pathLink := "/var/www/public/" + result[key]
+				i := lepusPathInfo(pathLink)
+				if i["IsNotExist"] == 0 {
+					continue
+				}
+				a, _ := user.Lookup(session.Values["user"].(string))
+				os.Symlink(pathSite, pathLink)
+				exec.Command("chown", "-h", a.Uid+":"+a.Gid, pathLink).Output()
+			}
+		}
+		leConfPath := "/etc/apache2/sites-enabled/" + val + "-le-ssl.conf"
+		i := lepusPathInfo(leConfPath)
+		if i["IsNotExist"] == 0 && i["isDir"] == 0 && i["Readlink"] == 0 {
+			os.RemoveAll(leConfPath)
 		}
 
-		if _, err := os.Stat(file); err == nil {
-			file, _ := os.OpenFile(file, os.O_RDWR, 0755)
+	case "vhost":
+		config, _ := ioutil.ReadFile("/root/lepuscp/files/apache.tmp")
+		x := strings.NewReplacer("%domain%", val)
+		result := x.Replace(string(config))
+		confPath := "/etc/apache2/sites-enabled/" + val + ".conf"
+		i = lepusPathInfo(confPath)
+		if i["IsNotExist"] == 0 {
+			w.Write(lepusMessage("Err", "Dir exist"))
+			return
+		}
+		os.Create(confPath)
+		if _, err := os.Stat(confPath); err == nil {
+			file, _ := os.OpenFile(confPath, os.O_RDWR, 0755)
 			defer file.Close()
 			file.WriteString(result)
 			file.Sync()
-		}  */
+		}
+		files, _ := ioutil.ReadDir("/var/www/public")
+		for _, f := range files {
+			i = lepusPathInfo("/var/www/public/" + f.Name())
+			if i["IsNotExist"] == 1 || i["isDir"] == 0 || i["Readlink"] == 0 || lepusRegexp(f.Name(), "") == false {
+				continue
+			}
+			pathReal, _ := os.Readlink("/var/www/public/" + f.Name())
+			if pathReal == pathSite {
+				lepusApacheAlias("add", f.Name(), confPath)
+				os.RemoveAll("/var/www/public/" + f.Name())
+			}
+		}
+	}
+	w.Write(lepusMessage("OK", "Done"))
+}
 
+func lepusTestAPI(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("test"))
 }

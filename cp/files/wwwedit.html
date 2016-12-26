@@ -47,6 +47,7 @@
 				<ul class="nav nav-tabs" role="tablist" id="myTab">
 					<li role="presentation" class="active"><a href="#subdom" aria-controls="subdom" role="tab" data-toggle="tab">Поддомены</a></li>
 					<li role="presentation"><a href="#httpmode" aria-controls="httpmode" role="tab" data-toggle="tab">HTTP mode</a></li>
+					<li role="presentation"><a href="#letsencrypt" aria-controls="letsencrypt" role="tab" data-toggle="tab">Let's Encrypt</a></li>
 				</ul>
 				<br/>
 				
@@ -70,9 +71,28 @@
 					<div role="tabpanel" class="tab-pane" id="httpmode">
 						<select id="mode" class="form-control" style="margin-top: 3px;" name="type">
 							<option value="mod_alias">apache mod_vhost_alias</option>
-							<option value="vhost">apache vhost + https (letsencrypt)</option>
+							<option value="vhost">apache vhost</option>
 						</select>
 						<input type="submit" name="login" class="btn btn-sm btn-success btn-block" style="margin-top: 10px;" data-do-changeModeWWW="" value="Сохранить">
+					</div>
+					<div role="tabpanel" class="tab-pane" id="letsencrypt">
+						Для доменов apache vhost => раз в 10 минут запускается bash скрипт.<br/><br/>
+						1. Получает список *.conf в директории /etc/apache2/sites-enabled <br/>
+						2. Последовательно читает каждый файл. Получает список ServerName и ServerAlias.<br/><br/>
+						3. Находит *-le-ssl.conf => если нет файла => запускает certbot<br/>
+						3.1 Если файл есть => проверяет совпадение, если не сопадает => запускает certbot.<br/><br/>
+						4. Сertbot генерирует сертификаты, создает файл *-le-ssl.conf, перезагружает apache.
+						<hr/>
+						Редирект http => https. В корне сайта, создайте файл .htaccess<br/><br/>
+						<div style="background-color: #efefef;">
+						<code style="color: inherit;">
+							RewriteEngine On<br/>
+							RewriteCond %{HTTPS} !=on<br/>
+							RewriteRule ^.*$ https://%{SERVER_NAME}%{REQUEST_URI} [R,L]
+						</code>
+						</div>
+						<hr/>
+						Документация Let`s encrypt доступна <a href="https://letsencrypt.org/docs" target="_blank">по ссылке</a>.
 					</div>
 				</div>
 				<hr>

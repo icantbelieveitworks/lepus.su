@@ -289,4 +289,18 @@
 			return;
 		});
 	});
-
+	
+	$(document).on("click", "[data-do-changemodewww]", function(e) {
+		$(this).blur();
+		e.preventDefault();
+		mode = $('select[id=mode]').val();
+		if(!confirm("Вы подтверждаете изменение?")) return;
+		$.post("//"+document.domain+":"+location.port+"/api/chwebmode", {val: getUrlParameter("www"), mode: mode}, function(json){
+			data = JSON.parse(json);
+			if(data.Err == 'OK'){
+				alertify.success(data.Mes);
+			}else{
+				alertify.error(data.Mes);
+			}
+		});
+	});

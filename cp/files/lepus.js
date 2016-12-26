@@ -256,7 +256,7 @@
         var row = $(this).closest("tr").get(0);
         var table = $('#mainList').dataTable();
 		if(!confirm("Вы подтверждаете удаление?")) return;
-		$.post("//"+document.domain+":"+location.port+"/api/delwebdir", {val: site, site: getUrlParameter("www")}, function(json){
+		$.post("//"+document.domain+":"+location.port+"/api/delwebdir", {val: punycode.toASCII(site)}, function(json){
 		data = JSON.parse(json);
 			if(data.Err == 'OK'){
 				table.fnDeleteRow(table.fnGetPosition(row));

@@ -1,6 +1,5 @@
 <VirtualHost *:80>
 ServerName %domain%
-ServerAlias %alias%
 DocumentRoot "/var/www/public/%domain%"
 <FilesMatch \.php$>
 	SetHandler "proxy:unix:/var/run/php5-fpm.sock|fcgi://localhost/"

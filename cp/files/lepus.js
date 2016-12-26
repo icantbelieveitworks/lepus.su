@@ -142,7 +142,7 @@
 						if(key.includes("ServerAlias")){
 							arr = key.split(" ");
 							for (var x in arr){
-								if(arr[x] == "ServerAlias" || lepusCheck(arr[x]) || arr[x] == getUrlParameter("www")){
+								if(arr[x] == "ServerAlias" || arr[x] == "" || lepusCheck(arr[x]) || arr[x] == getUrlParameter("www")){
 									continue;
 								}
 								i++;
@@ -161,17 +161,16 @@
 			});
 		}
 	});
-	
+
 	function lepusAddLink(site, num){
 		var table = $('#mainList').DataTable();
 		table.row.add({
 							DT_RowId: site,
 							0:     num,
 							1:     punycode.toUnicode(site),
-							2:     '<a href="#" data-delete-site='+site+' title="Удалить"><i class="glyphicon glyphicon-remove"></i></a>',
+							2:     '<a href="#" data-delete-link='+site+' title="Удалить"><i class="glyphicon glyphicon-remove"></i></a>',
 						}).draw(false);
 	}
-
 
 	$(document).on("click", "[data-do-addLinkWWW]", function(e) {
 		$(this).blur();
@@ -179,7 +178,7 @@
 		var table = $('#mainList').DataTable();
 		site = punycode.toASCII(getUrlParameter("www"));
 		var link = punycode.toASCII($('input[id=link]').val());
-		$.post("//"+document.domain+":"+location.port+"/api/addweblink", {val: site, link: link}, function(json){
+		$.post("//"+document.domain+":"+location.port+"/api/weblink", {command: "add", val: site, link: link}, function(json){
 			data = JSON.parse(json);
 			if(data.Err == 'OK'){
 				table.row.add({
@@ -243,6 +242,27 @@
 		});
 	});
 
+
+	$(document).on("click", "[data-delete-link]", function(e) {
+		$(this).blur();
+		e.preventDefault();
+		var id = this.id;
+		link = $(this).data("delete-link");
+		var row = $(this).closest("tr").get(0);
+        var table = $('#mainList').dataTable();
+		if(!confirm("Вы подтверждаете удаление?")) return;
+		$.post("//"+document.domain+":"+location.port+"/api/weblink", {command: "del", val: getUrlParameter("www"), link: link}, function(json){
+			data = JSON.parse(json);
+			if(data.Err == 'OK'){
+				table.fnDeleteRow(table.fnGetPosition(row));
+				alertify.success(data.Mes);
+			}else{
+				alertify.error(data.Mes);
+			}
+			return;
+		});
+	});
+	
 	$(document).on("click", "[data-delete-site]", function(e) {
 		$(this).blur();
 		e.preventDefault();

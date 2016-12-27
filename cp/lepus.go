@@ -32,13 +32,11 @@ func main() {
 	lepusConf["port"] = ":8085"
 	lepusConf["ip"] = lepusGetIP()
 	lepusConf["dir"] = "/root/lepuscp"
-	lepusConf["log"] = lepusConf["dir"] + "/lepuscp.log"
+	lepusConf["log"] = lepusConf["dir"] + "/logs/lepuscp.log"
 	lepusConf["pages"] = lepusConf["dir"] + "/files"
 
 	mux := http.NewServeMux()
-
 	mux.HandleFunc("/", lepusPage)
-
 	mux.HandleFunc("/api/login", lepusLoginAPI)
 	mux.HandleFunc("/api/exit", lepusExitAPI)
 	mux.HandleFunc("/api/get", lepusGetAPI)
@@ -50,7 +48,7 @@ func main() {
 	mux.HandleFunc("/api/chwebmode", lepusChWebModeAPI)
 
 	log.Println("Start server on port " + lepusConf["port"])
-	log.Fatal(http.ListenAndServeTLS(lepusConf["port"], lepusConf["dir"]+"/server.crt", lepusConf["dir"]+"/server.key", mux))
+	log.Fatal(http.ListenAndServeTLS(lepusConf["port"], lepusConf["dir"]+"/ssl/server.crt", lepusConf["dir"]+"/ssl/server.key", mux))
 }
 
 func lepusPage(w http.ResponseWriter, r *http.Request) {
@@ -81,7 +79,6 @@ func lepusPage(w http.ResponseWriter, r *http.Request) {
 func lepusLoginAPI(w http.ResponseWriter, r *http.Request) {
 	session, _ := store.Get(r, "lepuscp")
 	ip := strings.Split(r.RemoteAddr, ":")[0]
-
 	r.ParseForm()
 	fmt.Println(r.Form)
 	if r.Form["login"] == nil || r.Form["passwd"] == nil {
@@ -89,15 +86,12 @@ func lepusLoginAPI(w http.ResponseWriter, r *http.Request) {
 		w.Write(b)
 		return
 	}
-
 	if strings.Join(r.Form["login"], "") != "lepus" { // only lepus can login (for this version)
 		b := lepusMessage("Err", "Wrong login")
 		w.Write(b)
 		return
 	}
-
 	i := lepusLogin(strings.Join(r.Form["login"], ""), strings.Join(r.Form["passwd"], ""))
-
 	if i[0] == "right" {
 		session.Values["user"] = strings.Join(r.Form["login"], "")
 		session.Values["hash"] = lepusSHA256(ip + i[1])
@@ -126,13 +120,10 @@ func lepusLogin(user, passwd string) []string {
 		fmt.Println("No hash passwd from /etc/shadow")
 		return []string{"wrong", "no_hash"}
 	}
-
 	salt := "$" + x[1] + "$" + x[2] + "$"
 	hash := salt + x[3]
-
 	c := sha512_crypt.New()
 	new_hash, _ := c.Generate([]byte(passwd), []byte(salt))
-	//fmt.Println(new_hash+"\n"+hash)
 	if hash != new_hash {
 		return []string{"wrong", hash}
 	} else {
@@ -144,7 +135,6 @@ func lepusFindUser(user string) []string {
 	var userdata []string
 	file, _ := os.Open("/etc/shadow")
 	defer file.Close()
-
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		x := strings.Split(scanner.Text(), ":")
@@ -204,10 +194,8 @@ func lepusGetAPI(w http.ResponseWriter, r *http.Request) {
 		w.Write(b)
 		return
 	}
-
 	r.ParseForm()
 	fmt.Println(r.Form)
-
 	b := lepusMessage("Err", "empty post")
 	val := strings.Join(r.Form["val"], "")
 	switch val {
@@ -293,7 +281,6 @@ func lepusGetAPI(w http.ResponseWriter, r *http.Request) {
 				fmt.Println("1")
 				continue
 			}
-
 			item["ip"] = ip
 			item["http"] = vh
 			if i["Perm"] != 000 {
@@ -416,6 +403,7 @@ func lepusAddWebDirAPI(w http.ResponseWriter, r *http.Request) {
 			file.WriteString(result)
 			file.Sync()
 		}
+		lepusApache("reload")
 	}
 	path := "/var/www/public/" + val
 	i := lepusPathInfo(path)
@@ -516,6 +504,7 @@ func lepusApacheAlias(command, alias, confPath string) []byte {
 		result := regex.ReplaceAllString(strings.Replace(string(text), val, new, -1), "\n")
 		ioutil.WriteFile(confPath, []byte(result), 0755)
 	}
+	lepusApache("reload")
 	return lepusMessage("OK", "Done")
 }
 
@@ -743,7 +732,24 @@ func lepusChWebModeAPI(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
+	lepusApache("reload")
 	w.Write(lepusMessage("OK", "Done"))
+}
+
+func lepusApache(cmd string) {
+	switch cmd {
+	case "start":
+		exec.Command("/etc/init.d/apache2", "start").Output()
+
+	case "stop":
+		exec.Command("/etc/init.d/apache2", "stop").Output()
+
+	case "restart":
+		exec.Command("/etc/init.d/apache2", "restart").Output()
+
+	default:
+		exec.Command("/etc/init.d/apache2", "reload").Output()
+	}
 }
 
 func lepusTestAPI(w http.ResponseWriter, r *http.Request) {

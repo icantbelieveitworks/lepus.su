@@ -76,7 +76,7 @@
 						<input type="submit" name="login" class="btn btn-sm btn-success btn-block" style="margin-top: 10px;" data-do-changeModeWWW="" value="Сохранить">
 					</div>
 					<div role="tabpanel" class="tab-pane" id="letsencrypt">
-						Для доменов apache vhost => раз в 10 минут запускается bash скрипт.<br/><br/>
+						Для доменов apache vhost => раз в 10 минут запускается скрипт.<br/><br/>
 						1. Получает список *.conf в директории /etc/apache2/sites-enabled <br/>
 						2. Последовательно читает каждый файл. Получает список ServerName и ServerAlias.<br/><br/>
 						3. Находит *-le-ssl.conf => если нет файла => запускает certbot<br/>

@@ -440,6 +440,12 @@ func lepusDelWebDirAPI(w http.ResponseWriter, r *http.Request) {
 		// no need check lepusPathInfo => already check it (in lepusGetTypeWWW) => conf file exist, not dir and not link.
 		confPath := "/etc/apache2/sites-enabled/" + val + ".conf"
 		os.RemoveAll(confPath)
+		leConfPath := "/etc/apache2/sites-enabled/" + val + "-le-ssl.conf"
+		i := lepusPathInfo(leConfPath)
+		if i["IsNotExist"] == 0 && i["isDir"] == 0 && i["Readlink"] == 0 {
+			os.RemoveAll(leConfPath)
+		}
+		lepusApache("reload")
 	}
 	pathSite := "/var/www/public/" + val
 	i := lepusPathInfo(pathSite)

@@ -199,7 +199,7 @@
 		$(this).blur();
 		e.preventDefault();
 		var site = $('input[id=site]').val();
-		mode = $('select[id=mode]').val();
+		var mode = $('select[id=mode]').val();
 		var table = $('#mainList').DataTable();
 		$.post("//"+document.domain+":"+location.port+"/api/addwebdir", {val: punycode.toASCII(site), mode: mode}, function(json){
 			data = JSON.parse(json);
@@ -212,7 +212,7 @@
 					0:     table.page.info().recordsTotal+1,
 					1:     site,
 					2:     data.Mes,
-					3:     'mod_alias',
+					3:     mode,
 					4:     'online',
 					5:     '<a href="/?page=wwwedit&www='+punycode.toASCII(site)+'" title="Редактировать"><i class="glyphicon glyphicon-pencil"></i></a> &nbsp; <a href="/" data-delete-site='+punycode.toASCII(site)+' title="Удалить"><i class="glyphicon glyphicon-remove"></i></a>',
 				}).draw( false );

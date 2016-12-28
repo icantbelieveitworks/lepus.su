@@ -21,6 +21,7 @@ import "github.com/gorilla/context"
 import "github.com/gorilla/sessions"
 import "github.com/kless/osutil/user/crypt/sha512_crypt"
 
+var sess []string
 var lepusConf = make(map[string]string)
 var store = sessions.NewFilesystemStore("sess", []byte("something-very-secret"))
 
@@ -36,6 +37,8 @@ func main() {
 	lepusConf["log"] = lepusConf["dir"] + "/logs/lepuscp.log"
 	lepusConf["pages"] = lepusConf["dir"] + "/files"
 
+	go lepusCleaner()
+
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", lepusPage)
 	mux.HandleFunc("/api/login", lepusLoginAPI)
@@ -49,10 +52,33 @@ func main() {
 	mux.HandleFunc("/api/chwebmode", lepusChWebModeAPI)
 
 	log.Println("Start server on port " + lepusConf["port"])
-	
+
 	// https://github.com/gorilla/sessions
 	// If you aren't using gorilla/mux, you need to wrap your handlers with context.ClearHandler as or else you will leak memory!
 	log.Fatal(http.ListenAndServeTLS(lepusConf["port"], lepusConf["dir"]+"/ssl/server.crt", lepusConf["dir"]+"/ssl/server.key", context.ClearHandler(mux)))
+}
+
+func lepusCleaner() {
+	for {
+		if len(sess) > 0 {
+			for _, val := range sess {
+				path := "/root/lepuscp/sess/session_" + val
+				i := lepusPathInfo(path)
+				if i["IsNotExist"] == 0 && i["isDir"] == 0 && i["Readlink"] == 0 {
+					os.RemoveAll(path)
+					if len(sess) > 0 {
+						sess = sess[:len(sess)-1] // clean
+					}
+				}
+				if i["IsNotExist"] == 1 {
+					if len(sess) > 0 {
+						sess = sess[:len(sess)-1] // clean
+					}
+				}
+			}
+		}
+		time.Sleep(1500 * time.Millisecond)
+	}
 }
 
 func lepusPage(w http.ResponseWriter, r *http.Request) {
@@ -81,7 +107,6 @@ func lepusPage(w http.ResponseWriter, r *http.Request) {
 }
 
 func lepusLoginAPI(w http.ResponseWriter, r *http.Request) {
-	session, _ := store.Get(r, "lepuscp")
 	ip := strings.Split(r.RemoteAddr, ":")[0]
 	r.ParseForm()
 	fmt.Println(r.Form)
@@ -97,6 +122,7 @@ func lepusLoginAPI(w http.ResponseWriter, r *http.Request) {
 	}
 	i := lepusLogin(strings.Join(r.Form["login"], ""), strings.Join(r.Form["passwd"], ""))
 	if i[0] == "right" {
+		session, _ := store.Get(r, "lepuscp")
 		session.Values["user"] = strings.Join(r.Form["login"], "")
 		session.Values["hash"] = lepusSHA256(ip + i[1])
 		session.Save(r, w)
@@ -151,9 +177,14 @@ func lepusFindUser(user string) []string {
 }
 
 func lepusAuth(w http.ResponseWriter, r *http.Request) bool {
+	cookie, _ := r.Cookie("lepuscp")
+	if cookie == nil {
+		return false
+	}
 	session, _ := store.Get(r, "lepuscp")
 	if session.Values["user"] == nil || session.Values["hash"] == nil {
 		lepusExitAPI(w, r)
+		sess = append(sess, session.ID)
 		return false
 	}
 	x := lepusLogin(session.Values["user"].(string), "no")
@@ -161,6 +192,7 @@ func lepusAuth(w http.ResponseWriter, r *http.Request) bool {
 		return true
 	} else {
 		lepusExitAPI(w, r)
+		sess = append(sess, session.ID)
 		return false
 	}
 }

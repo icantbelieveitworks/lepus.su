@@ -17,6 +17,7 @@ import "io/ioutil"
 import "encoding/hex"
 import "crypto/sha256"
 import "encoding/json"
+import "github.com/gorilla/context"
 import "github.com/gorilla/sessions"
 import "github.com/kless/osutil/user/crypt/sha512_crypt"
 
@@ -48,7 +49,10 @@ func main() {
 	mux.HandleFunc("/api/chwebmode", lepusChWebModeAPI)
 
 	log.Println("Start server on port " + lepusConf["port"])
-	log.Fatal(http.ListenAndServeTLS(lepusConf["port"], lepusConf["dir"]+"/ssl/server.crt", lepusConf["dir"]+"/ssl/server.key", mux))
+	
+	// https://github.com/gorilla/sessions
+	// If you aren't using gorilla/mux, you need to wrap your handlers with context.ClearHandler as or else you will leak memory!
+	log.Fatal(http.ListenAndServeTLS(lepusConf["port"], lepusConf["dir"]+"/ssl/server.crt", lepusConf["dir"]+"/ssl/server.key", context.ClearHandler(mux)))
 }
 
 func lepusPage(w http.ResponseWriter, r *http.Request) {

@@ -85,13 +85,19 @@ func lepusPage(w http.ResponseWriter, r *http.Request) {
 	ret := r.URL.Query()
 	page := lepusConf["pages"] + "/index.html"
 	val := strings.Join(ret["page"], "")
+	contentType := ""
 	switch val {
 	case "js":
 		page = lepusConf["pages"] + "/lepus.js"
+	case "css":
+		page = lepusConf["pages"] + "/style.css"
+		contentType = "text/css"
 	case "cp":
 		page = lepusConf["pages"] + "/cp.html"
 	case "wwwedit":
-		page = lepusConf["pages"] + "/wwwedit.html"
+		page = lepusConf["pages"] + "/wwwedit.html"	
+	case "cron":
+		page = lepusConf["pages"] + "/cron.html"
 	}
 	x := lepusAuth(w, r)
 	if x != false && page == lepusConf["pages"]+"/index.html" {
@@ -103,6 +109,9 @@ func lepusPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	file, _ := ioutil.ReadFile(page)
+	if contentType != "" {
+		w.Header().Add("Content Type", contentType)
+	}
 	io.WriteString(w, string(file))
 }
 
@@ -423,7 +432,7 @@ func lepusAddWebDirAPI(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if mode == "vhost" {
-		config, _ := ioutil.ReadFile("/root/lepuscp/files/apache.tmp")
+		config, _ := ioutil.ReadFile("/root/lepuscp/files/tmpl/apache.tmpl")
 		x := strings.NewReplacer("%domain%", val)
 		result := x.Replace(string(config))
 		path := "/etc/apache2/sites-enabled/" + val + ".conf"
@@ -745,7 +754,7 @@ func lepusChWebModeAPI(w http.ResponseWriter, r *http.Request) {
 		}
 
 	case "vhost":
-		config, _ := ioutil.ReadFile("/root/lepuscp/files/apache.tmp")
+		config, _ := ioutil.ReadFile("/root/lepuscp/files/tmpl/apache.tmpl")
 		x := strings.NewReplacer("%domain%", val)
 		result := x.Replace(string(config))
 		confPath := "/etc/apache2/sites-enabled/" + val + ".conf"
@@ -794,6 +803,18 @@ func lepusApache(cmd string) {
 	}
 }
 
+//func lepusCronList(user string) { ... }
+
 func lepusTestAPI(w http.ResponseWriter, r *http.Request) {
+	config, _ := ioutil.ReadFile("/root/lepuscp/files/tmpl/cron.tmpl")
+	
+	x1 := "* * * * *"
+	x2 := "lepus"
+	x3 := "/usr/bin/wget https://poiuty.ru >/dev/null 2>&1" 
+
+	x := strings.NewReplacer("%time%", x1, "%user%", x2, "%command%", x3)
+	result := x.Replace(string(config))
+	fmt.Println(result)
+	
 	w.Write([]byte("test"))
 }

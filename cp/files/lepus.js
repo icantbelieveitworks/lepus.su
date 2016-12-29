@@ -57,9 +57,10 @@
 		if(page){
 			var menu = {};
 			menu.hr = '<hr/>'
+			menu.cron = '<li><a href="/?page=cron">Планировщик задач</a></li>'
 			menu.www = '<li><a href="/?page=cp">WWW домены</a></li>'
 			menu.phpmyadmin = '<li><a href="http://'+document.domain+'/phpmyadmin" target="_blank">phpMyAdmin</a></li>'
-			$("#menu").append(menu.hr+menu.phpmyadmin+menu.www+menu.hr);
+			$("#menu").append(menu.hr+menu.phpmyadmin+menu.www+menu.cron+menu.hr);
 			
 			$.post("//"+document.domain+":"+location.port+"/api/get", {val: "login"}, function(json){
 				data = JSON.parse(json);

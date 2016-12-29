@@ -1,0 +1,17 @@
+body{min-width:1025px; height:100%; font:13px 'Arial';background:#EFEFEF;}
+
+td,th { text-align: center; vertical-align: middle; }
+
+.main{width:820px; height:200px; position:absolute; left:35%; top:35%; margin:-100px 0 0 -150px;}
+		
+.content-box { width:75%; float:left; }
+.content-info { min-height:245px; margin:0px auto; background: #FFF; border-radius: 8px; }
+.content-text {  padding:10px 15px; }
+
+.blocks { float:left; width: 176px; margin-left:1%; }
+.block-body { width:160px; margin-left: 8px; padding-top: 12px; }
+.block-login { min-height:140px; background: #FFF; border-radius: 8px; }
+
+.page-title { color:#333333; font:15pt 'Times New Roman'; padding-bottom:5px; }
+
+.box-shadow--2dp { box-shadow: 0 2px 2px 0 rgba(0, 0, 0, .14), 0 2px 1px -2px rgba(0, 0, 0, .2), 0 1px 5px 0 rgba(0, 0, 0, .12) }

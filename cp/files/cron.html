@@ -29,23 +29,26 @@
 			<div class="content-text">
 				<div class="page-title">Планировщик задач</div>
 				<hr/>
-				Допустимые символы в поле время: 0-9 и *<br/>
-				Допустимые символы в поле URL: 0-9a-zA-Z.=_&-?:/<br/>
+				Допустимые символы в поле время: 0-9/,* и пробел<br/>
+				Допустимые символы в поле URL: 0-9a-zA-Z.=_&?:/-<br/>
 				Формат времени: минута (0-59), час (0-23), день месяца (1-31), месяц (1-12), день_недели (0-6).
 				<hr/>
 				<div class="controls form-inline">
-					<center><input class="form-control" id="cronTime" style="width: 20%;" type="text" name="count" value="" required="" placeholder="*/2 * * * *">
-					<input class="form-control" id="cronURL" style="width: 79%;" type="text" name="count" value="" required="" placeholder="http://mysite.ru/cron.php"></center>
-					<input class="btn btn-sm btn-success btn-block" data-cron-add="" style="margin-top: 2px;" type="submit" value="Сохранить задание">
+					<center><input class="form-control" id="cronTime" style="width: 20%;" type="text" name="count" value="" required="" placeholder="*/5 * * * *">
+					<select id="cronHandler" class="form-control" name="type">
+						<option value="curl" selected="selected">curl</option>
+						<option value="php">php</option>
+					</select>
+					<input class="form-control" id="cronCommand" style="width: 66%;" type="text" name="count" value="" required="" placeholder="http://example.com/cron.php"></center>
+					<input class="btn btn-sm btn-success btn-block" data-cron-add="" style="margin-top: 3px;" type="submit" value="Сохранить задание">
 				</div>
 				<hr/>
 				<table id="mainList" class="table table-striped table-bordered" cellspacing="0" width="100%">
 					<thead>
 						<tr>
 							<th style="width: 8%;" ></th>
-							<th style="width: 25%;">Time</th>
-							<th>Command</th>
-							<th style="width: 10%;"></th>
+							<th>Tasks</th>
+							<th style="width: 8%;"></th>
 						</tr>
 					</thead>
 					<tbody>

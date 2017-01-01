@@ -50,6 +50,7 @@ func main() {
 	mux.HandleFunc("/api/chwebdir", lepusChWebDirAPI)
 	mux.HandleFunc("/api/weblink", lepusAddWebLinkAPI)
 	mux.HandleFunc("/api/chwebmode", lepusChWebModeAPI)
+	mux.HandleFunc("/api/addcron", lepusCronAPI)
 
 	log.Println("Start server on port " + lepusConf["port"])
 
@@ -95,7 +96,7 @@ func lepusPage(w http.ResponseWriter, r *http.Request) {
 	case "cp":
 		page = lepusConf["pages"] + "/cp.html"
 	case "wwwedit":
-		page = lepusConf["pages"] + "/wwwedit.html"	
+		page = lepusConf["pages"] + "/wwwedit.html"
 	case "cron":
 		page = lepusConf["pages"] + "/cron.html"
 	}
@@ -274,6 +275,16 @@ func lepusGetAPI(w http.ResponseWriter, r *http.Request) {
 				b = lepusMessage("OK", "disable")
 			}
 		}
+
+	case "cron":
+		user := session.Values["user"].(string)
+		i := lepusPathInfo("/etc/cron.d/" + user)
+		if i["IsNotExist"] == 1 || i["isDir"] == 1 || i["Readlink"] == 1 {
+			w.Write(lepusMessage("Err", "Wrong cron file"))
+			return
+		}
+		cron, _ := ioutil.ReadFile("/etc/cron.d/" + user)
+		b = lepusMessage("OK", string(cron))
 
 	case "www":
 		ip := lepusGetIP()
@@ -616,6 +627,10 @@ func lepusChWebDirAPI(w http.ResponseWriter, r *http.Request) {
 func lepusRegexp(data, val string) bool {
 	re := regexp.MustCompile("^[a-z0-9._-]*$")
 	switch val {
+	case "cronTime":
+		re = regexp.MustCompile("^[0-9/,* ]*$")
+	case "cronCommand":
+		re = regexp.MustCompile("^[0-9a-zA-Z.=_&?:/-]*$")
 	case "09":
 		re = regexp.MustCompile("^[0-9]*$")
 	case "az":
@@ -803,18 +818,73 @@ func lepusApache(cmd string) {
 	}
 }
 
-//func lepusCronList(user string) { ... }
+func lepusCronAPI(w http.ResponseWriter, r *http.Request) {
+	session, _ := store.Get(r, "lepuscp")
+	x := lepusAuth(w, r)
+	if x == false {
+		b := lepusMessage("Err", "Wrong auth")
+		w.Write(b)
+		return
+	}
+	r.ParseForm()
+	if r.Form["val"] == nil {
+		w.Write(lepusMessage("Err", "Empty post"))
+		return
+	}
+	val := strings.Join(r.Form["val"], "")
+	if lepusRegexp(val, "") == false {
+		w.Write(lepusMessage("Err", "Wrong post"))
+		return
+	}
+	user := session.Values["user"].(string)
+	i := lepusPathInfo("/etc/cron.d/" + user)
+	if i["isDir"] == 1 || i["Readlink"] == 1 {
+		w.Write(lepusMessage("Err", "Wrong cron file"))
+		return
+	}
+	if i["IsNotExist"] == 1 {
+		os.Create("/etc/cron.d/" + user)
+	}
+	switch val {
+	case "add":
+		if r.Form["time"] == nil || r.Form["handler"] == nil || r.Form["command"] == nil {
+			w.Write(lepusMessage("Err", "Empty task"))
+			return
+		}
+		time := strings.Join(r.Form["time"], "")
+		handler := strings.Join(r.Form["handler"], "")
+		command := strings.Join(r.Form["command"], "")
+		if time == "" || handler == "" || command == "" {
+			w.Write(lepusMessage("Err", "Wrong task"))
+			return
+		}
+		if lepusRegexp(time, "cronTime") == false || lepusRegexp(command, "cronCommand") == false {
+			w.Write(lepusMessage("Err", "Wrong task"))
+			return
+		}
+		if handler == "php" {
+			handler = "/usr/bin/php"
+		} else if handler == "curl" {
+			handler = "/usr/bin/curl"
+		} else {
+			w.Write(lepusMessage("Err", "Wrong cron handler"))
+			return
+		}
+		cron, _ := ioutil.ReadFile("/root/lepuscp/files/tmpl/cron.tmpl")
+		x := strings.NewReplacer("%time%", time, "%user%", user, "%handler%", handler, "%command%", command)
+		result := x.Replace(string(cron))
+		fmt.Println(result)
+		if _, err := os.Stat("/etc/cron.d/" + user); err == nil {
+			file, _ := os.OpenFile("/etc/cron.d/"+user, os.O_APPEND|os.O_RDWR, 0644)
+			defer file.Close()
+			file.WriteString(result)
+			file.Sync()
+		}
+		exec.Command("/etc/init.d/cron", "reload").Output()
+		w.Write(lepusMessage("OK", result))
+	}
+}
 
 func lepusTestAPI(w http.ResponseWriter, r *http.Request) {
-	config, _ := ioutil.ReadFile("/root/lepuscp/files/tmpl/cron.tmpl")
-	
-	x1 := "* * * * *"
-	x2 := "lepus"
-	x3 := "/usr/bin/wget https://poiuty.ru >/dev/null 2>&1" 
-
-	x := strings.NewReplacer("%time%", x1, "%user%", x2, "%command%", x3)
-	result := x.Replace(string(config))
-	fmt.Println(result)
-	
 	w.Write([]byte("test"))
 }

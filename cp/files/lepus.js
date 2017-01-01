@@ -101,6 +101,28 @@
 				return;
 			});
 		}
+		
+		if(page == "cron"){
+			var table = $('#mainList').DataTable();
+			$.post("//"+document.domain+":"+location.port+"/api/get", {val: "cron"}, function(json){
+				data = JSON.parse(json);
+				if(data.Err == 'OK'){
+					tasks = data.Mes.split("\n");
+					
+					for (var key in tasks){
+						if(tasks[key] == "") continue;
+						console.log(key+" => "+tasks[key]);
+						table.row.add({
+							0:     parseInt(key)+1,
+							1:     tasks[key],
+							2:     '<a href="#" data-delete-cron="'+tasks[key]+'" title="Удалить"><i class="glyphicon glyphicon-remove"></i></a>'
+						}).draw(false);
+					}
+					
+				}
+			});
+		}
+		
 		if(page == "wwwedit"){
 			if(lepusCheck(getUrlParameter('www'))){
 				window.location = "/";
@@ -305,3 +327,26 @@
 			}
 		});
 	});
+	
+	$(document).on("click", "[data-cron-add]", function(e) {
+		$(this).blur();
+		e.preventDefault();
+		time = $('input[id=cronTime]').val();
+		handler = $('select[id=cronHandler]').val();
+		command = $('input[id=cronCommand]').val();
+		var table = $('#mainList').DataTable();
+		$.post("//"+document.domain+":"+location.port+"/api/addcron", {val: "add", time: time, handler: handler, command: command}, function(json){
+			data = JSON.parse(json);
+			if(data.Err == 'OK'){
+				table.row.add({
+							0:     table.page.info().recordsTotal+1,
+							1:     data.Mes,
+							2:     '<a href="#" data-delete-cron="'+data.Mes+'" title="Удалить"><i class="glyphicon glyphicon-remove"></i></a>'
+				}).draw(false);
+				alertify.success("Done");
+			}else{
+				alertify.error(data.Mes);
+			}
+		});
+	});
+	

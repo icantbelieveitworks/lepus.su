@@ -335,9 +335,10 @@
 		handler = $('select[id=cronHandler]').val();
 		command = $('input[id=cronCommand]').val();
 		var table = $('#mainList').DataTable();
-		$.post("//"+document.domain+":"+location.port+"/api/addcron", {val: "add", time: time, handler: handler, command: command}, function(json){
+		$.post("//"+document.domain+":"+location.port+"/api/cron", {val: "add", time: time, handler: handler, command: command}, function(json){
 			data = JSON.parse(json);
 			if(data.Err == 'OK'){
+				data.Mes = data.Mes.replace(/(\r\n|\n|\r)/gm,"");
 				table.row.add({
 							0:     table.page.info().recordsTotal+1,
 							1:     data.Mes,
@@ -350,3 +351,19 @@
 		});
 	});
 	
+	$(document).on("click", "[data-delete-cron]", function(e) {
+		$(this).blur();
+		e.preventDefault();
+		task = $(this).data("delete-cron");
+		var table = $('#mainList').dataTable();
+		var row = $(this).closest("tr").get(0);
+		$.post("//"+document.domain+":"+location.port+"/api/cron", {val: "del", task: task}, function(json){
+			data = JSON.parse(json);
+			if(data.Err == 'OK'){
+				table.fnDeleteRow(table.fnGetPosition(row));
+				alertify.success(data.Mes);
+			}else{
+				alertify.error(data.Mes)
+			}
+		});
+	});

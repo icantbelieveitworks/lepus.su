@@ -50,7 +50,7 @@ func main() {
 	mux.HandleFunc("/api/chwebdir", lepusChWebDirAPI)
 	mux.HandleFunc("/api/weblink", lepusAddWebLinkAPI)
 	mux.HandleFunc("/api/chwebmode", lepusChWebModeAPI)
-	mux.HandleFunc("/api/addcron", lepusCronAPI)
+	mux.HandleFunc("/api/cron", lepusCronAPI)
 
 	log.Println("Start server on port " + lepusConf["port"])
 
@@ -882,6 +882,39 @@ func lepusCronAPI(w http.ResponseWriter, r *http.Request) {
 		}
 		exec.Command("/etc/init.d/cron", "reload").Output()
 		w.Write(lepusMessage("OK", result))
+
+	case "del":
+		if r.Form["task"] == nil {
+			w.Write(lepusMessage("Err", "Empty task"))
+			return
+		}
+		task := strings.Join(r.Form["task"], "")
+		if task == "" {
+			w.Write(lepusMessage("Err", "Wrong task"))
+			return
+		}
+
+		result := ""
+		file, _ := os.Open("/etc/cron.d/" + user)
+		defer file.Close()
+		scanner := bufio.NewScanner(file)
+		for scanner.Scan() {
+			if scanner.Text() == task {
+				continue
+			}
+			result += scanner.Text() + "\n"
+		}
+
+		result = result[:len(result)-2] // remove \n
+		fmt.Println(result)
+
+		fileHandle, _ := os.Create("/etc/cron.d/" + user)
+		writer := bufio.NewWriter(fileHandle)
+		defer fileHandle.Close()
+		fmt.Fprintln(writer, result)
+		writer.Flush()
+		exec.Command("/etc/init.d/cron", "reload").Output()
+		w.Write(lepusMessage("OK", "Done"))
 	}
 }
 

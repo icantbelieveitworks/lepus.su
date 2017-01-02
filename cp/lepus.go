@@ -873,7 +873,6 @@ func lepusCronAPI(w http.ResponseWriter, r *http.Request) {
 		cron, _ := ioutil.ReadFile("/root/lepuscp/files/tmpl/cron.tmpl")
 		x := strings.NewReplacer("%time%", time, "%user%", user, "%handler%", handler, "%command%", command)
 		result := x.Replace(string(cron))
-		fmt.Println(result)
 		if _, err := os.Stat("/etc/cron.d/" + user); err == nil {
 			file, _ := os.OpenFile("/etc/cron.d/"+user, os.O_APPEND|os.O_RDWR, 0644)
 			defer file.Close()
@@ -893,26 +892,28 @@ func lepusCronAPI(w http.ResponseWriter, r *http.Request) {
 			w.Write(lepusMessage("Err", "Wrong task"))
 			return
 		}
-
 		result := ""
+		j := 0
 		file, _ := os.Open("/etc/cron.d/" + user)
 		defer file.Close()
 		scanner := bufio.NewScanner(file)
 		for scanner.Scan() {
-			if scanner.Text() == task {
+			if scanner.Text() == task && j == 0 { // only one delete
+				j++
 				continue
 			}
 			result += scanner.Text() + "\n"
 		}
-
-		result = result[:len(result)-2] // remove \n
-		fmt.Println(result)
-
-		fileHandle, _ := os.Create("/etc/cron.d/" + user)
-		writer := bufio.NewWriter(fileHandle)
-		defer fileHandle.Close()
-		fmt.Fprintln(writer, result)
-		writer.Flush()
+		if len(result) > 0 {
+			result = result[:len(result)-2] // remove \n
+			fileHandle, _ := os.Create("/etc/cron.d/" + user)
+			writer := bufio.NewWriter(fileHandle)
+			defer fileHandle.Close()
+			fmt.Fprintln(writer, result)
+			writer.Flush()
+		}else{
+			os.RemoveAll("/etc/cron.d/" + user)
+		}
 		exec.Command("/etc/init.d/cron", "reload").Output()
 		w.Write(lepusMessage("OK", "Done"))
 	}

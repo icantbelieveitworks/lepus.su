@@ -57,7 +57,7 @@
 		if(page){
 			var menu = [ '<li><a href="http://'+document.domain+'/phpmyadmin" target="_blank">phpMyAdmin</a></li>', 
 						 '<li><a href="/?page=cp">WWW домены</a></li>',
-						 'Доменные имена',
+						 '<li><a href="/?page=dns">Доменные имена</a></li>',
 						 '<li><a href="/?page=cron">Планировщик задач</a></li>' ];
 			
 			var text = ""
@@ -119,6 +119,27 @@
 							0:     parseInt(key)+1,
 							1:     tasks[key],
 							2:     '<a href="#" data-delete-cron="'+tasks[key]+'" title="Удалить"><i class="glyphicon glyphicon-remove"></i></a>'
+						}).draw(false);
+					}
+					
+				}
+			});
+		}
+		
+		if(page == "dns"){
+			var table = $('#mainList').DataTable();
+			$.post("//"+document.domain+":"+location.port+"/api/get", {val: "dns"}, function(json){
+				data = JSON.parse(json);
+				if(data.Err == 'OK'){
+					domains = data.Mes.split(" ");
+					
+					for (var key in domains){
+						if(domains[key] == "") continue;
+						console.log(key+" => "+domains[key]);
+						table.row.add({
+							0:     parseInt(key)+1,
+							1:     punycode.toUnicode(domains[key]),
+							2:     '<a href="/?page=editdns&www='+domains[key]+'" title="Редактировать"><i class="glyphicon glyphicon-pencil"></i></a> &nbsp; <a href="#" data-delete-dns="'+domains[key]+'" title="Удалить"><i class="glyphicon glyphicon-remove"></i></a>'
 						}).draw(false);
 					}
 					
@@ -366,7 +387,28 @@
 				table.fnDeleteRow(table.fnGetPosition(row));
 				alertify.success(data.Mes);
 			}else{
-				alertify.error(data.Mes)
+				alertify.error(data.Mes);
+			}
+		});
+	});
+	
+	$(document).on("click", "[data-dns-add]", function(e) {
+		$(this).blur();
+		e.preventDefault();
+		domain = $('input[id=dnsDomain]').val();
+		var table = $('#mainList').DataTable();
+
+		$.post("//"+document.domain+":"+location.port+"/api/dns", {val: "add", domain: domain}, function(json){
+			data = JSON.parse(json);
+			if(data.Err == 'OK'){
+				table.row.add({
+							0:     table.page.info().recordsTotal+1,
+							1:     domain,
+							2:     '<a href="/?page=editdns&www='+punycode.toASCII(domain)+'" title="Редактировать"><i class="glyphicon glyphicon-pencil"></i></a> &nbsp; <a href="#" data-delete-dns="'+punycode.toASCII(domain)+'" title="Удалить"><i class="glyphicon glyphicon-remove"></i></a>'
+				}).draw(false);
+				alertify.success(data.Mes);
+			}else{
+				alertify.error(data.Mes);
 			}
 		});
 	});

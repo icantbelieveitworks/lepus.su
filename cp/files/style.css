@@ -2,7 +2,7 @@ body{min-width:1025px; height:100%; font:13px 'Arial';background:#EFEFEF;}
 
 td,th { text-align: center; vertical-align: middle; }
 
-.main{width:820px; height:200px; position:absolute; left:35%; top:35%; margin:-100px 0 0 -150px;}
+.main{width:925px; height:200px; position:absolute; left:35%; top:35%; margin:-100px 0 0 -150px;}
 		
 .content-box { width:75%; float:left; }
 .content-info { min-height:245px; margin:0px auto; background: #FFF; border-radius: 8px; }
@@ -10,7 +10,7 @@ td,th { text-align: center; vertical-align: middle; }
 
 .blocks { float:left; width: 176px; margin-left:1%; }
 .block-body { width:160px; margin-left: 8px; padding-top: 12px; }
-.block-login { min-height:140px; background: #FFF; border-radius: 8px; }
+.block-login { min-height:180px; background: #FFF; border-radius: 8px; }
 
 .page-title { color:#333333; font:15pt 'Times New Roman'; /* padding-bottom:5px; */ }
 

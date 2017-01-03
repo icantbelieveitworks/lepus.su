@@ -51,6 +51,7 @@ func main() {
 	mux.HandleFunc("/api/weblink", lepusAddWebLinkAPI)
 	mux.HandleFunc("/api/chwebmode", lepusChWebModeAPI)
 	mux.HandleFunc("/api/cron", lepusCronAPI)
+	mux.HandleFunc("/api/dns", lepusDNSAPI)
 
 	log.Println("Start server on port " + lepusConf["port"])
 
@@ -99,15 +100,19 @@ func lepusPage(w http.ResponseWriter, r *http.Request) {
 		page = lepusConf["pages"] + "/wwwedit.html"
 	case "cron":
 		page = lepusConf["pages"] + "/cron.html"
+	case "dns":
+		page = lepusConf["pages"] + "/dns.html"
 	}
-	x := lepusAuth(w, r)
-	if x != false && page == lepusConf["pages"]+"/index.html" {
-		http.Redirect(w, r, "https://"+lepusConf["ip"]+lepusConf["port"]+"/?page=cp", 301)
-		return
-	}
-	if x == false && ret["page"] != nil && val != "js" {
-		http.Redirect(w, r, "https://"+lepusConf["ip"]+lepusConf["port"], 301)
-		return
+	if lepusAuth(w, r){
+		if page == lepusConf["pages"]+"/index.html" {
+			http.Redirect(w, r, "https://"+lepusConf["ip"]+lepusConf["port"]+"/?page=cp", 301)
+			return
+		}
+	}else{
+		if ret["page"] != nil && val != "js" {
+			http.Redirect(w, r, "https://"+lepusConf["ip"]+lepusConf["port"], 301)
+			return
+		}
 	}
 	file, _ := ioutil.ReadFile(page)
 	if contentType != "" {
@@ -187,24 +192,22 @@ func lepusFindUser(user string) []string {
 }
 
 func lepusAuth(w http.ResponseWriter, r *http.Request) bool {
+	status := false
 	cookie, _ := r.Cookie("lepuscp")
-	if cookie == nil {
-		return false
+	if cookie != nil {
+		session, _ := store.Get(r, "lepuscp")
+		if session.Values["user"] != nil && session.Values["hash"] != nil {
+			x := lepusLogin(session.Values["user"].(string), "no")
+			if session.Values["hash"].(string) == lepusSHA256(strings.Split(r.RemoteAddr, ":")[0]+x[1]) {
+				status = true
+			}
+		}
+		if !status {
+			lepusExitAPI(w, r)
+			sess = append(sess, session.ID)
+		}
 	}
-	session, _ := store.Get(r, "lepuscp")
-	if session.Values["user"] == nil || session.Values["hash"] == nil {
-		lepusExitAPI(w, r)
-		sess = append(sess, session.ID)
-		return false
-	}
-	x := lepusLogin(session.Values["user"].(string), "no")
-	if session.Values["hash"].(string) == lepusSHA256(strings.Split(r.RemoteAddr, ":")[0]+x[1]) {
-		return true
-	} else {
-		lepusExitAPI(w, r)
-		sess = append(sess, session.ID)
-		return false
-	}
+	return status
 }
 
 func lepusSHA256(val string) string {
@@ -233,13 +236,11 @@ func lepusLog(val string) {
 }
 
 func lepusGetAPI(w http.ResponseWriter, r *http.Request) {
-	session, _ := store.Get(r, "lepuscp")
-	x := lepusAuth(w, r)
-	if x == false {
-		b := lepusMessage("Err", "Wrong auth")
-		w.Write(b)
+	if !lepusAuth(w, r) {
+		w.Write(lepusMessage("Err", "Wrong auth"))
 		return
 	}
+	session, _ := store.Get(r, "lepuscp")
 	r.ParseForm()
 	fmt.Println(r.Form)
 	b := lepusMessage("Err", "empty post")
@@ -285,7 +286,19 @@ func lepusGetAPI(w http.ResponseWriter, r *http.Request) {
 		}
 		cron, _ := ioutil.ReadFile("/etc/cron.d/" + user)
 		b = lepusMessage("OK", string(cron))
-
+		
+	case "dns":
+		result := ""
+		files, _ := ioutil.ReadDir("/etc/bind/zone")
+		for _, f := range files {
+			i := lepusPathInfo("/etc/bind/zone/" + f.Name())
+			if i["IsNotExist"] == 1 || i["isDir"] == 1 || i["Readlink"] == 1 {
+				continue;
+			}
+		result += f.Name()+" "
+		}
+		b = lepusMessage("OK", result)
+			
 	case "www":
 		ip := lepusGetIP()
 		x := make(map[string]interface{})
@@ -354,9 +367,7 @@ func lepusGetAPI(w http.ResponseWriter, r *http.Request) {
 }
 
 func lepusAddWebLinkAPI(w http.ResponseWriter, r *http.Request) {
-	session, _ := store.Get(r, "lepuscp")
-	x := lepusAuth(w, r)
-	if x == false {
+	if !lepusAuth(w, r) {
 		w.Write(lepusMessage("Err", "Wrong auth"))
 		return
 	}
@@ -368,6 +379,10 @@ func lepusAddWebLinkAPI(w http.ResponseWriter, r *http.Request) {
 	val := strings.Join(r.Form["val"], "")
 	link := strings.Join(r.Form["link"], "")
 	command := strings.Join(r.Form["command"], "")
+	if val == "" || link == "" || command == "" {
+		w.Write(lepusMessage("Err", "Empty post"))
+		return
+	}
 	if lepusRegexp(val, "") == false || lepusRegexp(link, "") == false || lepusRegexp(command, "") == false {
 		w.Write(lepusMessage("Err", "Wrong data"))
 		return
@@ -388,6 +403,7 @@ func lepusAddWebLinkAPI(w http.ResponseWriter, r *http.Request) {
 				w.Write(lepusMessage("Err", "Link already exist"))
 				return
 			}
+			session, _ := store.Get(r, "lepuscp")
 			a, _ := user.Lookup(session.Values["user"].(string))
 			os.Symlink(pathSite, pathLink)
 			exec.Command("chown", "-h", a.Uid+":"+a.Gid, pathLink).Output()
@@ -424,11 +440,8 @@ func lepusAddWebLinkAPI(w http.ResponseWriter, r *http.Request) {
 }
 
 func lepusAddWebDirAPI(w http.ResponseWriter, r *http.Request) {
-	session, _ := store.Get(r, "lepuscp")
-	x := lepusAuth(w, r)
-	if x == false {
-		b := lepusMessage("Err", "Wrong auth")
-		w.Write(b)
+	if !lepusAuth(w, r) {
+		w.Write(lepusMessage("Err", "Wrong auth"))
 		return
 	}
 	r.ParseForm()
@@ -438,6 +451,10 @@ func lepusAddWebDirAPI(w http.ResponseWriter, r *http.Request) {
 	}
 	val := strings.Join(r.Form["val"], "")
 	mode := strings.Join(r.Form["mode"], "")
+	if val == "" || mode == "" {
+		w.Write(lepusMessage("Err", "Empty post"))
+		return
+	}
 	if lepusRegexp(val, "") == false {
 		w.Write(lepusMessage("Err", "Wrong data"))
 		return
@@ -467,6 +484,7 @@ func lepusAddWebDirAPI(w http.ResponseWriter, r *http.Request) {
 		w.Write(lepusMessage("Err", "Dir exist"))
 		return
 	}
+	session, _ := store.Get(r, "lepuscp")
 	a, _ := user.Lookup(session.Values["user"].(string))
 	uid, _ := strconv.Atoi(a.Uid)
 	gid, _ := strconv.Atoi(a.Gid)
@@ -476,8 +494,7 @@ func lepusAddWebDirAPI(w http.ResponseWriter, r *http.Request) {
 }
 
 func lepusDelWebDirAPI(w http.ResponseWriter, r *http.Request) {
-	x := lepusAuth(w, r)
-	if x == false {
+	if !lepusAuth(w, r) {
 		w.Write(lepusMessage("Err", "Wrong auth"))
 		return
 	}
@@ -585,43 +602,45 @@ func lepusGetIP() string {
 }
 
 func lepusChWebDirAPI(w http.ResponseWriter, r *http.Request) {
-	x := lepusAuth(w, r)
-	if x == false {
-		b := lepusMessage("Err", "Wrong auth")
-		w.Write(b)
+	if !lepusAuth(w, r) {
+		w.Write(lepusMessage("Err", "Wrong auth"))
 		return
 	}
 	r.ParseForm()
-	b := lepusMessage("Err", "Empty post")
+	if r.Form["val"] == nil {
+		w.Write(lepusMessage("Err", "Empty post"))
+		return
+	}
 	val := strings.Join(r.Form["val"], "")
+	if val == "" {
+		w.Write(lepusMessage("Err", "Empty post"))
+		return
+	}
 	if lepusRegexp(val, "") == false {
-		b = lepusMessage("Err", "Wrong website")
-		w.Write(b)
+		w.Write(lepusMessage("Err", "Wrong website"))
 		return
 	}
 	path := "/var/www/public/" + val
 	i := lepusPathInfo(path)
 	if i["IsNotExist"] == 1 {
-		b = lepusMessage("Err", "Not found")
-		w.Write(b)
+		w.Write(lepusMessage("Err", "Not found"))
 		return
 	}
 	if i["Readlink"] == 1 {
-		b = lepusMessage("Err", "It`s symlink")
-		w.Write(b)
+		w.Write(lepusMessage("Err", "It`s symlink"))
 		return
 	}
-	b = lepusMessage("Err", "It isn`t dir")
-	if i["isDir"] == 1 {
-		if i["Perm"] == 000 {
-			os.Chmod(path, 0755)
-			b = lepusMessage("OK", "online")
-		} else {
-			os.Chmod(path, 0000)
-			b = lepusMessage("OK", "disable")
-		}
+	if i["isDir"] != 1 {
+		w.Write(lepusMessage("Err", "It isn`t dir"))
+		return
 	}
-	w.Write(b)
+	if i["Perm"] == 000 {
+		os.Chmod(path, 0755)
+		w.Write(lepusMessage("OK", "online"))
+	} else {
+		os.Chmod(path, 0000)
+		w.Write(lepusMessage("OK", "disable"))
+	}
 }
 
 func lepusRegexp(data, val string) bool {
@@ -702,9 +721,7 @@ func stringInSlice(a string, list []string) bool {
 }
 
 func lepusChWebModeAPI(w http.ResponseWriter, r *http.Request) {
-	session, _ := store.Get(r, "lepuscp")
-	x := lepusAuth(w, r)
-	if x == false {
+	if !lepusAuth(w, r) {
 		w.Write(lepusMessage("Err", "Wrong auth"))
 		return
 	}
@@ -757,6 +774,7 @@ func lepusChWebModeAPI(w http.ResponseWriter, r *http.Request) {
 				if i["IsNotExist"] == 0 {
 					continue
 				}
+				session, _ := store.Get(r, "lepuscp")
 				a, _ := user.Lookup(session.Values["user"].(string))
 				os.Symlink(pathSite, pathLink)
 				exec.Command("chown", "-h", a.Uid+":"+a.Gid, pathLink).Output()
@@ -819,11 +837,8 @@ func lepusApache(cmd string) {
 }
 
 func lepusCronAPI(w http.ResponseWriter, r *http.Request) {
-	session, _ := store.Get(r, "lepuscp")
-	x := lepusAuth(w, r)
-	if x == false {
-		b := lepusMessage("Err", "Wrong auth")
-		w.Write(b)
+	if !lepusAuth(w, r) {
+		w.Write(lepusMessage("Err", "Wrong auth"))
 		return
 	}
 	r.ParseForm()
@@ -836,6 +851,7 @@ func lepusCronAPI(w http.ResponseWriter, r *http.Request) {
 		w.Write(lepusMessage("Err", "Wrong post"))
 		return
 	}
+	session, _ := store.Get(r, "lepuscp")
 	user := session.Values["user"].(string)
 	i := lepusPathInfo("/etc/cron.d/" + user)
 	if i["isDir"] == 1 || i["Readlink"] == 1 {
@@ -919,6 +935,83 @@ func lepusCronAPI(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func lepusTestAPI(w http.ResponseWriter, r *http.Request) {
+func lepusDNSAPI(w http.ResponseWriter, r *http.Request) {
+	if !lepusAuth(w, r) {
+		w.Write(lepusMessage("Err", "Wrong auth"))
+		return
+	}
+	r.ParseForm()
+	if r.Form["val"] == nil || r.Form["domain"] == nil {
+		w.Write(lepusMessage("Err", "Empty post"))
+		return
+	}
+	val := strings.Join(r.Form["val"], "")
+	domain := strings.Join(r.Form["domain"], "")
+	if lepusRegexp(val, "") == false || lepusRegexp(val, "") == false {
+		w.Write(lepusMessage("Err", "Wrong post"))
+		return
+	}
+	if lepusRegexp(domain, "") == false {
+		w.Write(lepusMessage("Err", "Wrong task"))
+		return
+	}
+	switch val {
+		case "add":
+			records, _ := ioutil.ReadFile("/root/lepuscp/files/tmpl/dns-records.tmpl")
+			zone, _ := ioutil.ReadFile("/root/lepuscp/files/tmpl/dns-zone.tmpl")
+			x := strings.NewReplacer("%domain%", domain)
+			result := x.Replace(string(zone))
+			if !lepusCreateTextFile(w, r, "/etc/bind/zone/" + domain) || !lepusCreateTextFile(w, r, "/etc/bind/domain/" + domain) {
+				return
+			}
+			if !lepusWriteTextFile(w, r, "/etc/bind/zone/" + domain, result, os.O_RDWR, 0755) || !lepusWriteTextFile(w, r, "/etc/bind/domain/" + domain, string(records), os.O_RDWR, 0755) {
+				return
+			}
+			if lepusCheckStringInFile(w, r, "/etc/bind/named.conf", `include "/etc/bind/zone/`+domain+`";`) {
+				w.Write(lepusMessage("Err", "Already exists"))
+				return
+			}
+	}
+}
+
+func lepusCheckStringInFile(w http.ResponseWriter, r *http.Request, val, data string) bool {
+	file, _ := os.Open(val)
+	defer file.Close()
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		if scanner.Text() == data {
+			return true
+		}
+	}
+	return false
+}
+
+func lepusWriteTextFile(w http.ResponseWriter, r *http.Request, val, data string, flag int, perm os.FileMode) bool {
+	if _, err := os.Stat(val); err != nil {
+		w.Write(lepusMessage("Err", "Cant write file"))
+		return false
+	}
+	file, _ := os.OpenFile(val, flag, perm)
+	defer file.Close()
+	file.WriteString(data)
+	file.Sync()
+	return true
+}
+
+func lepusCreateTextFile(w http.ResponseWriter, r *http.Request, val string) bool {
+	i := lepusPathInfo(val)
+	if i["isDir"] == 1 || i["Readlink"] == 1 {
+		w.Write(lepusMessage("Err", "Wrong file"))
+		return false
+	}
+	if i["IsNotExist"] == 0 {
+		w.Write(lepusMessage("Err", "Already exists"))
+		return false
+	}
+	os.Create(val)
+	return true
+}
+
+func lepusTestAPI(w http.ResponseWriter, r *http.Request) {	
 	w.Write([]byte("test"))
 }

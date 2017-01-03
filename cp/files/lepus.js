@@ -397,7 +397,6 @@
 		e.preventDefault();
 		domain = $('input[id=dnsDomain]').val();
 		var table = $('#mainList').DataTable();
-
 		$.post("//"+document.domain+":"+location.port+"/api/dns", {val: "add", domain: domain}, function(json){
 			data = JSON.parse(json);
 			if(data.Err == 'OK'){
@@ -412,3 +411,21 @@
 			}
 		});
 	});
+	
+	$(document).on("click", "[data-delete-dns]", function(e) {
+		$(this).blur();
+		e.preventDefault();
+		domain = $(this).data("delete-dns");
+		var table = $('#mainList').dataTable();
+		var row = $(this).closest("tr").get(0);
+		$.post("//"+document.domain+":"+location.port+"/api/dns", {val: "del", domain: domain}, function(json){
+			data = JSON.parse(json);
+			if(data.Err == 'OK'){
+				table.fnDeleteRow(table.fnGetPosition(row));
+				alertify.success(data.Mes);
+			}else{
+				alertify.error(data.Mes);
+			}
+		});
+	});
+

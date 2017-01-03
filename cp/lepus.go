@@ -124,32 +124,23 @@ func lepusPage(w http.ResponseWriter, r *http.Request) {
 func lepusLoginAPI(w http.ResponseWriter, r *http.Request) {
 	ip := strings.Split(r.RemoteAddr, ":")[0]
 	r.ParseForm()
-	fmt.Println(r.Form)
-	if r.Form["login"] == nil || r.Form["passwd"] == nil {
-		b := lepusMessage("Err", "empty post")
-		w.Write(b)
-		return
-	}
-	if strings.Join(r.Form["login"], "") != "lepus" { // only lepus can login (for this version)
-		b := lepusMessage("Err", "Wrong login")
-		w.Write(b)
+	if !lepusCheckPost(r.Form["login"], "no", 32) || !lepusCheckPost(r.Form["passwd"], "no", 255){
+		w.Write(lepusMessage("Err", "Wrong post"))
 		return
 	}
 	i := lepusLogin(strings.Join(r.Form["login"], ""), strings.Join(r.Form["passwd"], ""))
-	if i[0] == "right" {
-		session, _ := store.Get(r, "lepuscp")
-		session.Values["user"] = strings.Join(r.Form["login"], "")
-		session.Values["hash"] = lepusSHA256(ip + i[1])
-		session.Save(r, w)
-		lepusLog("auth sucsess from ip " + ip + " user " + session.Values["user"].(string))
-		fmt.Println("sess: " + session.ID + "\nhash: " + session.Values["hash"].(string) + "\nip: " + ip)
-		b := lepusMessage("OK", "Sucsess login")
-		w.Write(b)
-	} else {
+	if i[0] != "right" {
 		lepusLog("auth error from ip " + ip)
-		b := lepusMessage("Err", "Wrong login or passwd")
-		w.Write(b)
+		w.Write(lepusMessage("Err", "Wrong login or passwd"))
+		return
 	}
+	session, _ := store.Get(r, "lepuscp")
+	session.Values["user"] = strings.Join(r.Form["login"], "")
+	session.Values["hash"] = lepusSHA256(ip + i[1])
+	session.Save(r, w)
+	lepusLog("auth sucsess from ip " + ip + " user " + session.Values["user"].(string))
+	fmt.Println("sess: " + session.ID + "\nhash: " + session.Values["hash"].(string) + "\nip: " + ip)
+	w.Write(lepusMessage("OK", "Sucsess login"))
 }
 
 func lepusExitAPI(w http.ResponseWriter, r *http.Request) {
@@ -157,9 +148,14 @@ func lepusExitAPI(w http.ResponseWriter, r *http.Request) {
 	session.Values["user"] = nil
 	session.Values["hash"] = nil
 	session.Save(r, w)
+	sess = append(sess, session.ID)
 }
 
 func lepusLogin(user, passwd string) []string {
+	if(user != "lepus") {
+		fmt.Println("Only lepus can login (for this version)")
+		return []string{"wrong", "no_hash"}
+	}
 	x := lepusFindUser(user)
 	if len(x) != 4 {
 		fmt.Println("No hash passwd from /etc/shadow")
@@ -204,7 +200,6 @@ func lepusAuth(w http.ResponseWriter, r *http.Request) bool {
 		}
 		if !status {
 			lepusExitAPI(w, r)
-			sess = append(sess, session.ID)
 		}
 	}
 	return status
@@ -941,54 +936,127 @@ func lepusDNSAPI(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	r.ParseForm()
-	if r.Form["val"] == nil || r.Form["domain"] == nil {
-		w.Write(lepusMessage("Err", "Empty post"))
+	fmt.Println(r.Form)
+	if !lepusCheckPost(r.Form["val"], "", 10) || !lepusCheckPost(r.Form["domain"], "", 255){
+		w.Write(lepusMessage("Err", "Wrong post"))
 		return
 	}
 	val := strings.Join(r.Form["val"], "")
 	domain := strings.Join(r.Form["domain"], "")
-	if lepusRegexp(val, "") == false || lepusRegexp(val, "") == false {
-		w.Write(lepusMessage("Err", "Wrong post"))
-		return
-	}
-	if lepusRegexp(domain, "") == false {
-		w.Write(lepusMessage("Err", "Wrong task"))
-		return
-	}
 	switch val {
 		case "add":
 			records, _ := ioutil.ReadFile("/root/lepuscp/files/tmpl/dns-records.tmpl")
 			zone, _ := ioutil.ReadFile("/root/lepuscp/files/tmpl/dns-zone.tmpl")
 			x := strings.NewReplacer("%domain%", domain)
 			result := x.Replace(string(zone))
-			if !lepusCreateTextFile(w, r, "/etc/bind/zone/" + domain) || !lepusCreateTextFile(w, r, "/etc/bind/domain/" + domain) {
-				return
-			}
-			if !lepusWriteTextFile(w, r, "/etc/bind/zone/" + domain, result, os.O_RDWR, 0755) || !lepusWriteTextFile(w, r, "/etc/bind/domain/" + domain, string(records), os.O_RDWR, 0755) {
-				return
-			}
-			if lepusCheckStringInFile(w, r, "/etc/bind/named.conf", `include "/etc/bind/zone/`+domain+`";`) {
+			if !lepusStringFile("/etc/bind/named.conf.local", `include "/etc/bind/zone/`+domain+`";`, "check") {
 				w.Write(lepusMessage("Err", "Already exists"))
 				return
 			}
+			lepusStringFile("/etc/bind/named.conf.local", `include "/etc/bind/zone/`+domain+`";`, "add")
+			if !lepusCreateTextFile("/etc/bind/zone/" + domain) || !lepusCreateTextFile("/etc/bind/domain/" + domain) {
+				w.Write(lepusMessage("Err", "Wrong file or already exist"))
+				return
+			}
+			if !lepusWriteTextFile("/etc/bind/zone/" + domain, result, os.O_RDWR, 0755) || !lepusWriteTextFile("/etc/bind/domain/" + domain, string(records), os.O_RDWR, 0755) {
+				w.Write(lepusMessage("Err", "Cant write file"))
+				return
+			}
+			w.Write(lepusMessage("OK", "Done"))
+			
+		case "del":
+			lepusStringFile("/etc/bind/named.conf.local", `include "/etc/bind/zone/`+domain+`";`, "del")
+			x, mes := lepusDeleteFile("/etc/bind/zone/" + domain)
+			if !x {
+				w.Write(lepusMessage("Err", mes))
+				return
+			}
+			x, mes = lepusDeleteFile("/etc/bind/domain/" + domain)
+			if !x {
+				w.Write(lepusMessage("Err", mes))
+				return
+			}
+			w.Write(lepusMessage("OK", "Done"))
 	}
 }
 
-func lepusCheckStringInFile(w http.ResponseWriter, r *http.Request, val, data string) bool {
-	file, _ := os.Open(val)
-	defer file.Close()
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		if scanner.Text() == data {
-			return true
+func lepusStringFile(val, data, command string) bool {
+	j := 0
+	result := ""
+	switch command {
+		case "check":
+			file, _ := os.Open(val)
+			defer file.Close()
+			scanner := bufio.NewScanner(file)
+			for scanner.Scan() {
+				if scanner.Text() == data {
+					return false
+				}
+			}
+
+		case "del":
+			file, _ := os.Open(val)
+			defer file.Close()
+			scanner := bufio.NewScanner(file)
+			for scanner.Scan() {
+				if scanner.Text() == data && j == 0 { // only one delete
+					j++
+					continue;
+				}
+				result += scanner.Text() + "\n"
+			}
+			if len(result) <= 0 {
+				os.RemoveAll(val)
+				return true
+			}
+			//result = result[:len(result)-2] // remove \n
+			fileHandle, _ := os.Create(val)
+			writer := bufio.NewWriter(fileHandle)
+			defer fileHandle.Close()
+			fmt.Fprintln(writer, result)
+			writer.Flush()
+
+		case "add":
+			file, _ := os.OpenFile(val, os.O_APPEND|os.O_RDWR, 0644)
+			defer file.Close()
+			file.WriteString(data+"\n")
+			file.Sync()
+	}
+	return true
+}
+
+func lepusDeleteFile(val string) (bool, string) {
+	i := lepusPathInfo(val)
+	if i["isDir"] == 1 || i["Readlink"] == 1 {
+		return false, "Wrong file"
+	}
+	if i["IsNotExist"] == 1 {
+		return false, "File not exists"
+	}
+	os.RemoveAll(val)
+	return true, "Done"
+}
+
+func lepusCheckPost(val []string, re string, max int) bool {
+	if val == nil {
+		return false
+	}
+	if strings.Join(val, "") == "" {
+		return false
+	}
+	if len(strings.Join(val, "")) > max { // domain 255, linux user 32
+		return false
+	}
+	if re != "no"{
+		if lepusRegexp(strings.Join(val, ""), re) == false {
+			return false
 		}
 	}
-	return false
+	return true
 }
 
-func lepusWriteTextFile(w http.ResponseWriter, r *http.Request, val, data string, flag int, perm os.FileMode) bool {
+func lepusWriteTextFile(val, data string, flag int, perm os.FileMode) bool {
 	if _, err := os.Stat(val); err != nil {
-		w.Write(lepusMessage("Err", "Cant write file"))
 		return false
 	}
 	file, _ := os.OpenFile(val, flag, perm)
@@ -998,20 +1066,18 @@ func lepusWriteTextFile(w http.ResponseWriter, r *http.Request, val, data string
 	return true
 }
 
-func lepusCreateTextFile(w http.ResponseWriter, r *http.Request, val string) bool {
+func lepusCreateTextFile(val string) bool {
 	i := lepusPathInfo(val)
 	if i["isDir"] == 1 || i["Readlink"] == 1 {
-		w.Write(lepusMessage("Err", "Wrong file"))
 		return false
 	}
 	if i["IsNotExist"] == 0 {
-		w.Write(lepusMessage("Err", "Already exists"))
 		return false
 	}
 	os.Create(val)
 	return true
 }
 
-func lepusTestAPI(w http.ResponseWriter, r *http.Request) {	
+func lepusTestAPI(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("test"))
 }

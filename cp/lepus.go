@@ -477,7 +477,7 @@ func lepusAddWebDirAPI(w http.ResponseWriter, r *http.Request) {
 			file.WriteString(result)
 			file.Sync()
 		}
-		lepusApache("reload")
+		lepusExecInit("/etc/init.d/apache2", "reload")
 	}
 	path := "/var/www/public/" + val
 	i := lepusPathInfo(path)
@@ -519,7 +519,7 @@ func lepusDelWebDirAPI(w http.ResponseWriter, r *http.Request) {
 		if i["IsNotExist"] == 0 && i["isDir"] == 0 && i["Readlink"] == 0 {
 			os.RemoveAll(leConfPath)
 		}
-		lepusApache("reload")
+		lepusExecInit("/etc/init.d/apache2", "reload")
 	}
 	pathSite := "/var/www/public/" + val
 	i := lepusPathInfo(pathSite)
@@ -584,7 +584,7 @@ func lepusApacheAlias(command, alias, confPath string) []byte {
 		result := regex.ReplaceAllString(strings.Replace(string(text), val, new, -1), "\n")
 		ioutil.WriteFile(confPath, []byte(result), 0755)
 	}
-	lepusApache("reload")
+	lepusExecInit("/etc/init.d/apache2", "reload")
 	return lepusMessage("OK", "Done")
 }
 
@@ -817,24 +817,12 @@ func lepusChWebModeAPI(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
-	lepusApache("reload")
+	lepusExecInit("/etc/init.d/apache2", "reload")
 	w.Write(lepusMessage("OK", "Done"))
 }
 
-func lepusApache(cmd string) {
-	switch cmd {
-	case "start":
-		exec.Command("/etc/init.d/apache2", "start").Output()
-
-	case "stop":
-		exec.Command("/etc/init.d/apache2", "stop").Output()
-
-	case "restart":
-		exec.Command("/etc/init.d/apache2", "restart").Output()
-
-	default:
-		exec.Command("/etc/init.d/apache2", "reload").Output()
-	}
+func lepusExecInit(service, val string) {
+	exec.Command(service, val).Output()
 }
 
 func lepusCronAPI(w http.ResponseWriter, r *http.Request) {
@@ -951,34 +939,55 @@ func lepusDNSAPI(w http.ResponseWriter, r *http.Request) {
 	}
 	val := strings.Join(r.Form["val"], "")
 	domain := strings.Join(r.Form["domain"], "")
+	a, named := lepusReadTextFile("/etc/bind/named.conf.local")
+	if !a {
+		fmt.Println(named)
+		return
+	}
 	switch val {
 		case "add":
-			records, _ := ioutil.ReadFile("/root/lepuscp/files/tmpl/dns-records.tmpl")
-			zone, _ := ioutil.ReadFile("/root/lepuscp/files/tmpl/dns-zone.tmpl")
-			x := strings.NewReplacer("%domain%", domain)
-			result := x.Replace(string(zone))
-			if lepusCheckTextFile("/etc/bind/named.conf.local", `include "/etc/bind/zone/`+domain+`";`) {
+			if lepusCheckStringInText(named, `include "/etc/bind/zone/`+domain+`";`){
 				w.Write(lepusMessage("Err", "Already exists"))
 				return
 			}
-			lepusWriteTextFile("/etc/bind/named.conf.local", `include "/etc/bind/zone/`+domain+`";`, os.O_RDWR|os.O_APPEND, 0644)
-			
-			a, mes := lepusCreateTextFile("/etc/bind/zone/" + domain)
+			a, zone := lepusReadTextFile("/root/lepuscp/files/tmpl/dns-zone.tmpl")
 			if !a {
-				w.Write(lepusMessage("Err", mes))
+				fmt.Println(zone)
 				return
 			}
-			a, mes = lepusCreateTextFile("/etc/bind/domain/" + domain)
+			a, records := lepusReadTextFile("/root/lepuscp/files/tmpl/dns-records.tmpl")
 			if !a {
-				w.Write(lepusMessage("Err", mes))
+				fmt.Println(records)
 				return
 			}
-			lepusWriteTextFile("/etc/bind/zone/" + domain, result, os.O_RDWR, 0644)
-			lepusWriteTextFile("/etc/bind/domain/" + domain, string(records), os.O_RDWR, 0644)
+			zone = lepusReplaceText(zone, "%domain%", domain)
+			records = lepusReplaceText(records, "%domain%", domain)
+			named += "\n"+`include "/etc/bind/zone/`+domain+`";`
+			a, mes = lepusWriteTextFile("/etc/bind/named.conf.local", named, 0644)
+			if !a {
+				fmt.Println(mes)
+				return
+			}
+			a, mes = lepusWriteTextFile("/etc/bind/zone/" + domain, zone, 0644)
+			if !a {
+				fmt.Println(mes)
+				return
+			}
+			a, mes = lepusWriteTextFile("/etc/bind/domain/" + domain, records, 0644)
+			if !a {
+				fmt.Println(mes)
+				return
+			}
+			lepusExecInit("rndc", "reload")
 			w.Write(lepusMessage("OK", "Done"))
 			
 		case "del":
-			lepusDelTextFile("/etc/bind/named.conf.local", `include "/etc/bind/zone/`+domain+`";`)
+			named = lepusDeleteStrFromText(named, `include "/etc/bind/zone/`+domain+`";`)
+			a, mes = lepusWriteTextFile("/etc/bind/named.conf.local", named, 0644)
+			if !a {
+				fmt.Println(mes)
+				return
+			}
 			x, mes := lepusDeleteFile("/etc/bind/zone/" + domain)
 			if !x {
 				w.Write(lepusMessage("Err", mes))
@@ -989,57 +998,34 @@ func lepusDNSAPI(w http.ResponseWriter, r *http.Request) {
 				w.Write(lepusMessage("Err", mes))
 				return
 			}
+			lepusExecInit("rndc", "reload")
 			w.Write(lepusMessage("OK", "Done"))
 	}
 }
 
-func lepusCheckTextFile(val, data string) bool {
-	file, _ := os.Open(val)
-	defer file.Close()
-		scanner := bufio.NewScanner(file)
-		for scanner.Scan() {
-			if scanner.Text() == data {
-				return true
-			}
-		}
+func lepusReplaceText(str, old, new string) string {
+	x := strings.NewReplacer(old, new)
+	result := x.Replace(str)
+	return result
+}
+
+func lepusCheckStringInText(text, str string) bool {
+	if strings.Contains(text, str) {
+		return true
+	}
 	return false
 }
 
-func lepusDelTextFile(val, data string) bool {
-	j := 0
-	result := ""
-	file, _ := os.Open(val)
-	defer file.Close()
-	scanner := bufio.NewScanner(file)
-		for scanner.Scan() {
-			if len(scanner.Text()) == 0 {
-				continue;
-			}
-			if scanner.Text() == data && j == 0 { // only one delete
-				j++
-				continue;
-			}
-			result += scanner.Text()+"\n"
-		}
-		if len(result) <= 0 {
-			os.RemoveAll(val)
-		}else{
-			result = result[:len(result)-1] // remove \n
-			fileHandle, _ := os.Create(val)
-			writer := bufio.NewWriter(fileHandle)
-			defer fileHandle.Close()
-			fmt.Fprintln(writer, result)
-			writer.Flush()
-		}
-	return true
-}
-
-func lepusWriteTextFile(val, data string, flag int, perm os.FileMode) bool {
-	file, _ := os.OpenFile(val, flag, perm)
-	defer file.Close()
-	file.WriteString(data)
-	file.Sync()
-	return true
+func lepusDeleteStrFromText(text, str string) string {
+	data := ""
+	result := strings.Split(text, "\n")
+	for key := range result {
+		if result[key] == str {
+			continue
+		}		
+		data += result[key]+"\n"
+	}
+	return data
 }
 
 func lepusDeleteFile(val string) (bool, string) {
@@ -1047,10 +1033,9 @@ func lepusDeleteFile(val string) (bool, string) {
 	if i["isDir"] == 1 || i["Readlink"] == 1 {
 		return false, "Wrong file"
 	}
-	if i["IsNotExist"] == 1 {
-		return false, "File not exists"
+	if i["IsNotExist"] == 0 {
+		os.RemoveAll(val)
 	}
-	os.RemoveAll(val)
 	return true, "Done"
 }
 
@@ -1061,7 +1046,8 @@ func lepusCheckPost(val []string, re string, max int) (bool, string) {
 	if strings.Join(val, "") == "" {
 		return false, "Empty post"
 	}
-	if len(strings.Join(val, "")) > max { // domain 255, linux user 32
+	// domain 255, linux user 32
+	if len(strings.Join(val, "")) > max {
 		return false, "Wrong post"
 	}
 	if re != "no"{
@@ -1072,15 +1058,42 @@ func lepusCheckPost(val []string, re string, max int) (bool, string) {
 	return true, "Done"
 }
 
-func lepusCreateTextFile(val string) (bool, string) {
-	i := lepusPathInfo(val)
+func lepusCheckTextFile(path string) bool {
+	i := lepusPathInfo(path)
 	if i["isDir"] == 1 || i["Readlink"] == 1 {
-		return false, "Wrong cron file"
+		return false
 	}
-	if i["IsNotExist"] == 1 {
-		os.Create(val)
+	return true
+} 
+
+func lepusReadTextFile(path string) (bool, string) {
+	if !lepusCheckTextFile(path) {
+		return false, "Wrong file"	
 	}
-	return true, "Done"
+	b, err := ioutil.ReadFile(path)
+	if err == nil {
+        return true, string(b)
+    }
+    return false, "Cant read file"
+}
+
+func lepusWriteTextFile(path, data string, perm os.FileMode) (bool, string) {
+	if !lepusCheckTextFile(path) {
+		return false, "Wrong file"	
+	}
+	str := ""
+	result := strings.Split(data, "\n")
+	for key := range result {
+		if len(result[key]) == 0 {
+			continue
+		}		
+		str += result[key]+"\n"
+	}
+	err := ioutil.WriteFile(path, []byte(str), perm)
+	if err == nil {
+		return true, "Done"
+	}
+	return false, "Cant write file"	
 }
 
 func lepusTestAPI(w http.ResponseWriter, r *http.Request) {

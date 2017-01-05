@@ -180,14 +180,15 @@ func lepusLogin(user, passwd string) []string {
 
 func lepusFindUser(user string) []string {
 	var userdata []string
-	file, _ := os.Open("/etc/shadow")
-	defer file.Close()
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		x := strings.Split(scanner.Text(), ":")
-		if x[0] == user {
-			userdata = strings.Split(x[1], "$")
-			break
+	a, str := lepusReadTextFile("/etc/shadow")
+	if a {
+		result := strings.Split(str, "\n")
+		for key := range result {
+			x := strings.Split(result[key], ":")
+			if x[0] == user {
+				userdata = strings.Split(x[1], "$")
+				break
+			}
 		}
 	}
 	return userdata
@@ -335,13 +336,10 @@ func lepusGetAPI(w http.ResponseWriter, r *http.Request) {
 					if strings.Join(r.Form["symlink"], "") != f.Name() {
 						continue
 					}
-					file, _ := os.Open("/etc/apache2/sites-enabled/" + f.Name() + ".conf")
-					defer file.Close()
-
-					scanner := bufio.NewScanner(file)
-
-					for scanner.Scan() {
-						o := strings.Split(scanner.Text(), " ")
+					_, str := lepusReadTextFile("/etc/apache2/sites-enabled/" + f.Name() + ".conf")
+					result := strings.Split(str, "\n")
+					for k := range result {
+						o := strings.Split(result[k], " ")
 						if o[0] == "ServerAlias" {
 							key = strings.Join(o, " ")
 						}
@@ -839,31 +837,30 @@ func lepusCronAPI(w http.ResponseWriter, r *http.Request) {
 	val := strings.Join(r.Form["val"], "")
 	session, _ := store.Get(r, "lepuscp")
 	user := session.Values["user"].(string)
-	i := lepusPathInfo("/etc/cron.d/" + user)
-	if i["isDir"] == 1 || i["Readlink"] == 1 {
-		w.Write(lepusMessage("Err", "Wrong cron file"))
-		return
-	}
-	if i["IsNotExist"] == 1 {
-		os.Create("/etc/cron.d/" + user)
-	}
 	switch val {
 	case "add":
-		if r.Form["time"] == nil || r.Form["handler"] == nil || r.Form["command"] == nil {
-			w.Write(lepusMessage("Err", "Empty task"))
+		a, file := lepusReadTextFile("/etc/cron.d/" + user)
+		if !a {
+			file = ""
+		}
+		a, mes = lepusCheckPost(r.Form["time"], "cronTime", 10)
+		if !a {
+			w.Write(lepusMessage("Err", mes))
+			return
+		}
+		a, mes = lepusCheckPost(r.Form["handler"], "", 10)
+		if !a {
+			w.Write(lepusMessage("Err", mes))
+			return
+		}
+		a, mes = lepusCheckPost(r.Form["command"], "cronCommand", 255)
+		if !a {
+			w.Write(lepusMessage("Err", mes))
 			return
 		}
 		time := strings.Join(r.Form["time"], "")
 		handler := strings.Join(r.Form["handler"], "")
 		command := strings.Join(r.Form["command"], "")
-		if time == "" || handler == "" || command == "" {
-			w.Write(lepusMessage("Err", "Wrong task"))
-			return
-		}
-		if lepusRegexp(time, "cronTime") == false || lepusRegexp(command, "cronCommand") == false {
-			w.Write(lepusMessage("Err", "Wrong task"))
-			return
-		}
 		if handler == "php" {
 			handler = "/usr/bin/php"
 		} else if handler == "curl" {
@@ -872,51 +869,50 @@ func lepusCronAPI(w http.ResponseWriter, r *http.Request) {
 			w.Write(lepusMessage("Err", "Wrong cron handler"))
 			return
 		}
-		cron, _ := ioutil.ReadFile("/root/lepuscp/files/tmpl/cron.tmpl")
-		x := strings.NewReplacer("%time%", time, "%user%", user, "%handler%", handler, "%command%", command)
-		result := x.Replace(string(cron))
-		if _, err := os.Stat("/etc/cron.d/" + user); err == nil {
-			file, _ := os.OpenFile("/etc/cron.d/"+user, os.O_APPEND|os.O_RDWR, 0644)
-			defer file.Close()
-			file.WriteString(result)
-			file.Sync()
+		a, cron := lepusReadTextFile("/root/lepuscp/files/tmpl/cron.tmpl")
+		if !a {
+			fmt.Println(cron)
+			return
 		}
-		exec.Command("/etc/init.d/cron", "reload").Output()
-		w.Write(lepusMessage("OK", result))
+		cron = lepusReplaceText(cron, "%time%", time)
+		cron = lepusReplaceText(cron, "%user%", user)
+		cron = lepusReplaceText(cron, "%handler%", handler)
+		cron = lepusReplaceText(cron, "%command%", command)
+		if lepusCheckStringInText(file, cron){
+			w.Write(lepusMessage("Err", "Already exists"))
+			return
+		}
+		a, mes = lepusWriteTextFile("/etc/cron.d/" + user, file + "\n" + cron, 0644)
+		if !a {
+			fmt.Println(mes)
+			return
+		}
+		lepusExecInit("/etc/init.d/cron", "reload")
+		w.Write(lepusMessage("OK", cron))
 
 	case "del":
-		if r.Form["task"] == nil {
-			w.Write(lepusMessage("Err", "Empty task"))
+		a, file := lepusReadTextFile("/etc/cron.d/" + user)
+		if !a {
+			w.Write(lepusMessage("Err", mes))
+			return
+		}
+		a, mes = lepusCheckPost(r.Form["task"], "no", 255)
+		if !a {
+			w.Write(lepusMessage("Err", mes))
 			return
 		}
 		task := strings.Join(r.Form["task"], "")
-		if task == "" {
-			w.Write(lepusMessage("Err", "Wrong task"))
-			return
-		}
-		result := ""
-		j := 0
-		file, _ := os.Open("/etc/cron.d/" + user)
-		defer file.Close()
-		scanner := bufio.NewScanner(file)
-		for scanner.Scan() {
-			if scanner.Text() == task && j == 0 { // only one delete
-				j++
-				continue
+		cron := lepusDeleteStrFromText(file, task)
+		if len(strings.TrimSpace(cron)) == 0 {
+			lepusDeleteFile("/etc/cron.d/" + user)
+		} else {
+			a, mes = lepusWriteTextFile("/etc/cron.d/" + user, cron, 0644)
+			if !a {
+				fmt.Println(mes)
+				return
 			}
-			result += scanner.Text() + "\n"
 		}
-		if len(result) > 0 {
-			result = result[:len(result)-1] // remove \n
-			fileHandle, _ := os.Create("/etc/cron.d/" + user)
-			writer := bufio.NewWriter(fileHandle)
-			defer fileHandle.Close()
-			fmt.Fprintln(writer, result)
-			writer.Flush()
-		}else{
-			os.RemoveAll("/etc/cron.d/" + user)
-		}
-		exec.Command("/etc/init.d/cron", "reload").Output()
+		lepusExecInit("/etc/init.d/cron", "reload")
 		w.Write(lepusMessage("OK", "Done"))
 	}
 }
@@ -1044,15 +1040,15 @@ func lepusCheckPost(val []string, re string, max int) (bool, string) {
 		return false, "Empty post"
 	}
 	if strings.Join(val, "") == "" {
-		return false, "Empty post"
+		return false, "Empty post val"
 	}
 	// domain 255, linux user 32
 	if len(strings.Join(val, "")) > max {
-		return false, "Wrong post"
+		return false, "Wrong len post"
 	}
 	if re != "no"{
 		if lepusRegexp(strings.Join(val, ""), re) == false {
-			return false, "Wrong post"
+			return false, "Wrong regexp post"
 		}
 	}
 	return true, "Done"

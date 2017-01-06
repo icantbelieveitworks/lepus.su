@@ -707,17 +707,18 @@ func lepusChWebModeAPI(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	r.ParseForm()
-	if r.Form["val"] == nil || r.Form["mode"] == nil {
-		w.Write(lepusMessage("Err", "Empty post"))
+	a, mes := lepusCheckPost(r.Form["val"], "", 255)
+	if !a {
+		w.Write(lepusMessage("Err", mes))
+		return
+	}
+	a, mes = lepusCheckPost(r.Form["mode"], "", 10)
+	if !a {
+		w.Write(lepusMessage("Err", mes))
 		return
 	}
 	val := strings.Join(r.Form["val"], "")
 	mode := strings.Join(r.Form["mode"], "")
-	if lepusRegexp(val, "") == false || lepusRegexp(mode, "") == false {
-		w.Write(lepusMessage("Err", "Wrong website"))
-		return
-	}
-
 	if mode == lepusGetTypeWWW(val) {
 		w.Write(lepusMessage("Err", "Same mode"))
 		return
@@ -731,6 +732,8 @@ func lepusChWebModeAPI(w http.ResponseWriter, r *http.Request) {
 	switch mode {
 	case "mod_alias":
 		str := ""
+		session, _ := store.Get(r, "lepuscp")
+		a, _ := user.Lookup(session.Values["user"].(string))
 		confPath := "/etc/apache2/sites-enabled/" + val + ".conf"
 		_, file := lepusReadTextFile("/etc/shadow")
 		result := strings.Split(file, "\n")
@@ -754,8 +757,6 @@ func lepusChWebModeAPI(w http.ResponseWriter, r *http.Request) {
 				if i["IsNotExist"] == 0 {
 					continue
 				}
-				session, _ := store.Get(r, "lepuscp")
-				a, _ := user.Lookup(session.Values["user"].(string))
 				os.Symlink(pathSite, pathLink)
 				exec.Command("chown", "-h", a.Uid+":"+a.Gid, pathLink).Output()
 			}
@@ -767,21 +768,22 @@ func lepusChWebModeAPI(w http.ResponseWriter, r *http.Request) {
 		}
 
 	case "vhost":
-		config, _ := ioutil.ReadFile("/root/lepuscp/files/tmpl/apache.tmpl")
-		x := strings.NewReplacer("%domain%", val)
-		result := x.Replace(string(config))
+		a, config := lepusReadTextFile("/root/lepuscp/files/tmpl/apache.tmpl")
+		if !a {
+			w.Write(lepusMessage("Err", config))
+			return
+		}	
+		result := lepusReplaceText(config, "%domain%", val)	
 		confPath := "/etc/apache2/sites-enabled/" + val + ".conf"
 		i = lepusPathInfo(confPath)
 		if i["IsNotExist"] == 0 {
 			w.Write(lepusMessage("Err", "Dir exist"))
 			return
 		}
-		os.Create(confPath)
-		if _, err := os.Stat(confPath); err == nil {
-			file, _ := os.OpenFile(confPath, os.O_RDWR, 0755)
-			defer file.Close()
-			file.WriteString(result)
-			file.Sync()
+		a, mes = lepusWriteTextFile(confPath, result, 0755)
+		if !a {
+			w.Write(lepusMessage("Err", mes))
+			return
 		}
 		files, _ := ioutil.ReadDir("/var/www/public")
 		for _, f := range files {

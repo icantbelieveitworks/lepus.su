@@ -6,7 +6,6 @@ import "log"
 import "fmt"
 import "net"
 import "time"
-import "bufio"
 import "regexp"
 import "strconv"
 import "strings"
@@ -57,7 +56,7 @@ func main() {
 
 	// https://github.com/gorilla/sessions
 	// If you aren't using gorilla/mux, you need to wrap your handlers with context.ClearHandler as or else you will leak memory!
-	log.Fatal(http.ListenAndServeTLS(lepusConf["port"], lepusConf["dir"]+"/ssl/server.crt", lepusConf["dir"]+"/ssl/server.key", context.ClearHandler(mux)))
+	log.Println(http.ListenAndServeTLS(lepusConf["port"], lepusConf["dir"]+"/ssl/server.crt", lepusConf["dir"]+"/ssl/server.key", context.ClearHandler(mux)))
 }
 
 func lepusCleaner() {
@@ -103,12 +102,12 @@ func lepusPage(w http.ResponseWriter, r *http.Request) {
 	case "dns":
 		page = lepusConf["pages"] + "/dns.html"
 	}
-	if lepusAuth(w, r){
+	if lepusAuth(w, r) {
 		if page == lepusConf["pages"]+"/index.html" {
 			http.Redirect(w, r, "https://"+lepusConf["ip"]+lepusConf["port"]+"/?page=cp", 301)
 			return
 		}
-	}else{
+	} else {
 		if ret["page"] != nil && val != "js" {
 			http.Redirect(w, r, "https://"+lepusConf["ip"]+lepusConf["port"], 301)
 			return
@@ -158,7 +157,7 @@ func lepusExitAPI(w http.ResponseWriter, r *http.Request) {
 }
 
 func lepusLogin(user, passwd string) []string {
-	if(user != "lepus") {
+	if user != "lepus" {
 		fmt.Println("Only lepus can login (for this version)")
 		return []string{"wrong", "no_hash"}
 	}
@@ -288,19 +287,19 @@ func lepusGetAPI(w http.ResponseWriter, r *http.Request) {
 		}
 		cron, _ := ioutil.ReadFile("/etc/cron.d/" + user)
 		b = lepusMessage("OK", string(cron))
-		
+
 	case "dns":
 		result := ""
 		files, _ := ioutil.ReadDir("/etc/bind/zone")
 		for _, f := range files {
 			i := lepusPathInfo("/etc/bind/zone/" + f.Name())
 			if i["IsNotExist"] == 1 || i["isDir"] == 1 || i["Readlink"] == 1 {
-				continue;
+				continue
 			}
-		result += f.Name()+" "
+			result += f.Name() + " "
 		}
 		b = lepusMessage("OK", result)
-			
+
 	case "www":
 		ip := lepusGetIP()
 		x := make(map[string]interface{})
@@ -545,19 +544,20 @@ func lepusApacheAlias(command, alias, confPath string) []byte {
 	val := ""
 	new := ""
 	val2 := ""
-	file, _ := os.Open(confPath)
-	defer file.Close()
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		o := strings.Split(scanner.Text(), " ")
-		if o[0] == "ServerAlias" {
-			val = strings.Join(o, " ")
-			if stringInSlice(alias, o) && command == "add" {
-				return lepusMessage("Err", "Domain already add")
+	a, str := lepusReadTextFile(confPath)
+	if a {
+		result := strings.Split(str, "\n")
+		for key := range result {
+			o := strings.Split(result[key], " ")
+			if o[0] == "ServerAlias" {
+				val = strings.Join(o, " ")
+				if stringInSlice(alias, o) && command == "add" {
+					return lepusMessage("Err", "Domain already add")
+				}
 			}
-		}
-		if o[0] == "ServerName" {
-			val2 = strings.Join(o, " ")
+			if o[0] == "ServerName" {
+				val2 = strings.Join(o, " ")
+			}
 		}
 	}
 	switch command {
@@ -748,13 +748,12 @@ func lepusChWebModeAPI(w http.ResponseWriter, r *http.Request) {
 	}
 	switch mode {
 	case "mod_alias":
-		confPath := "/etc/apache2/sites-enabled/" + val + ".conf"
 		str := ""
-		file, _ := os.Open(confPath)
-		defer file.Close()
-		scanner := bufio.NewScanner(file)
-		for scanner.Scan() {
-			o := strings.Split(scanner.Text(), " ")
+		confPath := "/etc/apache2/sites-enabled/" + val + ".conf"
+		_, file := lepusReadTextFile("/etc/shadow")
+		result := strings.Split(file, "\n")
+		for key := range result {
+			o := strings.Split(result[key], " ")
 			if o[0] == "ServerAlias" {
 				str = strings.Join(o, " ")
 			}
@@ -878,11 +877,11 @@ func lepusCronAPI(w http.ResponseWriter, r *http.Request) {
 		cron = lepusReplaceText(cron, "%user%", user)
 		cron = lepusReplaceText(cron, "%handler%", handler)
 		cron = lepusReplaceText(cron, "%command%", command)
-		if lepusCheckStringInText(file, cron){
+		if lepusCheckStringInText(file, cron) {
 			w.Write(lepusMessage("Err", "Already exists"))
 			return
 		}
-		a, mes = lepusWriteTextFile("/etc/cron.d/" + user, file + "\n" + cron, 0644)
+		a, mes = lepusWriteTextFile("/etc/cron.d/"+user, file+"\n"+cron, 0644)
 		if !a {
 			fmt.Println(mes)
 			return
@@ -906,7 +905,7 @@ func lepusCronAPI(w http.ResponseWriter, r *http.Request) {
 		if len(strings.TrimSpace(cron)) == 0 {
 			lepusDeleteFile("/etc/cron.d/" + user)
 		} else {
-			a, mes = lepusWriteTextFile("/etc/cron.d/" + user, cron, 0644)
+			a, mes = lepusWriteTextFile("/etc/cron.d/"+user, cron, 0644)
 			if !a {
 				fmt.Println(mes)
 				return
@@ -941,61 +940,61 @@ func lepusDNSAPI(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	switch val {
-		case "add":
-			if lepusCheckStringInText(named, `include "/etc/bind/zone/`+domain+`";`){
-				w.Write(lepusMessage("Err", "Already exists"))
-				return
-			}
-			a, zone := lepusReadTextFile("/root/lepuscp/files/tmpl/dns-zone.tmpl")
-			if !a {
-				fmt.Println(zone)
-				return
-			}
-			a, records := lepusReadTextFile("/root/lepuscp/files/tmpl/dns-records.tmpl")
-			if !a {
-				fmt.Println(records)
-				return
-			}
-			zone = lepusReplaceText(zone, "%domain%", domain)
-			records = lepusReplaceText(records, "%domain%", domain)
-			named += "\n"+`include "/etc/bind/zone/`+domain+`";`
-			a, mes = lepusWriteTextFile("/etc/bind/named.conf.local", named, 0644)
-			if !a {
-				fmt.Println(mes)
-				return
-			}
-			a, mes = lepusWriteTextFile("/etc/bind/zone/" + domain, zone, 0644)
-			if !a {
-				fmt.Println(mes)
-				return
-			}
-			a, mes = lepusWriteTextFile("/etc/bind/domain/" + domain, records, 0644)
-			if !a {
-				fmt.Println(mes)
-				return
-			}
-			lepusExecInit("rndc", "reload")
-			w.Write(lepusMessage("OK", "Done"))
-			
-		case "del":
-			named = lepusDeleteStrFromText(named, `include "/etc/bind/zone/`+domain+`";`)
-			a, mes = lepusWriteTextFile("/etc/bind/named.conf.local", named, 0644)
-			if !a {
-				fmt.Println(mes)
-				return
-			}
-			x, mes := lepusDeleteFile("/etc/bind/zone/" + domain)
-			if !x {
-				w.Write(lepusMessage("Err", mes))
-				return
-			}
-			x, mes = lepusDeleteFile("/etc/bind/domain/" + domain)
-			if !x {
-				w.Write(lepusMessage("Err", mes))
-				return
-			}
-			lepusExecInit("rndc", "reload")
-			w.Write(lepusMessage("OK", "Done"))
+	case "add":
+		if lepusCheckStringInText(named, `include "/etc/bind/zone/`+domain+`";`) {
+			w.Write(lepusMessage("Err", "Already exists"))
+			return
+		}
+		a, zone := lepusReadTextFile("/root/lepuscp/files/tmpl/dns-zone.tmpl")
+		if !a {
+			fmt.Println(zone)
+			return
+		}
+		a, records := lepusReadTextFile("/root/lepuscp/files/tmpl/dns-records.tmpl")
+		if !a {
+			fmt.Println(records)
+			return
+		}
+		zone = lepusReplaceText(zone, "%domain%", domain)
+		records = lepusReplaceText(records, "%domain%", domain)
+		named += "\n" + `include "/etc/bind/zone/` + domain + `";`
+		a, mes = lepusWriteTextFile("/etc/bind/named.conf.local", named, 0644)
+		if !a {
+			fmt.Println(mes)
+			return
+		}
+		a, mes = lepusWriteTextFile("/etc/bind/zone/"+domain, zone, 0644)
+		if !a {
+			fmt.Println(mes)
+			return
+		}
+		a, mes = lepusWriteTextFile("/etc/bind/domain/"+domain, records, 0644)
+		if !a {
+			fmt.Println(mes)
+			return
+		}
+		lepusExecInit("rndc", "reload")
+		w.Write(lepusMessage("OK", "Done"))
+
+	case "del":
+		named = lepusDeleteStrFromText(named, `include "/etc/bind/zone/`+domain+`";`)
+		a, mes = lepusWriteTextFile("/etc/bind/named.conf.local", named, 0644)
+		if !a {
+			fmt.Println(mes)
+			return
+		}
+		x, mes := lepusDeleteFile("/etc/bind/zone/" + domain)
+		if !x {
+			w.Write(lepusMessage("Err", mes))
+			return
+		}
+		x, mes = lepusDeleteFile("/etc/bind/domain/" + domain)
+		if !x {
+			w.Write(lepusMessage("Err", mes))
+			return
+		}
+		lepusExecInit("rndc", "reload")
+		w.Write(lepusMessage("OK", "Done"))
 	}
 }
 
@@ -1018,8 +1017,8 @@ func lepusDeleteStrFromText(text, str string) string {
 	for key := range result {
 		if result[key] == str {
 			continue
-		}		
-		data += result[key]+"\n"
+		}
+		data += result[key] + "\n"
 	}
 	return data
 }
@@ -1046,7 +1045,7 @@ func lepusCheckPost(val []string, re string, max int) (bool, string) {
 	if len(strings.Join(val, "")) > max {
 		return false, "Wrong len post"
 	}
-	if re != "no"{
+	if re != "no" {
 		if lepusRegexp(strings.Join(val, ""), re) == false {
 			return false, "Wrong regexp post"
 		}
@@ -1060,36 +1059,36 @@ func lepusCheckTextFile(path string) bool {
 		return false
 	}
 	return true
-} 
+}
 
 func lepusReadTextFile(path string) (bool, string) {
 	if !lepusCheckTextFile(path) {
-		return false, "Wrong file"	
+		return false, "Wrong file"
 	}
 	b, err := ioutil.ReadFile(path)
 	if err == nil {
-        return true, string(b)
-    }
-    return false, "Cant read file"
+		return true, string(b)
+	}
+	return false, "Cant read file"
 }
 
 func lepusWriteTextFile(path, data string, perm os.FileMode) (bool, string) {
 	if !lepusCheckTextFile(path) {
-		return false, "Wrong file"	
+		return false, "Wrong file"
 	}
 	str := ""
 	result := strings.Split(data, "\n")
 	for key := range result {
 		if len(result[key]) == 0 {
 			continue
-		}		
-		str += result[key]+"\n"
+		}
+		str += result[key] + "\n"
 	}
 	err := ioutil.WriteFile(path, []byte(str), perm)
 	if err == nil {
 		return true, "Done"
 	}
-	return false, "Cant write file"	
+	return false, "Cant write file"
 }
 
 func lepusTestAPI(w http.ResponseWriter, r *http.Request) {

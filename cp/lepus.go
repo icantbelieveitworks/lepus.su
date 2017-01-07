@@ -352,21 +352,24 @@ func lepusAddWebLinkAPI(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	r.ParseForm()
-	if r.Form["val"] == nil || r.Form["link"] == nil || r.Form["command"] == nil {
-		w.Write(lepusMessage("Err", "Empty post"))
+	a, mes := lepusCheckPost(r.Form["val"], "", 255)
+	if !a {
+		w.Write(lepusMessage("Err", mes))
+		return
+	}
+	a, mes = lepusCheckPost(r.Form["link"], "", 255)
+	if !a {
+		w.Write(lepusMessage("Err", mes))
+		return
+	}
+	a, mes = lepusCheckPost(r.Form["command"], "", 10)
+	if !a {
+		w.Write(lepusMessage("Err", mes))
 		return
 	}
 	val := strings.Join(r.Form["val"], "")
 	link := strings.Join(r.Form["link"], "")
 	command := strings.Join(r.Form["command"], "")
-	if val == "" || link == "" || command == "" {
-		w.Write(lepusMessage("Err", "Empty post"))
-		return
-	}
-	if lepusRegexp(val, "") == false || lepusRegexp(link, "") == false || lepusRegexp(command, "") == false {
-		w.Write(lepusMessage("Err", "Wrong data"))
-		return
-	}
 	mode := lepusGetTypeWWW(val)
 	switch mode {
 	case "mod_alias":
@@ -425,36 +428,30 @@ func lepusAddWebDirAPI(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	r.ParseForm()
-	if r.Form["val"] == nil || r.Form["mode"] == nil {
-		w.Write(lepusMessage("Err", "Empty post"))
+	a, mes := lepusCheckPost(r.Form["val"], "", 255)
+	if !a {
+		w.Write(lepusMessage("Err", mes))
+		return
+	}
+	a, mes = lepusCheckPost(r.Form["mode"], "", 10)
+	if !a {
+		w.Write(lepusMessage("Err", mes))
 		return
 	}
 	val := strings.Join(r.Form["val"], "")
 	mode := strings.Join(r.Form["mode"], "")
-	if val == "" || mode == "" {
-		w.Write(lepusMessage("Err", "Empty post"))
-		return
-	}
-	if lepusRegexp(val, "") == false {
-		w.Write(lepusMessage("Err", "Wrong data"))
-		return
-	}
 	if mode == "vhost" {
-		config, _ := ioutil.ReadFile("/root/lepuscp/files/tmpl/apache.tmpl")
-		x := strings.NewReplacer("%domain%", val)
-		result := x.Replace(string(config))
-		path := "/etc/apache2/sites-enabled/" + val + ".conf"
-		i := lepusPathInfo(path)
-		if i["IsNotExist"] == 0 {
-			w.Write(lepusMessage("Err", "Dir exist"))
+		a, config := lepusReadTextFile("/root/lepuscp/files/tmpl/apache.tmpl")
+		if !a {
+			w.Write(lepusMessage("Err", mes))
 			return
 		}
-		os.Create(path)
-		if _, err := os.Stat(path); err == nil {
-			file, _ := os.OpenFile(path, os.O_RDWR, 0755)
-			defer file.Close()
-			file.WriteString(result)
-			file.Sync()
+		str := lepusReplaceText(config, "%domain%", val)
+		path := "/etc/apache2/sites-enabled/" + val + ".conf"
+		a, mes = lepusWriteTextFile(path, str, 0755)
+		if !a {
+			w.Write(lepusMessage("Err", mes))
+			return
 		}
 		lepusExecInit("/etc/init.d/apache2", "reload")
 	}
@@ -465,9 +462,9 @@ func lepusAddWebDirAPI(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	session, _ := store.Get(r, "lepuscp")
-	a, _ := user.Lookup(session.Values["user"].(string))
-	uid, _ := strconv.Atoi(a.Uid)
-	gid, _ := strconv.Atoi(a.Gid)
+	u, _ := user.Lookup(session.Values["user"].(string))
+	uid, _ := strconv.Atoi(u.Uid)
+	gid, _ := strconv.Atoi(u.Gid)
 	os.Mkdir(path, 0755)
 	os.Chown(path, uid, gid)
 	w.Write(lepusMessage("OK", lepusGetIP()))
@@ -727,7 +724,7 @@ func lepusChWebModeAPI(w http.ResponseWriter, r *http.Request) {
 		session, _ := store.Get(r, "lepuscp")
 		a, _ := user.Lookup(session.Values["user"].(string))
 		confPath := "/etc/apache2/sites-enabled/" + val + ".conf"
-		_, file := lepusReadTextFile("/etc/shadow")
+		_, file := lepusReadTextFile(confPath)
 		result := strings.Split(file, "\n")
 		for key := range result {
 			o := strings.Split(result[key], " ")

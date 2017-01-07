@@ -18,8 +18,8 @@ function lepusGetWWW($dir, $value){
 }
 
 function lepusCertbot($cmd, $flag = ""){
-	echo "certbot --apache $cmd --agree-tos --text --non-interactive --no-redirect $flag\n";
-	return shell_exec("certbot --apache $cmd --agree-tos --text --non-interactive --no-redirect $flag");
+	echo "certbot --apache $cmd -m poiuty@lepus.su --agree-tos --text --non-interactive --no-redirect $flag\n";
+	return shell_exec("certbot --apache $cmd -m poiuty@lepus.su --agree-tos --text --non-interactive --no-redirect $flag");
 	return 'OK';
 }
 

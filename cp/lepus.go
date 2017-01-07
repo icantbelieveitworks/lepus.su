@@ -254,7 +254,7 @@ func lepusGetAPI(w http.ResponseWriter, r *http.Request) {
 		if !a {
 			w.Write(lepusMessage("Err", mes))
 			return
-		}		
+		}
 		site := strings.Join(r.Form["site"], "")
 		i := lepusPathInfo("/var/www/public/" + site)
 		if i["IsNotExist"] == 1 {
@@ -274,7 +274,7 @@ func lepusGetAPI(w http.ResponseWriter, r *http.Request) {
 		a, mes = lepusReadTextFile("/etc/cron.d/" + user)
 		if !a {
 			w.Write(lepusMessage("Err", mes))
-		}else{
+		} else {
 			w.Write(lepusMessage("OK", mes))
 		}
 		return
@@ -309,14 +309,14 @@ func lepusGetAPI(w http.ResponseWriter, r *http.Request) {
 			}
 			if r.Form["symlink"] != nil {
 				switch vh {
-					case "mod_alias":
+				case "mod_alias":
 					path := "/var/www/public/" + strings.Join(r.Form["symlink"], "")
 					real, _ := os.Readlink("/var/www/public/" + f.Name())
 					if real != path {
 						continue
 					}
-					
-					case "vhost":
+
+				case "vhost":
 					if strings.Join(r.Form["symlink"], "") != f.Name() {
 						continue
 					}
@@ -479,15 +479,12 @@ func lepusDelWebDirAPI(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	r.ParseForm()
-	if r.Form["val"] == nil {
-		w.Write(lepusMessage("Err", "Empty post"))
+	a, mes := lepusCheckPost(r.Form["val"], "", 255)
+	if !a {
+		w.Write(lepusMessage("Err", mes))
 		return
 	}
 	val := strings.Join(r.Form["val"], "")
-	if lepusRegexp(val, "") == false {
-		w.Write(lepusMessage("Err", "Wrong website"))
-		return
-	}
 	mode := lepusGetTypeWWW(val)
 	if mode == "vhost" {
 		// no need check lepusPathInfo => already check it (in lepusGetTypeWWW) => conf file exist, not dir and not link.
@@ -523,46 +520,48 @@ func lepusDelWebDirAPI(w http.ResponseWriter, r *http.Request) {
 }
 
 func lepusApacheAlias(command, alias, confPath string) []byte {
-	val := ""
-	new := ""
-	val2 := ""
+	val, val2, new := "", "", ""
 	a, str := lepusReadTextFile(confPath)
-	if a {
-		result := strings.Split(str, "\n")
-		for key := range result {
-			o := strings.Split(result[key], " ")
-			if o[0] == "ServerAlias" {
-				val = strings.Join(o, " ")
-				if stringInSlice(alias, o) && command == "add" {
-					return lepusMessage("Err", "Domain already add")
-				}
+	if !a {
+		return lepusMessage("Err", str)
+	}
+	result := strings.Split(str, "\n")
+	for key := range result {
+		o := strings.Split(result[key], " ")
+		if o[0] == "ServerAlias" {
+			val = strings.Join(o, " ")
+			if stringInSlice(alias, o) && command == "add" {
+				return lepusMessage("Err", "Domain already add")
 			}
-			if o[0] == "ServerName" {
-				val2 = strings.Join(o, " ")
-			}
+		}
+		if o[0] == "ServerName" {
+			val2 = strings.Join(o, " ")
 		}
 	}
-	switch command {
-	case "add":
-		if val == "" {
-			val = val2
-			new = val + "\nServerAlias " + alias
-		} else {
-			new = val + " " + alias
-			regex, _ := regexp.Compile("\\s+")
-			new = regex.ReplaceAllString(new, " ")
-		}
-	case "del":
+	if command == "add" && val != "" {
+		new = val + " " + alias
+		regex, _ := regexp.Compile("\\s+")
+		new = regex.ReplaceAllString(new, " ")
+	}
+	if command == "add" && val == "" {
+		val = val2
+		new = val + "\nServerAlias " + alias
+	}
+	if command == "del" {
 		new = strings.Replace(val, alias, "", -1)
+		regex, _ := regexp.Compile("\\s+")
+		new = regex.ReplaceAllString(new, " ")
 		if strings.Trim(new, " ") == "ServerAlias" {
 			new = ""
 		}
 	}
-	if val != "" {
-		text, _ := ioutil.ReadFile(confPath)
-		regex, _ := regexp.Compile("\n\n")
-		result := regex.ReplaceAllString(strings.Replace(string(text), val, new, -1), "\n")
-		ioutil.WriteFile(confPath, []byte(result), 0755)
+	if val == "" {
+		return lepusMessage("Err", "Nothing to do")
+	}
+	str = lepusReplaceText(str, val, new)
+	a, mes := lepusWriteTextFile(confPath, str, 0755)
+	if !a {
+		return lepusMessage("Err", mes)
 	}
 	lepusExecInit("/etc/init.d/apache2", "reload")
 	return lepusMessage("OK", "Done")
@@ -588,19 +587,12 @@ func lepusChWebDirAPI(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	r.ParseForm()
-	if r.Form["val"] == nil {
-		w.Write(lepusMessage("Err", "Empty post"))
+	a, mes := lepusCheckPost(r.Form["val"], "", 255)
+	if !a {
+		w.Write(lepusMessage("Err", mes))
 		return
 	}
 	val := strings.Join(r.Form["val"], "")
-	if val == "" {
-		w.Write(lepusMessage("Err", "Empty post"))
-		return
-	}
-	if lepusRegexp(val, "") == false {
-		w.Write(lepusMessage("Err", "Wrong website"))
-		return
-	}
 	path := "/var/www/public/" + val
 	i := lepusPathInfo(path)
 	if i["IsNotExist"] == 1 {
@@ -772,8 +764,8 @@ func lepusChWebModeAPI(w http.ResponseWriter, r *http.Request) {
 		if !a {
 			w.Write(lepusMessage("Err", config))
 			return
-		}	
-		result := lepusReplaceText(config, "%domain%", val)	
+		}
+		result := lepusReplaceText(config, "%domain%", val)
 		confPath := "/etc/apache2/sites-enabled/" + val + ".conf"
 		i = lepusPathInfo(confPath)
 		if i["IsNotExist"] == 0 {

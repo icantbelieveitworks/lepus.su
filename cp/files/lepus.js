@@ -232,7 +232,7 @@
 					DT_RowId: data,
 					0:     table.page.info().recordsTotal+1,
 					1:     punycode.toUnicode(link),
-					2:     '<a href="#" data-delete-site='+link+' title="Удалить"><i class="glyphicon glyphicon-remove"></i></a>',
+					2:     '<a href="#" data-delete-link='+link+' title="Удалить"><i class="glyphicon glyphicon-remove"></i></a>',
 				}).draw( false );
 				alertify.success(data.Mes);
 			}else{

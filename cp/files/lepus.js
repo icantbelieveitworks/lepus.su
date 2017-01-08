@@ -69,8 +69,6 @@
 				data = JSON.parse(json);
 				if(data.Err == 'OK'){
 					$("a#user").html(data.Mes+"<hr/>");
-				}else{
-					console.log(data.Mes)
 				}
 				return;
 			});
@@ -79,10 +77,8 @@
 			var table = $('#mainList').DataTable();
 			$.post("//"+document.domain+":"+location.port+"/api/get", {val: "www"}, function(json){
 				data = JSON.parse(json);
-				//console.log(data.Mes)
 				if(data.Err == 'OK'){
 					j = JSON.parse(data.Mes);
-					console.log(j);
 					var i = 0;
 					for (var key in j) {
 						if(!j.hasOwnProperty(key)) continue;
@@ -90,6 +86,11 @@
 							continue;
 						}
 						i++;
+						if(j[key].status == 'disable'){
+							glyphicon = "glyphicon glyphicon-play";
+						}else{
+							glyphicon ="glyphicon glyphicon-pause";
+						}
 						table.row.add({
 							DT_RowId: key,
 							0:     i,
@@ -97,7 +98,7 @@
 							2:     j[key].ip,
 							3:     j[key].http,
 							4:     j[key].status,
-							5:     '<a href="/?page=wwwedit&www='+key+'" title="Редактировать"><i class="glyphicon glyphicon-pencil"></i></a> &nbsp; <a href="#" data-delete-site='+key+' title="Удалить"><i class="glyphicon glyphicon-remove"></i></a>'
+							5:     '<a href="/?page=wwwedit&www='+key+'" title="Редактировать"><i class="glyphicon glyphicon-pencil"></i></a> &nbsp; <a href="#" data-delete-site='+key+' title="Удалить"><i class="glyphicon glyphicon-remove"></i></a> &nbsp; <a href="#" data-change-perm-site='+key+' title="Вкл/ выкл"><i id="permStatus" class="'+glyphicon+'"></i></a>'
 						}).draw(false);
 					}
 				}
@@ -114,7 +115,6 @@
 					
 					for (var key in tasks){
 						if(tasks[key] == "") continue;
-						console.log(key+" => "+tasks[key]);
 						table.row.add({
 							0:     parseInt(key)+1,
 							1:     tasks[key],
@@ -135,7 +135,6 @@
 					
 					for (var key in domains){
 						if(domains[key] == "") continue;
-						console.log(key+" => "+domains[key]);
 						table.row.add({
 							0:     parseInt(key)+1,
 							1:     punycode.toUnicode(domains[key]),
@@ -156,33 +155,16 @@
 			$.post("//"+document.domain+":"+location.port+"/api/get", {val: "type", site: getUrlParameter('www')}, function(json){
 				data = JSON.parse(json);
 				if(data.Err == 'OK'){
-					alertify.error(data.Mes);
 					$('select option[value="'+data.Mes+'"]').attr("selected",true);
 				}
 			});
 			
-			$("#title").append(punycode.toUnicode(getUrlParameter('www')));
-			$.post("//"+document.domain+":"+location.port+"/api/get", {val: "perm", site: getUrlParameter('www')}, function(json){
-				data = JSON.parse(json);
-				console.log(json);
-				if(data.Err == 'OK'){
-					if(data.Mes == 'disable'){
-						glyphicon = "glyphicon glyphicon-pause";
-					}else{
-						glyphicon ="glyphicon glyphicon-play";
-					}
-					tmpIcon = ' <a href="#" data-change-perm-site='+getUrlParameter('www')+' title="Вкл/ выкл"><i id="permStatus" class="'+glyphicon+'" style="vertical-align:middle;"></i></a>';
-					$(".page-title").append(tmpIcon);
-				}
-			});
-		
+			$(".page-title").append(punycode.toUnicode(getUrlParameter('www')));
 			var table = $('#mainList').DataTable();
 			$.post("//"+document.domain+":"+location.port+"/api/get", {val: "www", symlink: getUrlParameter('www')}, function(json){
-				console.log(json);
 				data = JSON.parse(json);
 				if(data.Err == 'OK'){
 					j = JSON.parse(data.Mes);
-					console.log(j);
 					var i = 0;
 					for (var key in j) {
 						if(!j.hasOwnProperty(key)) continue;
@@ -319,15 +301,19 @@
 		$(this).blur();
 		e.preventDefault();
 		site = $(this).data("change-perm-site");
+		var table = $('#mainList').dataTable();
+		var row = $(this).closest("tr").get(0);
 		$.post("//"+document.domain+":"+location.port+"/api/chwebdir", {val: site}, function(json){
 			data = JSON.parse(json);
 			if(data.Err == 'OK'){
 				if(data.Mes == 'online'){
-					$("#permStatus").removeClass("glyphicon-pause");
-					$("#permStatus").addClass("glyphicon-play");
-				}else{
 					$("#permStatus").removeClass("glyphicon-play");
 					$("#permStatus").addClass("glyphicon-pause");
+					table.fnUpdate('online', table.fnGetPosition(row), 4, false, false);
+				}else{
+					$("#permStatus").removeClass("glyphicon-pause");
+					$("#permStatus").addClass("glyphicon-play");
+					table.fnUpdate('disable', table.fnGetPosition(row), 4, false, false);
 				}
 				alertify.success(data.Mes);
 			}else{

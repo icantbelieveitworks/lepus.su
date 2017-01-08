@@ -78,7 +78,6 @@ func lepusCleaner() {
 }
 
 func lepusPage(w http.ResponseWriter, r *http.Request) {
-	contentType := ""
 	ret := r.URL.Query()
 	val := strings.Join(ret["page"], "")
 	page := lepusConf["pages"] + "/index.html"
@@ -87,7 +86,7 @@ func lepusPage(w http.ResponseWriter, r *http.Request) {
 		page = lepusConf["pages"] + "/lepus.js"
 	case "css":
 		page = lepusConf["pages"] + "/style.css"
-		contentType = "text/css"
+		w.Header().Add("Content Type", "text/css")
 	case "cp":
 		page = lepusConf["pages"] + "/cp.html"
 	case "wwwedit":
@@ -105,9 +104,6 @@ func lepusPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	file, _ := ioutil.ReadFile(page)
-	if contentType != "" {
-		w.Header().Add("Content Type", contentType)
-	}
 	io.WriteString(w, string(file))
 }
 

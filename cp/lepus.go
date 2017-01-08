@@ -245,25 +245,6 @@ func lepusGetAPI(w http.ResponseWriter, r *http.Request) {
 		w.Write(lepusMessage("OK", lepusGetTypeWWW(site)))
 		return
 
-	case "perm":
-		a, mes = lepusCheckPost(r.Form["site"], "", 255)
-		if !a {
-			w.Write(lepusMessage("Err", mes))
-			return
-		}
-		site := strings.Join(r.Form["site"], "")
-		i := lepusPathInfo("/var/www/public/" + site)
-		if i["IsNotExist"] == 1 {
-			w.Write(lepusMessage("Err", "Not exist"))
-			return
-		}
-		if i["Perm"] == 000 {
-			w.Write(lepusMessage("OK", "disable"))
-		} else {
-			w.Write(lepusMessage("OK", "online"))
-		}
-		return
-
 	case "cron":
 		session, _ := store.Get(r, "lepuscp")
 		user := session.Values["user"].(string)

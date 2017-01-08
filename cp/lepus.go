@@ -14,6 +14,7 @@ import "os/exec"
 import "net/http"
 import "io/ioutil"
 import "encoding/hex"
+import "compress/gzip"
 import "crypto/sha256"
 import "encoding/json"
 import "github.com/gorilla/context"
@@ -29,6 +30,11 @@ type lepusMes struct {
 	Mes string
 }
 
+type gzipResponseWriter struct {
+	io.Writer
+	http.ResponseWriter
+}
+
 func main() {
 	lepusConf["port"] = ":8085"
 	lepusConf["ip"] = lepusGetIP()
@@ -39,24 +45,44 @@ func main() {
 	go lepusCleaner()
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("/", lepusPage)
-	mux.HandleFunc("/api/login", lepusLoginAPI)
-	mux.HandleFunc("/api/exit", lepusExitAPI)
-	mux.HandleFunc("/api/get", lepusGetAPI)
-	mux.HandleFunc("/api/test", lepusTestAPI)
-	mux.HandleFunc("/api/addwebdir", lepusAddWebDirAPI)
-	mux.HandleFunc("/api/delwebdir", lepusDelWebDirAPI)
-	mux.HandleFunc("/api/chwebdir", lepusChWebDirAPI)
-	mux.HandleFunc("/api/weblink", lepusAddWebLinkAPI)
-	mux.HandleFunc("/api/chwebmode", lepusChWebModeAPI)
-	mux.HandleFunc("/api/cron", lepusCronAPI)
-	mux.HandleFunc("/api/dns", lepusDNSAPI)
+	mux.HandleFunc("/", Gzip(lepusPage))
+	mux.HandleFunc("/favicon.ico", Gzip(lepusFavicon))
+	mux.HandleFunc("/api/login", Gzip(lepusLoginAPI))
+	mux.HandleFunc("/api/exit", Gzip(lepusExitAPI))
+	mux.HandleFunc("/api/get", Gzip(lepusGetAPI))
+	mux.HandleFunc("/api/test", Gzip(lepusTestAPI))
+	mux.HandleFunc("/api/addwebdir", Gzip(lepusAddWebDirAPI))
+	mux.HandleFunc("/api/delwebdir", Gzip(lepusDelWebDirAPI))
+	mux.HandleFunc("/api/chwebdir", Gzip(lepusChWebDirAPI))
+	mux.HandleFunc("/api/weblink", Gzip(lepusAddWebLinkAPI))
+	mux.HandleFunc("/api/chwebmode", Gzip(lepusChWebModeAPI))
+	mux.HandleFunc("/api/cron", Gzip(lepusCronAPI))
+	mux.HandleFunc("/api/dns", Gzip(lepusDNSAPI))
 
 	log.Println("Start server on port " + lepusConf["port"])
 
 	// https://github.com/gorilla/sessions
 	// If you aren't using gorilla/mux, you need to wrap your handlers with context.ClearHandler as or else you will leak memory!
 	log.Fatal(http.ListenAndServeTLS(lepusConf["port"], lepusConf["dir"]+"/ssl/server.crt", lepusConf["dir"]+"/ssl/server.key", context.ClearHandler(mux)))
+}
+
+func (w gzipResponseWriter) Write(b []byte) (int, error) {
+	return w.Writer.Write(b)
+}
+
+func Gzip(fn http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/plain")
+		if !strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
+			fn(w, r)
+			return
+		}
+		w.Header().Set("Content-Encoding", "gzip")
+		gz, _ := gzip.NewWriterLevel(w, gzip.BestSpeed)
+		defer gz.Close()
+		gzr := gzipResponseWriter{Writer: gz, ResponseWriter: w}
+		fn(gzr, r)
+	}
 }
 
 func lepusCleaner() {
@@ -77,16 +103,23 @@ func lepusCleaner() {
 	}
 }
 
+func lepusFavicon(w http.ResponseWriter, r *http.Request) {
+	file, _ := ioutil.ReadFile(lepusConf["pages"] + "/favicon.ico")
+	w.Write(file)
+}
+
 func lepusPage(w http.ResponseWriter, r *http.Request) {
 	ret := r.URL.Query()
 	val := strings.Join(ret["page"], "")
 	page := lepusConf["pages"] + "/index.html"
+	w.Header().Set("Content-Type", "text/html")
 	switch val {
 	case "js":
 		page = lepusConf["pages"] + "/lepus.js"
+		w.Header().Set("Content-Type", "text/javascript")
 	case "css":
 		page = lepusConf["pages"] + "/style.css"
-		w.Header().Add("Content Type", "text/css")
+		w.Header().Set("Content-Type", "text/css")
 	case "cp":
 		page = lepusConf["pages"] + "/cp.html"
 	case "wwwedit":
@@ -96,6 +129,11 @@ func lepusPage(w http.ResponseWriter, r *http.Request) {
 	case "dns":
 		page = lepusConf["pages"] + "/dns.html"
 	}
+	if val == "css" || val == "js" {
+		w.Header().Set("Cache-Control", "max-age=86400")
+		w.Header().Set("Last-Modified", lepusLastModified(page))
+		w.Header().Set("Expires", time.Now().AddDate(0, 0, 7).Format(http.TimeFormat))
+	}
 	if lepusAuth(w, r) && page == lepusConf["pages"]+"/index.html" {
 		http.Redirect(w, r, "https://"+lepusConf["ip"]+lepusConf["port"]+"/?page=cp", 301)
 		return
@@ -104,7 +142,7 @@ func lepusPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	file, _ := ioutil.ReadFile(page)
-	io.WriteString(w, string(file))
+	w.Write(file)
 }
 
 func lepusLoginAPI(w http.ResponseWriter, r *http.Request) {
@@ -1041,6 +1079,10 @@ func lepusWriteTextFile(path, data string, perm os.FileMode) (bool, string) {
 	return false, "Cant write file"
 }
 
+func lepusLastModified(path string) string {
+	info, _ := os.Stat(path)
+	return info.ModTime().Format(http.TimeFormat)
+}
 func lepusTestAPI(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("test"))
 }

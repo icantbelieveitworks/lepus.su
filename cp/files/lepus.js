@@ -106,6 +106,29 @@
 			});
 		}
 		
+		if(page == "editdns"){
+			$(".page-title").append(punycode.toUnicode(getUrlParameter('www')));
+			
+			var table = $('#mainList').DataTable();
+			$.post("//"+document.domain+":"+location.port+"/api/get", {val: "dnsrecords", domain: getUrlParameter('www')}, function(json){
+				data = JSON.parse(json);
+				lines = data.Mes.split("\n");
+				for (var key in lines){
+					record = lines[key].split("\t");
+					if((record.length - 1) != 3){
+						continue;
+					}
+					table.row.add({
+							0:     parseInt(key),
+							1:     punycode.toUnicode(record[0]),
+							2:     record[2],
+							3:     record[3],
+							4:     '<a href="#" data-delete-dnsrecord="'+lines[key]+'" title="Удалить"><i class="glyphicon glyphicon-remove"></i></a>'
+					}).draw(false);
+				}
+			});
+		}
+		
 		if(page == "cron"){
 			var table = $('#mainList').DataTable();
 			$.post("//"+document.domain+":"+location.port+"/api/get", {val: "cron"}, function(json){
@@ -415,3 +438,19 @@
 		});
 	});
 
+	$(document).on("click", "[data-delete-dnsrecord]", function(e) {
+		$(this).blur();
+		e.preventDefault();
+		record = $(this).data("delete-dnsrecord");
+		var table = $('#mainList').dataTable();
+		var row = $(this).closest("tr").get(0);
+		$.post("//"+document.domain+":"+location.port+"/api/dnsrecords", {val: "del", domain: getUrlParameter('www'), data: record}, function(json){
+			data = JSON.parse(json);
+			if(data.Err == 'OK'){
+				table.fnDeleteRow(table.fnGetPosition(row));
+				alertify.success(data.Mes);
+			}else{
+				alertify.error(data.Mes);
+			}
+		});
+	});

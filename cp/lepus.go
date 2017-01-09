@@ -58,6 +58,7 @@ func main() {
 	mux.HandleFunc("/api/chwebmode", Gzip(lepusChWebModeAPI))
 	mux.HandleFunc("/api/cron", Gzip(lepusCronAPI))
 	mux.HandleFunc("/api/dns", Gzip(lepusDNSAPI))
+	mux.HandleFunc("/api/dnsrecords", Gzip(lepusRecordsDNSAPI))
 
 	log.Println("Start server on port " + lepusConf["port"])
 
@@ -128,12 +129,14 @@ func lepusPage(w http.ResponseWriter, r *http.Request) {
 		page = lepusConf["pages"] + "/cron.html"
 	case "dns":
 		page = lepusConf["pages"] + "/dns.html"
+	case "editdns":
+		page = lepusConf["pages"] + "/editdns.html"
 	}
-	if val == "css" || val == "js" {
-		w.Header().Set("Cache-Control", "max-age=86400")
-		w.Header().Set("Last-Modified", lepusLastModified(page))
-		w.Header().Set("Expires", time.Now().AddDate(0, 0, 7).Format(http.TimeFormat))
-	}
+	//if val == "css" || val == "js" {
+	//	w.Header().Set("Cache-Control", "max-age=86400")
+	//	w.Header().Set("Last-Modified", lepusLastModified(page))
+	//	w.Header().Set("Expires", time.Now().AddDate(0, 0, 7).Format(http.TimeFormat))
+	//}
 	if lepusAuth(w, r) && page == lepusConf["pages"]+"/index.html" {
 		http.Redirect(w, r, "https://"+lepusConf["ip"]+lepusConf["port"]+"/?page=cp", 301)
 		return
@@ -305,6 +308,21 @@ func lepusGetAPI(w http.ResponseWriter, r *http.Request) {
 			result += f.Name() + " "
 		}
 		w.Write(lepusMessage("OK", result))
+		return
+
+	case "dnsrecords":
+		a, mes = lepusCheckPost(r.Form["domain"], "", 255)
+		if !a {
+			w.Write(lepusMessage("Err", mes))
+			return
+		}
+		domain := strings.Join(r.Form["domain"], "")
+		a, str := lepusReadTextFile("/etc/bind/domain/" + domain)
+		if !a {
+			w.Write(lepusMessage("Err", str))
+			return
+		}
+		w.Write(lepusMessage("OK", str))
 		return
 
 	case "www":
@@ -1083,6 +1101,79 @@ func lepusLastModified(path string) string {
 	info, _ := os.Stat(path)
 	return info.ModTime().Format(http.TimeFormat)
 }
+
+func lepusRecordsDNSAPI(w http.ResponseWriter, r *http.Request) {
+	if !lepusAuth(w, r) {
+		w.Write(lepusMessage("Err", "Wrong auth"))
+		return
+	}
+	r.ParseForm()
+	a, mes := lepusCheckPost(r.Form["val"], "", 10)
+	if !a {
+		w.Write(lepusMessage("Err", mes))
+		return
+	}
+	a, mes = lepusCheckPost(r.Form["domain"], "", 255)
+	if !a {
+		w.Write(lepusMessage("Err", mes))
+		return
+	}
+	a, mes = lepusCheckPost(r.Form["data"], "no", 255)
+	if !a {
+		w.Write(lepusMessage("Err", mes))
+		return
+	}
+	val := strings.Join(r.Form["val"], "")
+	domain := strings.Join(r.Form["domain"], "")
+	data := strings.Join(r.Form["data"], "")
+	switch val {
+	case "del":
+		a, str := lepusReadTextFile("/etc/bind/domain/" + domain)
+		if !a {
+			w.Write(lepusMessage("Err", str))
+			return
+		}
+		str = lepusUpdateSerial(lepusDeleteStrFromText(str, data))
+		a, mes = lepusWriteTextFile("/etc/bind/domain/"+domain, str, 0755)
+		if !a {
+			w.Write(lepusMessage("Err", str))
+			return
+		}
+		w.Write(lepusMessage("OK", "Done"))
+		return
+
+	case "add":
+		w.Write(lepusMessage("OK", "Done"))
+		return
+	}
+}
+
+func lepusUpdateSerial(str string) string {
+	new_serial := time.Now().Format("20060102") + "01"
+	lines := strings.Split(str, "\n")
+	for key := range lines {
+		tabs := strings.Split(lines[key], "\t")
+		if len(tabs) < 4 {
+			continue
+		}
+		if tabs[2] == "SOA" {
+			v := strings.Split(tabs[3], " ")
+			serial := strings.Replace(v[2], "(", "", -1)
+			if lepusGetInt(new_serial) > lepusGetInt(serial) {
+				return lepusReplaceText(str, serial, new_serial)
+			} else {
+				return lepusReplaceText(str, serial, strconv.Itoa(lepusGetInt(serial)+1))
+			}
+		}
+	}
+	return str
+}
+
+func lepusGetInt(val string) int {
+	i, _ := strconv.Atoi(val)
+	return i
+}
+
 func lepusTestAPI(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("test"))
 }

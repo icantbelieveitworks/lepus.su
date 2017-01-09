@@ -454,3 +454,30 @@
 			}
 		});
 	});
+
+	$(document).on("click", "[data-dns-zone-add]", function(e) {
+		$(this).blur();
+		e.preventDefault();
+		record = $(this).data("delete-dnsrecord");
+		var table = $('#mainList').DataTable();
+		var zone = $('input[id=dnsZone]').val();
+		var type = $('select[id=dnsZoneType]').val();
+		var info = $('input[id=dnsZoneData]').val();
+		all = zone+"\tIN\t"+type+"\t"+info;
+		$.post("//"+document.domain+":"+location.port+"/api/dnsrecords", {val: "add", domain: getUrlParameter('www'), data: all}, function(json){
+			data = JSON.parse(json);
+			if(data.Err == 'OK'){
+				table.row.add({
+							0:     table.page.info().recordsTotal+1,
+							1:     zone,
+							2:     type,
+							3:     info,
+							4:     '<a href="#" data-delete-dnsrecord="'+all+'" title="Удалить"><i class="glyphicon glyphicon-remove"></i></a>'
+				}).draw(false);
+				alertify.success(data.Mes);
+			}else{
+				alertify.error(data.Mes);
+			}
+		});
+	});
+

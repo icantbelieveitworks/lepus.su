@@ -1118,7 +1118,7 @@ func lepusRecordsDNSAPI(w http.ResponseWriter, r *http.Request) {
 		w.Write(lepusMessage("Err", mes))
 		return
 	}
-	a, mes = lepusCheckPost(r.Form["data"], "no", 255)
+	a, mes = lepusCheckPost(r.Form["data"], "no", 1024)
 	if !a {
 		w.Write(lepusMessage("Err", mes))
 		return
@@ -1126,23 +1126,32 @@ func lepusRecordsDNSAPI(w http.ResponseWriter, r *http.Request) {
 	val := strings.Join(r.Form["val"], "")
 	domain := strings.Join(r.Form["domain"], "")
 	data := strings.Join(r.Form["data"], "")
+	a, str := lepusReadTextFile("/etc/bind/domain/" + domain)
+	if !a {
+		w.Write(lepusMessage("Err", str))
+		return
+	}
 	switch val {
 	case "del":
-		a, str := lepusReadTextFile("/etc/bind/domain/" + domain)
-		if !a {
-			w.Write(lepusMessage("Err", str))
-			return
-		}
 		str = lepusUpdateSerial(lepusDeleteStrFromText(str, data))
 		a, mes = lepusWriteTextFile("/etc/bind/domain/"+domain, str, 0755)
 		if !a {
 			w.Write(lepusMessage("Err", str))
 			return
 		}
+		lepusExecInit("rndc", "reload")
 		w.Write(lepusMessage("OK", "Done"))
 		return
 
 	case "add":
+		str += "\n"+data
+		str = lepusUpdateSerial(str)
+		a, mes = lepusWriteTextFile("/etc/bind/domain/"+domain, str, 0755)
+		if !a {
+			w.Write(lepusMessage("Err", str))
+			return
+		}
+		lepusExecInit("rndc", "reload")
 		w.Write(lepusMessage("OK", "Done"))
 		return
 	}

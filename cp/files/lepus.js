@@ -460,9 +460,9 @@
 		e.preventDefault();
 		record = $(this).data("delete-dnsrecord");
 		var table = $('#mainList').DataTable();
-		var zone = $('input[id=dnsZone]').val();
+		var zone = $('input[id=dnsZone]').val().trim().replace(/\s\s+/g, ' ');
 		var type = $('select[id=dnsZoneType]').val();
-		var info = $('input[id=dnsZoneData]').val();
+		var info = $('input[id=dnsZoneData]').val().trim().replace(/\s\s+/g, ' ');
 		all = zone+"\tIN\t"+type+"\t"+info;
 		$.post("//"+document.domain+":"+location.port+"/api/dnsrecords", {val: "add", domain: getUrlParameter('www'), data: all}, function(json){
 			data = JSON.parse(json);

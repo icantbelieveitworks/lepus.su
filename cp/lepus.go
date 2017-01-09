@@ -1134,27 +1134,20 @@ func lepusRecordsDNSAPI(w http.ResponseWriter, r *http.Request) {
 	switch val {
 	case "del":
 		str = lepusUpdateSerial(lepusDeleteStrFromText(str, data))
-		a, mes = lepusWriteTextFile("/etc/bind/domain/"+domain, str, 0755)
-		if !a {
-			w.Write(lepusMessage("Err", str))
-			return
-		}
-		lepusExecInit("rndc", "reload")
-		w.Write(lepusMessage("OK", "Done"))
-		return
-
 	case "add":
-		str += "\n"+data
+		str += "\n" + data
 		str = lepusUpdateSerial(str)
-		a, mes = lepusWriteTextFile("/etc/bind/domain/"+domain, str, 0755)
-		if !a {
-			w.Write(lepusMessage("Err", str))
-			return
-		}
-		lepusExecInit("rndc", "reload")
-		w.Write(lepusMessage("OK", "Done"))
+	default:
+		w.Write(lepusMessage("Err", "Wrong action"))
 		return
 	}
+	a, mes = lepusWriteTextFile("/etc/bind/domain/"+domain, str, 0755)
+	if !a {
+		w.Write(lepusMessage("Err", str))
+		return
+	}
+	lepusExecInit("rndc", "reload")
+	w.Write(lepusMessage("OK", "Done"))
 }
 
 func lepusUpdateSerial(str string) string {

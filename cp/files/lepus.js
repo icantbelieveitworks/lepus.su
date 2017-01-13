@@ -123,7 +123,7 @@
 							1:     punycode.toUnicode(record[0]),
 							2:     record[2],
 							3:     record[3],
-							4:     '<a href="#" data-delete-dnsrecord="'+lines[key]+'" title="Удалить"><i class="glyphicon glyphicon-remove"></i></a>'
+							4:     '<a href="#" data-delete-dnsrecord="'+btoa(lines[key])+'" title="Удалить"><i class="glyphicon glyphicon-remove"></i></a>'
 					}).draw(false);
 				}
 			});
@@ -141,7 +141,7 @@
 						table.row.add({
 							0:     parseInt(key)+1,
 							1:     tasks[key],
-							2:     '<a href="#" data-delete-cron="'+tasks[key]+'" title="Удалить"><i class="glyphicon glyphicon-remove"></i></a>'
+							2:     '<a href="#" data-delete-cron="'+btoa(tasks[key])+'" title="Удалить"><i class="glyphicon glyphicon-remove"></i></a>'
 						}).draw(false);
 					}
 					
@@ -375,7 +375,7 @@
 				table.row.add({
 							0:     table.page.info().recordsTotal+1,
 							1:     data.Mes,
-							2:     '<a href="#" data-delete-cron="'+data.Mes+'" title="Удалить"><i class="glyphicon glyphicon-remove"></i></a>'
+							2:     '<a href="#" data-delete-cron="'+btoa(data.Mes)+'" title="Удалить"><i class="glyphicon glyphicon-remove"></i></a>'
 				}).draw(false);
 				alertify.success("Done");
 			}else{
@@ -464,6 +464,9 @@
 		var type = $('select[id=dnsZoneType]').val();
 		var info = $('input[id=dnsZoneData]').val().trim().replace(/\s\s+/g, ' ');
 		all = zone+"\tIN\t"+type+"\t"+info;
+		if((zone.split(".").length - 1) > 0 && zone.slice(-1) != "."){
+			zone += ".";
+		}
 		$.post("//"+document.domain+":"+location.port+"/api/dnsrecords", {val: "add", domain: getUrlParameter('www'), data: all}, function(json){
 			data = JSON.parse(json);
 			if(data.Err == 'OK'){
@@ -472,7 +475,7 @@
 							1:     zone,
 							2:     type,
 							3:     info,
-							4:     '<a href="#" data-delete-dnsrecord="'+all+'" title="Удалить"><i class="glyphicon glyphicon-remove"></i></a>'
+							4:     '<a href="#" data-delete-dnsrecord="'+btoa(all)+'" title="Удалить"><i class="glyphicon glyphicon-remove"></i></a>'
 				}).draw(false);
 				alertify.success(data.Mes);
 			}else{

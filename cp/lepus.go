@@ -17,6 +17,7 @@ import "encoding/hex"
 import "compress/gzip"
 import "crypto/sha256"
 import "encoding/json"
+import "encoding/base64"
 import "github.com/gorilla/context"
 import "github.com/gorilla/sessions"
 import "github.com/kless/osutil/user/crypt/sha512_crypt"
@@ -657,6 +658,8 @@ func lepusRegexp(data, val string) bool {
 		re = regexp.MustCompile("^[0-9]*$")
 	case "az":
 		re = regexp.MustCompile("^[a-z]*$")
+	case "base64":
+		re = regexp.MustCompile("^[\\s\\t\\wA-Za-z0-9!\"#$%&'()*+,\\-./:;<=>?@^_`{|}~]*$")
 	}
 	return re.MatchString(data)
 }
@@ -907,7 +910,7 @@ func lepusCronAPI(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		task := strings.Join(r.Form["task"], "")
-		cron := lepusDeleteStrFromText(file, task)
+		cron := lepusDeleteStrFromText(file, lepusBase64Decode(task))
 		if len(strings.TrimSpace(cron)) == 0 {
 			lepusDeleteFile("/etc/cron.d/" + user)
 		} else {
@@ -1044,15 +1047,19 @@ func lepusCheckPost(val []string, re string, max int) (bool, string) {
 	if val == nil {
 		return false, "Empty post"
 	}
-	if strings.Join(val, "") == "" {
+	s := strings.Join(val, "")
+	if IsBase64(s) {
+		s = lepusBase64Decode(s)
+	}
+	if s == "" {
 		return false, "Empty post val"
 	}
 	// domain 255, linux user 32
-	if len(strings.Join(val, "")) > max {
+	if len(s) > max {
 		return false, "Wrong len post"
 	}
 	if re != "no" {
-		if lepusRegexp(strings.Join(val, ""), re) == false {
+		if lepusRegexp(s, re) == false {
 			return false, "Wrong regexp post"
 		}
 	}
@@ -1133,7 +1140,7 @@ func lepusRecordsDNSAPI(w http.ResponseWriter, r *http.Request) {
 	}
 	switch val {
 	case "del":
-		str = lepusUpdateSerial(lepusDeleteStrFromText(str, data))
+		str = lepusUpdateSerial(lepusDeleteStrFromText(str, lepusBase64Decode(data)))
 	case "add":
 		str += "\n" + data
 		str = lepusUpdateSerial(str)
@@ -1174,6 +1181,23 @@ func lepusUpdateSerial(str string) string {
 func lepusGetInt(val string) int {
 	i, _ := strconv.Atoi(val)
 	return i
+}
+
+func lepusBase64Encode(val string) string {
+	return base64.StdEncoding.EncodeToString([]byte(val))
+}
+
+func lepusBase64Decode(val string) string {
+	result, _ := base64.StdEncoding.DecodeString(val)
+	return string(result)
+}
+
+func IsBase64(val string) bool {
+	mes, err := base64.StdEncoding.DecodeString(val)
+	if lepusRegexp(string(mes), "base64") == false { // val = curl => true
+		return false
+	}
+	return err == nil
 }
 
 func lepusTestAPI(w http.ResponseWriter, r *http.Request) {

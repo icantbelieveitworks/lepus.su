@@ -463,10 +463,10 @@
 		var zone = $('input[id=dnsZone]').val().trim().replace(/\s\s+/g, ' ');
 		var type = $('select[id=dnsZoneType]').val();
 		var info = $('input[id=dnsZoneData]').val().trim().replace(/\s\s+/g, ' ');
-		all = zone+"\tIN\t"+type+"\t"+info;
 		if((zone.split(".").length - 1) > 0 && zone.slice(-1) != "."){
 			zone += ".";
 		}
+		all = zone+"\tIN\t"+type+"\t"+info;
 		$.post("//"+document.domain+":"+location.port+"/api/dnsrecords", {val: "add", domain: getUrlParameter('www'), data: all}, function(json){
 			data = JSON.parse(json);
 			if(data.Err == 'OK'){

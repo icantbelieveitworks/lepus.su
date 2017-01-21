@@ -23,8 +23,16 @@ import "github.com/gorilla/sessions"
 import "github.com/kless/osutil/user/crypt/sha512_crypt"
 
 var sess []string
-var lepusConf = make(map[string]string)
-var store = sessions.NewFilesystemStore("sess", []byte("something-very-secret"))
+var lepusConf Config
+var store = sessions.NewFilesystemStore("sess", []byte(mainConf()))
+
+type Config struct {
+	IP    string
+	Log   string
+	Pages string
+	Sess  string `json:"sessKey"`
+	Port  string `json:"port"`
+}
 
 type lepusMes struct {
 	Err string
@@ -37,12 +45,6 @@ type gzipResponseWriter struct {
 }
 
 func main() {
-	lepusConf["port"] = ":8085"
-	lepusConf["ip"] = lepusGetIP()
-	lepusConf["dir"] = "/root/lepuscp"
-	lepusConf["log"] = lepusConf["dir"] + "/logs/lepuscp.log"
-	lepusConf["pages"] = lepusConf["dir"] + "/files"
-
 	go lepusCleaner()
 
 	mux := http.NewServeMux()
@@ -61,11 +63,28 @@ func main() {
 	mux.HandleFunc("/api/dns", Gzip(lepusDNSAPI))
 	mux.HandleFunc("/api/dnsrecords", Gzip(lepusRecordsDNSAPI))
 
-	log.Println("Start server on port " + lepusConf["port"])
+	log.Println("Start server on port " + lepusConf.Port)
 
 	// https://github.com/gorilla/sessions
 	// If you aren't using gorilla/mux, you need to wrap your handlers with context.ClearHandler as or else you will leak memory!
-	log.Fatal(http.ListenAndServeTLS(lepusConf["port"], lepusConf["dir"]+"/ssl/server.crt", lepusConf["dir"]+"/ssl/server.key", context.ClearHandler(mux)))
+	log.Fatal(http.ListenAndServeTLS(lepusConf.Port, "./ssl/server.crt", "./ssl/server.key", context.ClearHandler(mux)))
+}
+
+func mainConf() string {
+	a, config := lepusReadTextFile("./main.conf")
+	if !a {
+		fmt.Println("main.conf error: " + config)
+		os.Exit(1)
+	}
+	if err := json.Unmarshal([]byte(config), &lepusConf); err != nil {
+		fmt.Printf("main.conf error: %s\n", err)
+		os.Exit(1)
+	}
+	lepusConf.IP = lepusGetIP()
+	lepusConf.Pages = "./files"
+	lepusConf.Log = "./logs/lepuscp.log"
+	fmt.Println(lepusConf)
+	return lepusConf.Sess
 }
 
 func (w gzipResponseWriter) Write(b []byte) (int, error) {
@@ -106,43 +125,43 @@ func lepusCleaner() {
 }
 
 func lepusFavicon(w http.ResponseWriter, r *http.Request) {
-	file, _ := ioutil.ReadFile(lepusConf["pages"] + "/favicon.ico")
+	file, _ := ioutil.ReadFile(lepusConf.Pages + "/favicon.ico")
 	w.Write(file)
 }
 
 func lepusPage(w http.ResponseWriter, r *http.Request) {
 	ret := r.URL.Query()
 	val := strings.Join(ret["page"], "")
-	page := lepusConf["pages"] + "/index.html"
+	page := lepusConf.Pages + "/index.html"
 	w.Header().Set("Content-Type", "text/html")
 	switch val {
 	case "js":
-		page = lepusConf["pages"] + "/lepus.js"
+		page = lepusConf.Pages + "/lepus.js"
 		w.Header().Set("Content-Type", "text/javascript")
 	case "css":
-		page = lepusConf["pages"] + "/style.css"
+		page = lepusConf.Pages + "/style.css"
 		w.Header().Set("Content-Type", "text/css")
 	case "cp":
-		page = lepusConf["pages"] + "/cp.html"
+		page = lepusConf.Pages + "/cp.html"
 	case "wwwedit":
-		page = lepusConf["pages"] + "/wwwedit.html"
+		page = lepusConf.Pages + "/wwwedit.html"
 	case "cron":
-		page = lepusConf["pages"] + "/cron.html"
+		page = lepusConf.Pages + "/cron.html"
 	case "dns":
-		page = lepusConf["pages"] + "/dns.html"
+		page = lepusConf.Pages + "/dns.html"
 	case "editdns":
-		page = lepusConf["pages"] + "/editdns.html"
+		page = lepusConf.Pages + "/editdns.html"
 	}
 	//if val == "css" || val == "js" {
 	//	w.Header().Set("Cache-Control", "max-age=86400")
 	//	w.Header().Set("Last-Modified", lepusLastModified(page))
 	//	w.Header().Set("Expires", time.Now().AddDate(0, 0, 7).Format(http.TimeFormat))
 	//}
-	if lepusAuth(w, r) && page == lepusConf["pages"]+"/index.html" {
-		http.Redirect(w, r, "https://"+lepusConf["ip"]+lepusConf["port"]+"/?page=cp", 301)
+	if lepusAuth(w, r) && page == lepusConf.Pages+"/index.html" {
+		http.Redirect(w, r, "https://"+lepusConf.IP+lepusConf.Port+"/?page=cp", 301)
 		return
 	} else if !lepusAuth(w, r) && ret["page"] != nil && val != "js" {
-		http.Redirect(w, r, "https://"+lepusConf["ip"]+lepusConf["port"], 301)
+		http.Redirect(w, r, "https://"+lepusConf.IP+lepusConf.Port, 301)
 		return
 	}
 	file, _ := ioutil.ReadFile(page)
@@ -254,9 +273,9 @@ func lepusMessage(Err, Mes string) []byte {
 
 func lepusLog(val string) {
 	t := time.Now()
-	_, str := lepusReadTextFile(lepusConf["log"])
+	_, str := lepusReadTextFile(lepusConf.Log)
 	str += "\n" + t.Format("[2006-01-02 15:04:05]") + " " + val
-	lepusWriteTextFile(lepusConf["log"], str, 0644)
+	lepusWriteTextFile(lepusConf.Log, str, 0644)
 }
 
 func lepusGetAPI(w http.ResponseWriter, r *http.Request) {

@@ -494,7 +494,7 @@ func lepusAddWebDirAPI(w http.ResponseWriter, r *http.Request) {
 	val := strings.Join(r.Form["val"], "")
 	mode := strings.Join(r.Form["mode"], "")
 	if mode == "vhost" {
-		a, config := lepusReadTextFile("/root/lepuscp/files/tmpl/apache.tmpl")
+		a, config := lepusReadTextFile("./files/tmpl/apache.tmpl")
 		if !a {
 			w.Write(lepusMessage("Err", mes))
 			return
@@ -812,7 +812,7 @@ func lepusChWebModeAPI(w http.ResponseWriter, r *http.Request) {
 		}
 
 	case "vhost":
-		a, config := lepusReadTextFile("/root/lepuscp/files/tmpl/apache.tmpl")
+		a, config := lepusReadTextFile("./files/tmpl/apache.tmpl")
 		if !a {
 			w.Write(lepusMessage("Err", config))
 			return
@@ -896,7 +896,7 @@ func lepusCronAPI(w http.ResponseWriter, r *http.Request) {
 			w.Write(lepusMessage("Err", "Wrong cron handler"))
 			return
 		}
-		a, cron := lepusReadTextFile("/root/lepuscp/files/tmpl/cron.tmpl")
+		a, cron := lepusReadTextFile("./files/tmpl/cron.tmpl")
 		if !a {
 			fmt.Println(cron)
 			return
@@ -973,12 +973,12 @@ func lepusDNSAPI(w http.ResponseWriter, r *http.Request) {
 			w.Write(lepusMessage("Err", "Already exists"))
 			return
 		}
-		a, zone := lepusReadTextFile("/root/lepuscp/files/tmpl/dns-zone.tmpl")
+		a, zone := lepusReadTextFile("./files/tmpl/dns-zone.tmpl")
 		if !a {
 			fmt.Println(zone)
 			return
 		}
-		a, records := lepusReadTextFile("/root/lepuscp/files/tmpl/dns-records.tmpl")
+		a, records := lepusReadTextFile("./files/tmpl/dns-records.tmpl")
 		if !a {
 			fmt.Println(records)
 			return

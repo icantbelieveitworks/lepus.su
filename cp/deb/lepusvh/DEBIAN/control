@@ -1,0 +1,8 @@
+Package: lepusvh
+Version: 1.0-5
+Section: misc
+Priority: extra
+Maintainer: poiuty 
+Architecture: amd64
+Depends: bash
+Description: lepusvh package

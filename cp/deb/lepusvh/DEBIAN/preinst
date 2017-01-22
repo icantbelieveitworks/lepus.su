@@ -1,0 +1,5 @@
+#!/bin/bash
+PID="$(pidof ./lepus)"
+if [ ! -z "$PID" ]; then
+	kill $PID
+fi

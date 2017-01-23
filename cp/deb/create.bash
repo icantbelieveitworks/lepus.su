@@ -45,6 +45,7 @@ cp -rp /root/lepuscp/php /root/lepuscp/deb/lepusvh/usr/local/lepuscp
 cp -rp /root/lepuscp/files /root/lepuscp/deb/lepusvh/usr/local/lepuscp
 cp -rp /root/lepuscp/lepus /root/lepuscp/deb/lepusvh/usr/local/lepuscp
 cp -rp /root/lepuscp/main.conf /root/lepuscp/deb/lepusvh/usr/local/lepuscp
+cp -rp /root/lepuscp/start.bash /root/lepuscp/deb/lepusvh/usr/local/lepuscp
 
 chmod 700 /root/lepuscp/deb/lepusvh/usr/local/lepuscp
 

@@ -3,3 +3,5 @@ PID="$(pidof ./lepus)"
 if [ ! -z "$PID" ]; then
 	kill $PID
 fi
+
+exit 0

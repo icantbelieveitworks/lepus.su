@@ -31,6 +31,7 @@ type Config struct {
 	Log   string
 	Pages string
 	Sess  string `json:"sessKey"`
+	Cache string `json:"cache"`
 	Port  string `json:"port"`
 }
 
@@ -133,14 +134,14 @@ func lepusPage(w http.ResponseWriter, r *http.Request) {
 	ret := r.URL.Query()
 	val := strings.Join(ret["page"], "")
 	page := lepusConf.Pages + "/index.html"
-	w.Header().Set("Content-Type", "text/html")
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	switch val {
 	case "js":
 		page = lepusConf.Pages + "/lepus.js"
-		w.Header().Set("Content-Type", "text/javascript")
+		w.Header().Set("Content-Type", "text/javascript; charset=utf-8")
 	case "css":
 		page = lepusConf.Pages + "/style.css"
-		w.Header().Set("Content-Type", "text/css")
+		w.Header().Set("Content-Type", "text/css; charset=utf-8")
 	case "cp":
 		page = lepusConf.Pages + "/cp.html"
 	case "wwwedit":
@@ -152,11 +153,13 @@ func lepusPage(w http.ResponseWriter, r *http.Request) {
 	case "editdns":
 		page = lepusConf.Pages + "/editdns.html"
 	}
-	//if val == "css" || val == "js" {
-	//	w.Header().Set("Cache-Control", "max-age=86400")
-	//	w.Header().Set("Last-Modified", lepusLastModified(page))
-	//	w.Header().Set("Expires", time.Now().AddDate(0, 0, 7).Format(http.TimeFormat))
-	//}
+	if lepusConf.Cache == "yes" {
+		if val == "css" || val == "js" {
+			w.Header().Set("Cache-Control", "public, max-age=604800")
+			w.Header().Set("Last-Modified", lepusLastModified(page))
+			w.Header().Set("Expires", time.Now().AddDate(0, 0, 7).Format(http.TimeFormat))
+		}
+	}
 	if lepusAuth(w, r) && page == lepusConf.Pages+"/index.html" {
 		http.Redirect(w, r, "https://"+lepusConf.IP+lepusConf.Port+"/?page=cp", 301)
 		return

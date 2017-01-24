@@ -55,7 +55,7 @@
 	$(document).ready(function(){
 		var page = getUrlParameter('page');
 		if(page){
-			var menu = [ '<li><a href="http://'+document.domain+'/phpmyadmin" target="_blank">phpMyAdmin</a></li>', 
+			var menu = [ '<li><a href="https://'+document.domain+'/phpmyadmin" target="_blank">phpMyAdmin</a></li>', 
 						 '<li><a href="/?page=cp">WWW домены</a></li>',
 						 '<li><a href="/?page=dns">Доменные имена</a></li>',
 						 '<li><a href="/?page=cron">Планировщик задач</a></li>' ];

@@ -73,6 +73,7 @@ apt-get install lepusvh
 service cron restart
 service exim4 restart
 service mysql restart
+service bind9 restart
 service proftpd restart
 service apache2 restart
 service fail2ban restart

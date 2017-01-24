@@ -1,20 +1,10 @@
-/root/lepuscp/logs/*.log {
-	rotate 7
-	weekly
-	missingok
-	notifempty
-	compress
-	delaycompress
-	create 644 root root
-}
-
 /var/www/logs/php_*.log {
-	rotate 7
-	weekly
+	daily
 	missingok
-	notifempty
+	rotate 7
 	compress
 	delaycompress
+	notifempty
 	create 640 root lepus
 	postrotate
 		/usr/lib/php5/php5-fpm-reopenlogs

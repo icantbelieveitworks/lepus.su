@@ -1,10 +1,9 @@
 #!/bin/bash
-openssl req -new -newkey rsa:2048 -days 9999 -nodes -x509 -subj /C=RU/ST=Moscow/L=Moscow/O=Lepus/CN=lepuscp -keyout /usr/local/lepuscp/ssl/server.key -out /usr/local/lepuscp/ssl/server.crt
 if [ ! -f /usr/local/lepuscp/logs/lepuscp.log ]; then
     echo "" > /usr/local/lepuscp/logs/lepuscp.log
 fi
-sesskey="$(date | md5sum | awk '{print $1}')"
-sed -i -e 's/7e6dad20cc6a9f1666d6dff91b8ffd90/$sesskey/' /etc/proftpd/proftpd.conf
+php5enmod ioncube
+php5enmod zendguard
+service php5-fpm restart
 cd /usr/local/lepuscp/ && ./lepus > /usr/local/lepuscp/logs/console.log 2>&1 &
-
 exit 0

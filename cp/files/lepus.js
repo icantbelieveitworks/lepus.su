@@ -58,7 +58,8 @@
 			var menu = [ '<li><a href="https://'+document.domain+'/phpmyadmin" target="_blank">phpMyAdmin</a></li>', 
 						 '<li><a href="/?page=cp">WWW домены</a></li>',
 						 '<li><a href="/?page=dns">Доменные имена</a></li>',
-						 '<li><a href="/?page=cron">Планировщик задач</a></li>' ];
+						 '<li><a href="/?page=cron">Планировщик задач</a></li>',
+						 '<li><a href="https://github.com/poiuty/lepus.su/issues">Пожелания и ошибки</a></li>' ];
 			
 			var text = ""
 			for (var key in menu) {

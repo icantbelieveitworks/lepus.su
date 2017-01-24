@@ -25,4 +25,7 @@ cp -rp /root/lepuscp/start.bash /root/lepuscp/deb/lepusvh/usr/local/lepuscp
 chmod 700 /root/lepuscp/deb/lepusvh/usr/local/lepuscp
 
 fakeroot dpkg-deb --build lepusvh
+
+rm -rf /root/lepuscp/deb/lepusvh/etc
+rm -rf /root/lepuscp/deb/lepusvh/usr
 mv lepusvh.deb lepusvh_1.0-x.deb

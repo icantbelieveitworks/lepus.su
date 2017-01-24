@@ -33,6 +33,7 @@ dpkg-reconfigure exim4-config
 
 a2enmod ssl proxy_fcgi vhost_alias proxy proxy_fcgi proxy_http rewrite
 a2dismod autoindex -f
+a2dissite 000-default
 
 adduser --no-create-home --home /var/www --gecos "" lepus
 usermod -a -G www-data lepus
@@ -62,6 +63,7 @@ chattr +i /var/www/public/.keep
 mkdir -p /usr/local/lepuscp
 mkdir -p /usr/local/lepuscp/ssl
 chmod 700 /usr/local/lepuscp
+chmod 750 /var/www
 openssl req -new -newkey rsa:2048 -days 9999 -nodes -x509 -subj /C=RU/ST=Moscow/L=Moscow/O=Lepus/CN=lepuscp -keyout /usr/local/lepuscp/ssl/server.key -out /usr/local/lepuscp/ssl/server.crt
 
 wget -O /usr/local/lepuscp/main.conf https://raw.githubusercontent.com/poiuty/lepus.su/master/cp/main.conf

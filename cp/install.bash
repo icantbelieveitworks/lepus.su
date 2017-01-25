@@ -15,7 +15,7 @@ apt-get -y upgrade
 
 apt-get -y install mysql-server-core-5.5 mysql-common mysql-client-5.5
 apt-get -y install bind9 mysql-server-5.5 apache2-mpm-prefork apache2-utils
-apt-get -y install mtr htop bwm-ng strace lsof nano fail2ban curl ca-certificates proftpd-basic screen exim4
+apt-get -y install mtr htop bwm-ng strace lsof nano fail2ban curl ca-certificates proftpd-basic screen exim4 unattended-upgrades cron-apt
 apt-get -y install php5-cli php5-common php5-curl php5-fpm php5-gd php5-geoip php5-intl php5-json php5-mcrypt php5-memcache php5-mysqlnd php5-readline php5-xsl phpmyadmin
 apt-get -y install python-certbot-apache -t jessie-backports
 
@@ -29,6 +29,7 @@ wget -O /etc/fail2ban/jail.d/proftpd.conf https://raw.githubusercontent.com/poiu
 wget -O /etc/fail2ban/filter.d/lepuscp.conf https://raw.githubusercontent.com/poiuty/lepus.su/master/cp/conf/fail2ban/filter.d/lepuscp.conf
 wget -O /etc/apache2/conf-enabled/lepuscp.conf https://raw.githubusercontent.com/poiuty/lepus.su/master/cp/conf/apache2/conf-enabled/lepuscp.conf
 
+dpkg-reconfigure unattended-upgrades
 dpkg-reconfigure exim4-config
 
 a2enmod ssl proxy_fcgi vhost_alias proxy proxy_fcgi proxy_http rewrite

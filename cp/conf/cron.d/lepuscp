@@ -1,6 +1,10 @@
+SHELL=/bin/sh
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+MAILTO=""
+HOME=/
+
 01 12 * * * root certbot renew --quiet --allow-subset-of-names
 */5 * * * *  root /usr/local/lepuscp/start.bash >/dev/null 2>&1
 */10 * * * * root php /usr/local/lepuscp/php/ssl.php >/dev/null 2>&1
 0 12 * * * root find /usr/local/lepuscp/sess/* -type f -mtime +7 -delete >/dev/null 2>&1
 0 10 * * * root apt-get -y install lepusvh >/dev/null 2>&1
-

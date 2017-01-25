@@ -69,7 +69,7 @@ openssl req -new -newkey rsa:2048 -days 9999 -nodes -x509 -subj /C=RU/ST=Moscow/
 
 wget -O /usr/local/lepuscp/main.conf https://raw.githubusercontent.com/poiuty/lepus.su/master/cp/main.conf
 sesskey="$(date | md5sum | awk '{print $1}')"
-sed -i -e 's/7e6dad20cc6a9f1666d6dff91b8ffd90/$sesskey/' /usr/local/lepuscp/main.conf
+sed -i -e "s/7e6dad20cc6a9f1666d6dff91b8ffd90/$sesskey/" /usr/local/lepuscp/main.conf
 
 apt-get install lepusvh
 

@@ -1,26 +1,28 @@
 package main
 
-import "io"
-import "os"
-import "log"
-import "fmt"
-import "net"
-import "time"
-import "regexp"
-import "strconv"
-import "strings"
-import "os/user"
-import "os/exec"
-import "net/http"
-import "io/ioutil"
-import "encoding/hex"
-import "compress/gzip"
-import "crypto/sha256"
-import "encoding/json"
-import "encoding/base64"
-import "github.com/gorilla/context"
-import "github.com/gorilla/sessions"
-import "github.com/kless/osutil/user/crypt/sha512_crypt"
+import (
+	"compress/gzip"
+	"crypto/sha256"
+	"encoding/base64"
+	"encoding/hex"
+	"encoding/json"
+	"fmt"
+	"github.com/gorilla/context"
+	"github.com/gorilla/sessions"
+	"github.com/kless/osutil/user/crypt/sha512_crypt"
+	"io"
+	"io/ioutil"
+	"log"
+	"net"
+	"net/http"
+	"os"
+	"os/exec"
+	"os/user"
+	"regexp"
+	"strconv"
+	"strings"
+	"time"
+)
 
 var sess []string
 var lepusConf Config
@@ -548,6 +550,7 @@ func lepusDelWebDirAPI(w http.ResponseWriter, r *http.Request) {
 		if i["IsNotExist"] == 0 && i["isDir"] == 0 && i["Readlink"] == 0 {
 			os.RemoveAll(leConfPath)
 		}
+		lepusDeleteDomainLogs(val)
 		lepusExecInit("/etc/init.d/apache2", "reload")
 	}
 	pathSite := "/var/www/public/" + val
@@ -1220,6 +1223,19 @@ func IsBase64(val string) bool {
 		return false
 	}
 	return err == nil
+}
+
+func lepusDeleteDomainLogs(val string) {
+	files, _ := ioutil.ReadDir("/var/www/logs")
+	for _, f := range files {
+		i := lepusPathInfo("/var/www/logs/" + f.Name())
+		if i["IsNotExist"] == 1 || i["isDir"] == 1 || i["Readlink"] == 1 {
+			continue
+		}
+		if lepusCheckStringInText(f.Name(), "apache_access_"+val+".log") || lepusCheckStringInText(f.Name(), "apache_error_"+val+".log") {
+			os.RemoveAll("/var/www/logs/" + f.Name())
+		}
+	}
 }
 
 func lepusTestAPI(w http.ResponseWriter, r *http.Request) {

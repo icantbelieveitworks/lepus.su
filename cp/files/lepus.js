@@ -267,7 +267,7 @@
 					2:     data.Mes,
 					3:     mode,
 					4:     'online',
-					5:     '<a href="/?page=wwwedit&www='+punycode.toASCII(site)+'" title="Редактировать"><i class="glyphicon glyphicon-pencil"></i></a> &nbsp; <a href="/" data-delete-site='+punycode.toASCII(site)+' title="Удалить"><i class="glyphicon glyphicon-remove"></i></a>',
+					5:     '<a href="/?page=wwwedit&www='+punycode.toASCII(site)+'" title="Редактировать"><i class="glyphicon glyphicon-pencil"></i></a> &nbsp; <a href="/" data-delete-site='+punycode.toASCII(site)+' title="Удалить"><i class="glyphicon glyphicon-remove"></i>  &nbsp; <a href="#" data-change-perm-site='+punycode.toASCII(site)+' title="Вкл/ выкл"><i id="permStatus" class="glyphicon glyphicon-pause"></i></a>',
 				}).draw( false );
 				alertify.success("Done");
 				if((punycode.toASCII(site).split(".").length - 1) == 1) {

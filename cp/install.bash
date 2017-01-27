@@ -15,7 +15,7 @@ apt-get -y upgrade
 
 apt-get -y install mysql-server-core-5.5 mysql-common mysql-client-5.5
 apt-get -y install bind9 mysql-server-5.5 apache2-mpm-prefork apache2-utils
-apt-get -y install mtr htop bwm-ng strace lsof nano fail2ban curl ca-certificates proftpd-basic screen exim4 unattended-upgrades cron-apt
+apt-get -y install mtr htop bwm-ng strace lsof nano fail2ban curl ca-certificates proftpd-basic screen exim4 unattended-upgrades cron-apt zip
 apt-get -y install php5-cli php5-common php5-curl php5-fpm php5-gd php5-geoip php5-intl php5-json php5-mcrypt php5-memcache php5-mysqlnd php5-readline php5-xsl php5-sqlite phpmyadmin
 apt-get -y install python-certbot-apache -t jessie-backports
 

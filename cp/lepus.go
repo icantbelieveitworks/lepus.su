@@ -816,6 +816,7 @@ func lepusChWebModeAPI(w http.ResponseWriter, r *http.Request) {
 		if i["IsNotExist"] == 0 && i["isDir"] == 0 && i["Readlink"] == 0 {
 			os.RemoveAll(leConfPath)
 		}
+		lepusDeleteDomainLogs(val)
 
 	case "vhost":
 		a, config := lepusReadTextFile("./files/tmpl/apache.tmpl")

@@ -14,20 +14,17 @@ apt-get -y update
 apt-get -y upgrade
 
 apt-get -y install mysql-server-core-5.5 mysql-common mysql-client-5.5
-apt-get -y install bind9 mysql-server-5.5 apache2-mpm-prefork apache2-utils
-apt-get -y install mtr htop bwm-ng strace lsof nano fail2ban curl ca-certificates proftpd-basic screen exim4 unattended-upgrades cron-apt zip
-apt-get -y install php5-cli php5-common php5-curl php5-fpm php5-gd php5-geoip php5-intl php5-json php5-mcrypt php5-memcache php5-mysqlnd php5-readline php5-xsl php5-sqlite phpmyadmin
+apt-get -y install bind9 mysql-server-5.5 apache2-mpm-prefork apache2-utils libapache2-mod-php5 
+apt-get -y install mtr htop bwm-ng strace lsof nano fail2ban curl ca-certificates pure-ftpd screen exim4 unattended-upgrades cron-apt zip
+apt-get -y install php5-cli php5-common php5-curl php5-fpm php5-gd php5-geoip php5-intl php5-json php5-mcrypt php5-mysqlnd php5-readline php5-xsl php5-sqlite phpmyadmin
 apt-get -y install python-certbot-apache -t jessie-backports
 
 wget -O /etc/mysql/my.cnf https://raw.githubusercontent.com/poiuty/lepus.su/master/cp/conf/mysql/my.cnf
 wget -O /etc/cron.d/lepuscp https://raw.githubusercontent.com/poiuty/lepus.su/master/cp/conf/cron.d/lepuscp
-wget -O /etc/proftpd/tls.conf https://raw.githubusercontent.com/poiuty/lepus.su/master/cp/conf/proftpd/tls.conf
 wget -O /etc/logrotate.d/lepuscp https://raw.githubusercontent.com/poiuty/lepus.su/master/cp/conf/logrotate.d/lepuscp
-wget -O /etc/proftpd/proftpd.conf https://raw.githubusercontent.com/poiuty/lepus.su/master/cp/conf/proftpd/proftpd.conf
 wget -O /etc/bind/named.conf.options https://raw.githubusercontent.com/poiuty/lepus.su/master/cp/conf/bind/named.conf.options
 wget -O /etc/php5/fpm/pool.d/lepus.conf https://raw.githubusercontent.com/poiuty/lepus.su/master/cp/conf/php5/fpm/pool.d/lepus.conf
 wget -O /etc/fail2ban/jail.d/lepuscp.conf https://raw.githubusercontent.com/poiuty/lepus.su/master/cp/conf/fail2ban/jail.d/lepuscp.conf
-wget -O /etc/fail2ban/jail.d/proftpd.conf https://raw.githubusercontent.com/poiuty/lepus.su/master/cp/conf/fail2ban/jail.d/proftpd.conf
 wget -O /etc/fail2ban/filter.d/lepuscp.conf https://raw.githubusercontent.com/poiuty/lepus.su/master/cp/conf/fail2ban/filter.d/lepuscp.conf
 wget -O /etc/apache2/conf-enabled/lepuscp.conf https://raw.githubusercontent.com/poiuty/lepus.su/master/cp/conf/apache2/conf-enabled/lepuscp.conf
 
@@ -72,14 +69,16 @@ openssl req -new -newkey rsa:2048 -days 9999 -nodes -x509 -subj /C=RU/ST=Moscow/
 chmod 0600 /usr/local/lepuscp/ssl/server.key
 chmod 0600 /usr/local/lepuscp/ssl/server.crt
 
+openssl req -new -newkey rsa:2048 -days 9999 -nodes -x509 -subj /C=RU/ST=Moscow/L=Moscow/O=Lepus/CN=lepus -keyout /etc/ssl/private/pure-ftpd.pem  -out /etc/ssl/private/pure-ftpd.pem
+chmod 0600 /etc/ssl/private/pure-ftpd.pem
+chmod 0600 /etc/ssl/private/pure-ftpd.pem
+echo yes > /etc/pure-ftpd/conf/ChrootEveryone
+echo yes > /etc/pure-ftpd/conf/DontResolve
+echo 1 > /etc/pure-ftpd/conf/TLS
+
 wget -O /usr/local/lepuscp/main.conf https://raw.githubusercontent.com/poiuty/lepus.su/master/cp/main.conf
 sesskey="$(date | md5sum | awk '{print $1}')"
 sed -i -e "s/7e6dad20cc6a9f1666d6dff91b8ffd90/$sesskey/" /usr/local/lepuscp/main.conf
-
-mkdir /etc/proftpd/ssl
-openssl req -new -newkey rsa:2048 -days 9999 -nodes -x509 -subj /C=RU/ST=Moscow/L=Moscow/O=Lepus/CN=lepus -keyout /etc/proftpd/ssl/proftpd.key -out /etc/proftpd/ssl/proftpd.crt
-chmod 0600 /etc/proftpd/ssl/proftpd.key
-chmod 0600 /etc/proftpd/ssl/proftpd.crt
 
 apt-get install lepusvh
 
@@ -87,6 +86,6 @@ service cron restart
 service exim4 restart
 service mysql restart
 service bind9 restart
-service proftpd restart
 service apache2 restart
 service fail2ban restart
+service pure-ftpd restart

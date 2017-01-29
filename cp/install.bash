@@ -24,6 +24,7 @@ wget -O /etc/cron.d/lepuscp https://raw.githubusercontent.com/poiuty/lepus.su/ma
 wget -O /etc/logrotate.d/lepuscp https://raw.githubusercontent.com/poiuty/lepus.su/master/cp/conf/logrotate.d/lepuscp
 wget -O /etc/bind/named.conf.options https://raw.githubusercontent.com/poiuty/lepus.su/master/cp/conf/bind/named.conf.options
 wget -O /etc/php5/fpm/pool.d/lepus.conf https://raw.githubusercontent.com/poiuty/lepus.su/master/cp/conf/php5/fpm/pool.d/lepus.conf
+wget -O /etc/fail2ban/jail.d/lepuscp.conf https://raw.githubusercontent.com/poiuty/lepus.su/master/cp/conf/fail2ban/jail.d/pureftpd.conf
 wget -O /etc/fail2ban/jail.d/lepuscp.conf https://raw.githubusercontent.com/poiuty/lepus.su/master/cp/conf/fail2ban/jail.d/lepuscp.conf
 wget -O /etc/fail2ban/filter.d/lepuscp.conf https://raw.githubusercontent.com/poiuty/lepus.su/master/cp/conf/fail2ban/filter.d/lepuscp.conf
 wget -O /etc/apache2/conf-enabled/lepuscp.conf https://raw.githubusercontent.com/poiuty/lepus.su/master/cp/conf/apache2/conf-enabled/lepuscp.conf

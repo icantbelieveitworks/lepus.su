@@ -1,0 +1,20 @@
+#!/bin/sh
+sesskey="$(date | md5sum | awk '{print $1}')"
+sed -i -e "s/7e6dad20cc6a9f1666d6dff91b8ffd90/$sesskey/" /usr/local/lepuscp/main.conf
+openssl req -new -newkey rsa:2048 -days 9999 -nodes -x509 -subj /C=RU/ST=Moscow/L=Moscow/O=Lepus/CN=lepuscp -keyout /usr/local/lepuscp/ssl/server.key -out /usr/local/lepuscp/ssl/server.crt
+chmod 0600 /usr/local/lepuscp/ssl/server.key
+chmod 0600 /usr/local/lepuscp/ssl/server.crt
+openssl req -new -newkey rsa:2048 -days 9999 -nodes -x509 -subj /C=RU/ST=Moscow/L=Moscow/O=Lepus/CN=lepus -keyout /etc/ssl/private/pure-ftpd.pem  -out /etc/ssl/private/pure-ftpd.pem
+chmod 0600 /etc/ssl/private/pure-ftpd.pem
+chmod 0600 /etc/ssl/private/pure-ftpd.pem
+openssl req -new -newkey rsa:2048 -days 9999 -nodes -x509 -subj /C=RU/ST=Moscow/L=Moscow/O=Lepus/CN=lepuscp -keyout /etc/apache2/ssl/server.key -out /etc/apache2/ssl/server.crt
+chmod 0600 /etc/apache2/ssl/server.key
+chmod 0600 /etc/apache2/ssl/server.crt
+rm -f etc/ssh/ssh_host_*
+/usr/bin/ssh-keygen -t rsa -N '' -f /etc/ssh/ssh_host_rsa_key
+/usr/bin/ssh-keygen -t dsa -N '' -f /etc/ssh/ssh_host_dsa_key
+/usr/bin/ssh-keygen -t rsa1 -N '' -f /etc/ssh/ssh_host_key
+/usr/bin/ssh-keygen -t ecdsa -N '' -f /etc/ssh/ssh_host_ecdsa_key
+/usr/bin/ssh-keygen -t ed25519 -N '' -f /etc/ssh/ssh_host_ed25519_key
+/etc/init.d/ssh restart
+mv -f /etc/rc.local.orig /etc/rc.local

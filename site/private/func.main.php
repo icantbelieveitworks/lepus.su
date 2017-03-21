@@ -48,8 +48,8 @@ function lost_passwd($login){
 	return 'Мы отправили письмо с инструкцией на ваш email';
 }
 
-function login($login, $passwd, $a = 'bad_passwd'){
-	global $db, $conf; $login = mb_strtolower($login);
+function login($login, $passwd, $check = 'no'){
+	global $db, $conf; $login = mb_strtolower($login); $a = 'bad_passwd';
 	if(IsTorExitPoint()) return 'deny_tor';
 	if(lepus_checkBan($login) || lepus_checkBan()) return 'no_access';
 	if(empty($login) || empty($passwd)) return 'empty_post_value';
@@ -58,6 +58,8 @@ function login($login, $passwd, $a = 'bad_passwd'){
 	if($is_user['0'] != 1) return 'no_user';
 	$row = $is_user['1'];
 	if(password_verify($passwd, $row['passwd'])){
+		if($check == 'yes') return $check;
+		if(!empty($row['2fa']) && oathHotp($row['2fa'], floor(microtime(true) / 30)) != @$_POST['fa2code']) return 'wrong_2fa';
 		$new_passwd = rehash($passwd, $row['passwd']);
 		$_SESSION['id'] = $row['id'];
 		$_SESSION['sess'] = hash('sha512' ,$login.$passwd.$_SERVER['REMOTE_ADDR'].$_SERVER['HTTP_USER_AGENT']);
@@ -97,7 +99,7 @@ function auth($id, $session){
 	}
 	$row = $query->fetch();
 	if(lepus_checkBan($row['login']) || lepus_checkBan()) return 'no_access';
-	return ["id" => $row['id'], "login" => $row['login'], "passwd" => $row['passwd'], "bitcoin" => $row['bitcoin'], "api" => $row['api'], "data" => $row['data']];
+	return ["id" => $row['id'], "login" => $row['login'], "passwd" => $row['passwd'], "2fa" => $row['2fa'], "bitcoin" => $row['bitcoin'], "api" => $row['api'], "data" => $row['data']];
 }
 
 function error($message, $j = 0){
@@ -209,7 +211,7 @@ function lepus_log_ip($id, $ip){
 
 function lepus_get_logip($id, $i = 0){
 	global $db; $data = null;
-	$query = $db->prepare("SELECT * FROM `log_ip` WHERE `uid` = :id");
+	$query = $db->prepare("SELECT * FROM `log_ip` WHERE `uid` = :id ORDER BY `id` DESC LIMIT 100");
 	$query->bindParam(':id', $id, PDO::PARAM_STR);
 	$query->execute();
 	if($query->rowCount() == 0) return "no_data";
@@ -2092,3 +2094,39 @@ function getQRCodeGoogleUrl($name, $secret){
 	return 'https://chart.googleapis.com/chart?chs=200x200&cht=qr&chl='.$urlencoded.'';
 }
 
+function lepus_2fAuth(){
+	global $db, $user;
+	switch(@$_POST['do']){
+		default: return 'empty_post_value'; break;
+		case 'gen':
+			if(!empty($user['2fa'])) return '2fa_already';
+			$base32_key = generate_secret();
+			return "<center><img src=".getQRCodeGoogleUrl($user['login']."@lepus.su", $base32_key)."><br>Secret key: $base32_key<br/>Сохраните секретный ключ в надежном месте.</center>";
+		break;
+		case 'save':
+			if(empty($_POST['passwd']) || empty($_POST['code']) || empty($_POST['recode'])){
+					return 'empty_post_value';
+			}
+			if($_POST['code'] != $_POST['recode'] || strlen($_POST['code']) != 16 || ctype_lower($_POST['code'])){
+				return 'wrong_2fa';
+			}
+			if(login($user['login'], $_POST['passwd'], 'yes') != 'yes'){
+				return 'bad_passwd';
+			}
+			if(!empty($user['2fa'])){
+				if($_POST['code'] != $user['2fa']) return 'wrong_2fa';
+				$query = $db->prepare("UPDATE `users` SET `2fa` = :code WHERE `id` = :uid");
+				$query->bindValue(':code', null, PDO::PARAM_INT);
+				$query->bindParam(':uid', $user['id'], PDO::PARAM_STR);
+				$query->execute();
+				return "off";
+			}else{
+				$query = $db->prepare("UPDATE `users` SET `2fa` = :code WHERE `id` = :uid");
+				$query->bindParam(':code', $_POST['code'], PDO::PARAM_STR);
+				$query->bindParam(':uid', $user['id'], PDO::PARAM_STR);
+				$query->execute();
+				return "on";
+			}
+		break;
+	}
+}

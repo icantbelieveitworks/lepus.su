@@ -5,6 +5,7 @@ if(empty($user)){ ?>
 		<div class="block-body">
 			<input class="form-control" id="login_email" placeholder="E-mail" name="email" type="email" value="" autofocus="">
 			<input class="form-control" id="login_passwd" style="margin-top: 3px;" placeholder="Password" name="password" type="password" value="" autofocus="">
+			<input class="form-control" id="login_2facode" style="margin-top: 3px;" placeholder="2FA code" name="2facode" type="text" maxlength="6" value="" autofocus="">
 			<input id="check_auth" type="submit" name="login" class="btn btn-sm btn-success btn-block" style="margin-top: 15px;" data-do-login value="Войти">
 		</div>
 	</div>
@@ -36,12 +37,14 @@ if(empty($user)){ ?>
 				<li><a href="/pages/archive.php">Архив услуг</a></li>
 				<li><a href="/pages/cp.php">Пополнить счет</a></li>
 				<li><a href="/pages/cron.php">Планировщик задач</a></li>
+				<li><a href="/pages/2fa.php">2FA аутентификация</a></li>
 				<li><a href="https://github.com/poiuty/lepus.su/issues" target="_blank">Пожелания и ошибки</a></li>
 				<hr>
 				<li><a href="/pages/service.php">Все услуги</a></li>
 				<li><a href="/pages/service.php?q=2">VPS хостинг</a></li>
 				<li><a href="/pages/dns.php">DNS хостинг</a></li>
 				<li><a href="/pages/service.php?q=1">ISPmanager хостинг</a></li>
+				<li><a href="/pages/reg.php">Домены</a></li>
 				<li><a href="https://my.lepus.su/billmgr?func=showroom.redirect&redirect_to=desktop&startform=service.order.itemtype&newwindow=yes" target="_blank">Домены и лицензии</a></li>
 				<li><a href="/pages/service.php?q=4">Администрирование</a></li>
 				<li><a href="/pages/service.php?q=5">Виртуальный xостинг</a></li>

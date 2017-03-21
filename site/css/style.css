@@ -5,14 +5,14 @@ a { color:#0055cc; }
 .wrapper { width:980px; margin:auto; }
 
 .content-box { width:81%; float:left; }
-.content-info { min-height:245px; margin:0px auto; background: #FFF; border-radius: 8px; }
+.content-info { min-height:283px; margin:0px auto; background: #FFF; border-radius: 8px; }
 .content-text { padding:10px 15px; }
 .page-title { color:#333333; font:15pt 'Times New Roman'; padding-bottom:5px; }
 
 .blocks { float:left; width:18%; margin-left:1%; }
 .block { margin-bottom:10px; }
 .block-body { width:160px; margin-left: 8px; padding-top: 12px; }
-.block-login { min-height:140px; background: #FFF; border-radius: 8px; }
+.block-login { min-height:178px; background: #FFF; border-radius: 8px; }
 .block-info1 { min-height:90px; background: #FFF; border-radius: 8px; }
 
 /* .footer-box { width:100%; height:47px; position:relative; margin-top:-100px; clear:both; padding-top: 5px; } */

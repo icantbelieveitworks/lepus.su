@@ -78,7 +78,9 @@ $(document).on("click", "[data-lost-passwd]", function(e) {
 var lepus_login = function() {
 	login_email = $('input[id=login_email]').val();
 	login_passwd = $('input[id=login_passwd]').val();
-	$.post("//"+document.domain+"/public/login.php", {command: 'login', email: login_email, passwd: login_passwd}, function(json){
+	login_2facode = $('input[id=login_2facode]').val();
+	
+	$.post("//"+document.domain+"/public/login.php", {command: 'login', email: login_email, passwd: login_passwd, fa2code: login_2facode}, function(json){
 		data = JSON.parse(json);
 		if(data.err == 'OK'){
 			location.reload();
@@ -559,6 +561,45 @@ $(document).on("click", "[data-promised-pay]", function(e) {
 		if(data.err == 'OK'){
 			alertify.success("Обещанный платеж до "+data.mes);			
 			$("#xxx").html("<font color='green'>"+data.mes+"</font>");
+		}else{
+			alertify.error(data.mes);
+		}
+	});
+});
+
+$(document).on("click", "[data-2fa-generate]", function(e) {
+	var _this = $(this);
+	_this.blur();
+	e.preventDefault();
+	$.post("//"+document.domain+"/public/2fa.php", {do: 'gen'}, function(json){
+		data = JSON.parse(json);
+		if(data.err == 'OK'){
+			_this.hide();
+			$("#2fakey").html(data.mes);
+			$("#2fainfo").show();
+		}else{
+			alertify.error(data.mes);
+		}
+	});
+});
+
+$(document).on("click", "[data-2fa-start]", function(e) {
+	$(this).blur();
+	e.preventDefault();
+	
+	code = $('input[id=f2acode]').val();
+	recode = $('input[id=ref2acode]').val();
+	passwd = $('input[id=passwd]').val();
+	
+	$.post("//"+document.domain+"/public/2fa.php", {do: 'save', code: code, recode: recode, passwd: passwd}, function(json){
+		data = JSON.parse(json);
+		if(data.err == 'OK'){
+			alertify.success('Done');
+			if(data.mes == 'on'){
+				$("#send2fa").val('Выключить 2FA');
+			}else{
+				$("#send2fa").val('Включить 2FA');
+			}
 		}else{
 			alertify.error(data.mes);
 		}

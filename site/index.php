@@ -25,7 +25,6 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/auth.php');
 		<script src="/js/bootstrap.min.js"></script>
 		<script src="/js/alertify.js"></script>
 		<script src="/js/lepus.js"></script>
-		<?=$head_code?>
 	</head>
 	<body>
 		<div class="wrapper">
@@ -34,7 +33,7 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/auth.php');
 				<div class="content-info box-shadow--2dp">
 					<div class="content-text">
 						<div class="page-title">Lepus хостинг</div>
-						Мы рады предложить вам услуги интернет хостинга. Готовы сотрудничать как с физическими, так и с юридическими лицами.<br/>
+						Рады предложить вам услуги интернет хостинга. Готовы сотрудничать как с физическими, так и с юридическими лицами.<br/>
 						Работаем с крупными дата центрами <a href="https://www.ovh.com/us/about-us/" target="_blank" rel="nofollow">OVH</a> и <a href="https://www.hetzner.de/us/hosting/unternehmen/ueber-uns" target="_blank" rel="nofollow">Hetzner</a>. Принимаем к оплате: webmoney, yandex, paypal, qiwi и visa/ mastercard.
 						<br/><br/>
 						<p>

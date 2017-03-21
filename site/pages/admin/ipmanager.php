@@ -55,7 +55,7 @@ if($user['data']['access'] < 2) die('no_access');
 									<option value=0>empty</option>
 									<?php echo lepus_getHTMLSelect('servers', 'domain'); ?>
 							</select>
-							<select id="ipUser" data-placeholder="Пользователь..." class="chosen-select" style="width: 30%;">
+							<select id="ipUser" data-placeholder="Пользователь..." class="chosen-select" style="width: 29.9%;">
 								<option value=""></option>
 									<?php echo lepus_getHTMLSelect('users', 'login'); ?>
 							</select></center>

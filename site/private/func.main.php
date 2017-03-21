@@ -34,7 +34,7 @@ function lost_passwd_change($arr){
 	if($data[1] != $real_hash) return 'wrong_hash';
 	if(time() > $data[2]) return 'lost_passwd_time';
 	$new_passwd = change_passwd($is_user['1']['id']);
-	_mail($is_user['1']['login'], "Новый пароль", "Дорогой клиент,<br/>по вашему запросу, мы поменяли пароль.<br/>Ваш новый пароль: $new_passwd");
+	_mail($is_user['1']['login'], "Новый пароль", "Дорогой клиент,<br/>по-вашему запросу, мы поменяли пароль.<br/>Ваш новый пароль: $new_passwd");
 	return 'Мы отправили новый пароль на ваш email';
 }
 
@@ -133,8 +133,12 @@ function _mail($email, $subject, $message){
 	mail($email, $subject, rtrim(chunk_split(base64_encode($message))), $headers);
 }
 
-function genRandStr($length = 10) {
-    return substr(str_shuffle('0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'), 0, $length);
+function genRandStr($length = 10, $chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ') { // when upgrade to php 7 => use random_bytes
+	$rnd = openssl_random_pseudo_bytes($length);
+	for ($i = 0; $i < $length; $i++) {
+		$str .= $chars[ord($rnd[$i]) & strlen($chars)-1];
+	}
+    return $str;
 }
 
 function change_passwd($id){
@@ -979,7 +983,11 @@ function lepus_getLogSpend($id, $i = 0){
 }
 
 function lepus_getPageNavi(){
-	$navi = ''; $pages = ['/' => 'Главная', '/pages/ovz.php' => 'Хостинг', '/pages/vps.php' => 'VPS', '/pages/servers.php' => 'Серверы',  '/pages/ssl.php' => 'SSL', '/pages/domains.php' => 'Домены', '/pages/license.php' => 'Лицензии', '/pages/contacts.php' => 'Контакты'];
+	$navi = ''; 
+	
+	//$pages = ['/' => 'Главная', '/pages/ovz.php' => 'Хостинг', '/pages/vps.php' => 'VPS', '/pages/servers.php' => 'Серверы',  '/pages/ssl.php' => 'SSL', '/pages/domains.php' => 'Домены', '/pages/license.php' => 'Лицензии', '/pages/contacts.php' => 'Контакты'];
+	$pages = ['/' => 'Главная', '/pages/ovz.php' => 'Хостинг', '/pages/vps.php' => 'VPS', '/pages/servers.php' => 'Серверы', '/pages/contacts.php' => 'Контакты'];
+	
 	foreach($pages as $key => $val){
 		if($_SERVER["REQUEST_URI"] == $key)
 			$navi .= "<li class=\"active\"><a href=\"$key\">$val</a></li>";
@@ -1153,7 +1161,7 @@ function lepus_getService($id){
 				$bottom = "<hr/><select class=\"form-control\" id=\"idboot\" style=\"margin-top: 4px;\" name=\"type\"><option value=\"1\">Boot => hard drive</option><option value=\"2\">Boot => Debian (cdrom)</option><option value=\"3\">Boot => Ubuntu (cdrom)</option><option value=\"4\">Boot => CentOS (cdrom)</option></select>
 						   <input class=\"btn btn-sm btn-danger\" style=\"margin-top: 4px; width: 33%;\" data-vm-stopandstart={$id} type=\"submit\" value=\"Выключить => включить\">
 						   <input class=\"btn btn-sm btn-danger\" style=\"margin-top: 4px; width: 33%;\" data-vm-restart={$id} type=\"submit\" value=\"Перезагрузить\">
-						   <input class=\"btn btn-sm btn-danger\" style=\"margin-top: 4px; width: 33%;\" data-vm-restart-hard={$id} type=\"submit\" value=\"Перезагрузить (hard reboot)\">
+						   <input class=\"btn btn-sm btn-danger\" style=\"margin-top: 4px; width: 32.9%;\" data-vm-restart-hard={$id} type=\"submit\" value=\"Перезагрузить (hard reboot)\">
 						   <input class=\"btn btn-sm btn-danger btn-block\" style=\"margin-top: 4px;\" data-vm-vnc={$id} type=\"submit\" value=\"Получить VNC доступ\">
 						   <hr/><table id=\"IPList\" class=\"table table-striped table-bordered\" cellspacing=\"0\" width=\"100%\"><thead><tr><th>ID</th><th>IP</th><th>Domain</th><th>MAC</th></tr></thead>".lepus_getListIP($id)."<tbody></tbody></table>";
 				}else{
@@ -1172,7 +1180,7 @@ function lepus_getService($id){
 
 function lepus_moneyback($id, $sid){
 	global $db, $user;
-	$query = $db->prepare("SELECT * FROM `log_spend` WHERE `oid` = :id AND `time2` > unix_timestamp(now())");
+	$query = $db->prepare("SELECT * FROM `log_spend` WHERE `oid` = :id AND `time2` > unix_timestamp(now()) ORDER BY `time2` DESC LIMIT 1");
 	$query->bindParam(':id', $id, PDO::PARAM_STR);
 	$query->execute();
 	if($query->rowCount() != 1) return 'no_moneyback';
@@ -1990,3 +1998,97 @@ function lepus_pastbinSend($api_user_key = '', $api_paste_code = 'I can\'t belie
 	}
 	return $i;
 }
+
+function lepus_regruList(){
+	global $conf, $user, $db; $i = ''; $o = 0;
+	$arr = json_decode(file_get_contents('https://api.reg.ru/api/regru2/service/get_list?input_data={"servtype":"domain"}&input_format=json&output_content_type=plain&password='.$conf['regru_pass'].'&username='.$conf['regru_user']), true);
+	foreach(array_keys($arr['answer']['services']) as $key){
+		$check = $db->prepare("SELECT * FROM `domains` WHERE `name` = :name AND `uid` = :uid");
+		$check->bindParam(':name', $arr['answer']['services'][$key]['dname'], PDO::PARAM_STR);
+		$check->bindParam(':uid', $user['id'], PDO::PARAM_STR);
+		$check->execute();
+		if($check->rowCount() != 1){
+			continue;
+		}
+		$o++;
+		switch($arr['answer']['services'][$key]['state']){
+			case "A": $arr['answer']['services'][$key]['state'] = 'Активен'; break;
+			case "N": $arr['answer']['services'][$key]['state'] = 'Неактивен'; break;
+			case "S": $arr['answer']['services'][$key]['state'] = 'Приостановлен'; break;	
+		}
+		$i .= "<tr><td>{$o}</td><td>{$arr['answer']['services'][$key]['dname']}</td><td>{$arr['answer']['services'][$key]['creation_date']}</td><td>{$arr['answer']['services'][$key]['expiration_date']}</td><td>{$arr['answer']['services'][$key]['state']}</td><td><i class='glyphicon glyphicon-pencil'></i></td></tr>";		
+	}
+	return $i;
+}
+
+function base32_map($i, $do = 'encode'){
+	$chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+	if( $do == 'encode'){
+		return $chars[$i];
+	}else{
+		return array_search($i, str_split($chars));
+	}
+}
+
+function base32_bits($v){
+	$value = ord($v);
+	return vsprintf(str_repeat('%08b', count($value)), $value);
+}
+
+function base32_encode($data){
+	$result = ''; $s = 0;
+	$j = [4 => 1, 3 => 3, 2 => 4, 1 => 6];
+	$arr = explode('|', substr(chunk_split($data, 5, '|'), 0, -1));
+	foreach($arr as $val){
+		$s++;
+		$arr2 = str_split($val);
+		$x = ['00000000', '00000000', '00000000', '00000000', '00000000'];
+		foreach($arr2 as $key => $val2){
+			$x[$key] = base32_bits($val2);	
+		}
+		$arr3 = explode('|', substr(chunk_split(implode('', $x), 5, '|'), 0, -1));
+		foreach($arr3 as $key => $val3){	
+			$result .= base32_map(bindec($val3));
+		}
+		if($s == count($arr) && isset($j[strlen($val)])){
+			$result = str_pad(substr($result, 0, -$j[strlen($val)]), 8*$s, '=', STR_PAD_RIGHT);
+		}
+	}
+	return $result;
+}
+
+function base32_decode($data){ // thx Sanasol
+	$x = '';
+	$arr = str_split($data);
+	foreach($arr as $val){
+		$x .= str_pad(decbin(base32_map($val, 'decode')), 5, '0', STR_PAD_LEFT);
+	}
+	$chunks = str_split($x, 8);
+	$string = array_map(function($chr){
+		return chr(bindec($chr));
+	}, $chunks);
+	return implode("", $string);
+}
+
+function generate_secret(){
+	return base32_encode(genRandStr());
+}
+
+function oathTruncate($hash){
+	$offset = ord($hash[19]) & 0xf;
+	$temp = unpack('N', substr($hash, $offset, 4));
+	return substr($temp[1] & 0x7fffffff, -6);
+}
+
+function oathHotp($secret, $time){
+	$secret = base32_decode($secret);
+	$time = pack('N*', 0, $time);
+	$hash = hash_hmac('sha1', $time, $secret, true);
+	return str_pad(oathTruncate($hash), 6, '0', STR_PAD_LEFT);
+}
+
+function getQRCodeGoogleUrl($name, $secret){
+	$urlencoded = urlencode('otpauth://totp/'.$name.'?secret='.$secret.'');
+	return 'https://chart.googleapis.com/chart?chs=200x200&cht=qr&chl='.$urlencoded.'';
+}
+

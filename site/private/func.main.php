@@ -986,10 +986,7 @@ function lepus_getLogSpend($id, $i = 0){
 
 function lepus_getPageNavi(){
 	$navi = ''; 
-	
-	//$pages = ['/' => 'Главная', '/pages/ovz.php' => 'Хостинг', '/pages/vps.php' => 'VPS', '/pages/servers.php' => 'Серверы',  '/pages/ssl.php' => 'SSL', '/pages/domains.php' => 'Домены', '/pages/license.php' => 'Лицензии', '/pages/contacts.php' => 'Контакты'];
-	$pages = ['/' => 'Главная', '/pages/ovz.php' => 'Хостинг', '/pages/vps.php' => 'VPS', '/pages/servers.php' => 'Серверы', '/pages/contacts.php' => 'Контакты'];
-	
+	$pages = ['/' => 'Главная', '/pages/ovz.php' => 'Хостинг', '/pages/vps.php' => 'VPS', '/pages/servers.php' => 'Серверы',  '/pages/ssl.php' => 'SSL', '/pages/domains.php' => 'Домены', '/pages/license.php' => 'Лицензии', '/pages/contacts.php' => 'Контакты'];
 	foreach($pages as $key => $val){
 		if($_SERVER["REQUEST_URI"] == $key)
 			$navi .= "<li class=\"active\"><a href=\"$key\">$val</a></li>";
@@ -1096,10 +1093,6 @@ function lepus_AutoExtend($uid = 0){
 		$arr = json_decode($row['data'], true);
 		$price = lepus_price($tmpRow['price'], $tmpRow['currency'])+lepus_price($arr['extra'], $arr['extra_currency']);
 		switch($tmpRow['handler']){
-			case 'ISPmanagerV4':
-				$toTask['order'] = $row['id'];
-				$toTask['user'] = $arr['user'];
-			break;
 			case 'VH':
 			case 'KVM':
 			case 'OpenVZ':
@@ -1144,17 +1137,6 @@ function lepus_getService($id){
 	$arr = lepus_getExtra($id);
 	$price = lepus_price($tmpRow['price'], $tmpRow['currency'])+lepus_price($arr['extra'], $arr['extra_currency']);
 	switch($tmpRow['handler']){
-		case 'ISPmanagerV4':
-			if($row['server'] != 0){
-				$select = $db->prepare("SELECT * FROM `servers` WHERE `id` =:id");
-				$select->bindParam(':id', $row['server'], PDO::PARAM_STR);
-				$select->execute();
-				$tmp = $select->fetch();
-				$data = json_decode($row['data'], true);
-				$top = "<br/><a href=\"https://{$tmp['domain']}\" target=\"_blank\">Панель управления</a> виртуальным хостингом.<br/>Пользователь <u>{$data['user']}</u> [<a href=\"https://{$tmp['domain']}/ispmgr?func=recovery\" target=\"_blank\">восстановить пароль</a>].";
-				$bottom = null;
-			}
-		break;
 		case 'VH':
 		case 'KVM':
 		case 'OpenVZ':
@@ -1265,9 +1247,6 @@ function lepus_changeTariff($id, $sid){
 	$row = $query->fetch();
 	$arr = json_decode($data['data'], true);
 	switch($row['handler']){
-		case 'ISPmanagerV4':
-			$toTask = ['do' => 'change', 'tariff' => $sid, 'user' => $arr['user'], 'email' => $user['login'], 'order' => $data['id']];
-		break;
 		case 'VH':
 		case 'KVM':
 			$query = $db->prepare("SELECT * FROM `tariff` WHERE `id` = :id");
@@ -1494,7 +1473,7 @@ function lepus_doTask(){
 	if($data['do'] == 'create'){
 		if(empty($data['tiket']) || empty($data['tariff']) || empty($data['order'])) $err = 'wrong data params';
 	}
-	if($row['handler'] == 'ISPmanagerV4' || $row['handler'] == 'OpenVZ' || $row['handler'] == 'KVM' || $row['handler'] = 'VH'){
+	if($row['handler'] == 'OpenVZ' || $row['handler'] == 'KVM' || $row['handler'] = 'VH'){
 		if($data['do'] == 'create'){
 			$server = lepus_searchFree($row['handler'], $data['tariff'], $data['order']);
 		}else{
@@ -1525,36 +1504,6 @@ function lepus_doTask(){
 	if(empty($err)){
 		switch($row['handler']){
 			default: $info = 'no_handler'; break;
-			case 'ISPmanagerV4':
-				$presets = [1 => 'basic', 2 => 'standart', 3 => 'pro', 4 => 'super', 5 => 'vip1', 6 => 'vip2', 7 => 'vip3', 8 => 'vip4'];
-				$commands = ['create' => 'createUser', 'stop' => 'blockUser', 'start' => 'unblockUser', 'change' => 'changeService'];
-				$disks = [1 => 1000, 2 => 2500, 3 => 4000, 4 => 6000, 5 => 10000, 6 => 12500, 7 => 15000, 8 => 20000];		
-				if(!empty($data['tariff'])){
-					$preset = $presets[$data['tariff']];
-					$disk = $disks[$data['tariff']];
-				}
-				switch($commands[$data['do']]){
-					default: $info = 'no_action'; break;
-					case 'createUser': // params: email, preset, ip, login, password
-						$login = mb_strtolower(genRandStr(7));
-						$passwd = genRandStr(9);
-						$info = lepus_sendToPythonAPI($server['ip'], $server['port'], $server['access'], $commands[$data['do']], "{$data['email']}/{$preset}/{$server['ip']}/{$login}/{$passwd}", $row['id']);
-						$xml = simplexml_load_string($info);
-						if(empty($xml->error['code']) && !empty($info)){
-							lepus_editServiceData($data['order'], 'edit', 'user', $login);
-							$_POST['msg'] = "Дорогой клиент, виртуальный хостинг готов.\nLogin: $login\nPassword: $passwd\nПожалуйста, поменяйте пароль.\nВы можете посмотреть более подробную информацию об услуге [url=https://lepus.su/pages/view.php?id={$data['order']}]на этой странице[/url].";
-							support_msg(5, $data['tiket'], 2, 1);
-						}
-					break;
-					case 'changeService': // params: login, preset, email, disk
-						$info = lepus_sendToPythonAPI($server['ip'], $server['port'], $server['access'], $commands[$data['do']], "{$data['user']}/{$preset}/{$data['email']}/{$disk}", $row['id']);
-					break;
-					case 'blockUser': // params: user
-					case 'unblockUser':
-						$info = lepus_sendToPythonAPI($server['ip'], $server['port'], $server['access'], $commands[$data['do']], $data['user'], $row['id']);
-					break;
-				}
-			break;
 			case 'VH':
 			case 'KVM':
 			case 'OpenVZ':
@@ -1814,6 +1763,7 @@ function lepus_closeTikets(){
 
 function lepus_getBillprice($id, $period, $j = 0){
 	global $conf, $cache;
+	$eur = lepus_price(1, 'EUR2');
 	$price = $cache->get("billprice.$id.$period");
 	if($price === FALSE || $price == 0 || $j == 1){
 		$ctx = stream_context_create(['http'=> ['timeout' => 30]]);
@@ -1824,7 +1774,7 @@ function lepus_getBillprice($id, $period, $j = 0){
 		}
 		$cache->set("billprice.$id.$period", $price, MEMCACHE_COMPRESSED, 3600);
 	}
-	return intval($price);
+	return intval($price*$eur);
 }
 
 function lepus_getServStat(){
@@ -2001,28 +1951,6 @@ function lepus_pastbinSend($api_user_key = '', $api_paste_code = 'I can\'t belie
 	return $i;
 }
 
-function lepus_regruList(){
-	global $conf, $user, $db; $i = ''; $o = 0;
-	$arr = json_decode(file_get_contents('https://api.reg.ru/api/regru2/service/get_list?input_data={"servtype":"domain"}&input_format=json&output_content_type=plain&password='.$conf['regru_pass'].'&username='.$conf['regru_user']), true);
-	foreach(array_keys($arr['answer']['services']) as $key){
-		$check = $db->prepare("SELECT * FROM `domains` WHERE `name` = :name AND `uid` = :uid");
-		$check->bindParam(':name', $arr['answer']['services'][$key]['dname'], PDO::PARAM_STR);
-		$check->bindParam(':uid', $user['id'], PDO::PARAM_STR);
-		$check->execute();
-		if($check->rowCount() != 1){
-			continue;
-		}
-		$o++;
-		switch($arr['answer']['services'][$key]['state']){
-			case "A": $arr['answer']['services'][$key]['state'] = 'Активен'; break;
-			case "N": $arr['answer']['services'][$key]['state'] = 'Неактивен'; break;
-			case "S": $arr['answer']['services'][$key]['state'] = 'Приостановлен'; break;	
-		}
-		$i .= "<tr><td>{$o}</td><td>{$arr['answer']['services'][$key]['dname']}</td><td>{$arr['answer']['services'][$key]['creation_date']}</td><td>{$arr['answer']['services'][$key]['expiration_date']}</td><td>{$arr['answer']['services'][$key]['state']}</td><td><i class='glyphicon glyphicon-pencil'></i></td></tr>";		
-	}
-	return $i;
-}
-
 function base32_map($i, $do = 'encode'){
 	$chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
 	if( $do == 'encode'){
@@ -2105,7 +2033,7 @@ function lepus_2fAuth(){
 		break;
 		case 'save':
 			if(empty($_POST['passwd']) || empty($_POST['code']) || empty($_POST['recode'])){
-					return 'empty_post_value';
+				return 'empty_post_value';
 			}
 			if($_POST['code'] != $_POST['recode'] || strlen($_POST['code']) != 16 || ctype_lower($_POST['code'])){
 				return 'wrong_2fa';

@@ -19,7 +19,7 @@ Bridge=br0
 ```
 
 ```
-nano /etc/systemd/network/br0.network
+# nano /etc/systemd/network/br0.network
 
 # This file sets the IP configuration of the primary (public) network device.
 # You can also see this as "OSI Layer 3" config.

@@ -48,3 +48,17 @@ Address=2001:41d0:1000:214c::/64
 Destination=2001:41d0:1000:21ff:ff:ff:ff:ff
 Scope=link
 ```
+
+```
+# nano /etc/systemd/network/50-public-interface.link
+
+[Match]
+MACAddress=0c:c4:7a:d9:c8:b8
+
+[Link]
+Description=network interface on public network, with default route
+MACAddressPolicy=persistent
+NamePolicy=kernel database onboard slot path mac
+#Name=eth0	# name under which this interface is known under OVH rescue system
+#Name=eno1	# name under which this interface is probably known by systemd
+```

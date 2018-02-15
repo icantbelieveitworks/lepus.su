@@ -28,7 +28,6 @@ Bridge=br0
 
 [Match]
 Name=br0
-#MACAddress=0c:c4:7a:d9:c8:b8
 
 [Network]
 Description=network interface on public network, with default route

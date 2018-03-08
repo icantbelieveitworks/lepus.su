@@ -768,7 +768,6 @@ function lepus_addCron($uid, $time, $url, $do, $id = 0){
 function telegram_send($msg){
 	global $conf;
 	file_get_contents("https://api.telegram.org/{$conf['telegram']}/sendMessage?chat_id=160138276&text=".urlencode($msg));
-	//file_get_contents("https://api.telegram.org/{$conf['telegram']}/sendMessage?chat_id=157056398&text=".urlencode($msg));	
 }
 
 function admin_lepus_getIPlist(){
@@ -1093,9 +1092,7 @@ function lepus_AutoExtend($uid = 0){
 		$arr = json_decode($row['data'], true);
 		$price = lepus_price($tmpRow['price'], $tmpRow['currency'])+lepus_price($arr['extra'], $arr['extra_currency']);
 		switch($tmpRow['handler']){
-			case 'VH':
 			case 'KVM':
-			case 'OpenVZ':
 				$toTask['order'] = $row['id'];
 			break;
 		}
@@ -1137,26 +1134,15 @@ function lepus_getService($id){
 	$arr = lepus_getExtra($id);
 	$price = lepus_price($tmpRow['price'], $tmpRow['currency'])+lepus_price($arr['extra'], $arr['extra_currency']);
 	switch($tmpRow['handler']){
-		case 'VH':
 		case 'KVM':
-		case 'OpenVZ':
 			if($row['server'] != 0){
-				if($tmpRow['handler'] == 'KVM'){
 				$bottom = "<hr/><select class=\"form-control\" id=\"idboot\" style=\"margin-top: 4px;\" name=\"type\"><option value=\"1\">Boot => hard drive</option><option value=\"2\">Boot => Debian (cdrom)</option><option value=\"3\">Boot => Ubuntu (cdrom)</option><option value=\"4\">Boot => CentOS (cdrom)</option></select>
 						   <input class=\"btn btn-sm btn-danger\" style=\"margin-top: 4px; width: 33%;\" data-vm-stopandstart={$id} type=\"submit\" value=\"Выключить => включить\">
 						   <input class=\"btn btn-sm btn-danger\" style=\"margin-top: 4px; width: 33%;\" data-vm-restart={$id} type=\"submit\" value=\"Перезагрузить\">
 						   <input class=\"btn btn-sm btn-danger\" style=\"margin-top: 4px; width: 32.9%;\" data-vm-restart-hard={$id} type=\"submit\" value=\"Перезагрузить (hard reboot)\">
 						   <input class=\"btn btn-sm btn-danger btn-block\" style=\"margin-top: 4px;\" data-vm-vnc={$id} type=\"submit\" value=\"Получить VNC доступ\">
 						   <hr/><table id=\"IPList\" class=\"table table-striped table-bordered\" cellspacing=\"0\" width=\"100%\"><thead><tr><th>ID</th><th>IP</th><th>MAC</th></tr></thead>".lepus_getListIP($id)."<tbody></tbody></table>";
-				}else{
-				$bottom = "<input class=\"btn btn-sm btn-danger btn-block\" style=\"margin-top: 4px;\" data-vm-restart={$id} type=\"submit\" value=\"Перезагрузить\">
-						   <hr/><table id=\"IPList\" class=\"table table-striped table-bordered\" cellspacing=\"0\" width=\"100%\"><thead><tr><th>ID</th><th>IP</th><th>MAC</th></tr></thead>".lepus_getListIP($id)."<tbody></tbody></table>";
-				}
 			}
-		break;
-		case 'OVH-DEDIC':
-		case 'HETZNER-DEDIC':
-			$bottom = "<hr/><table id=\"IPList\" class=\"table table-striped table-bordered\" cellspacing=\"0\" width=\"100%\"><thead><tr><th>ID</th><th>IP</th><th>MAC</th></tr></thead>".lepus_getListIP($id)."<tbody></tbody></table>";
 		break;
 	}
 	return ['id' => $row['id'], 'gid' => $tmpRow['gid'], 'sid' => $row['sid'], 'name' => $tmpRow['name'], 'time' => date("Y-m-d", $row['time2']), 'price' => $price, 'extra' => $arr['extra_text'], 'top' => $top, 'bottom' => $bottom, 'promised' => date("Y-m-d", $row['time3'])];
@@ -1247,7 +1233,6 @@ function lepus_changeTariff($id, $sid){
 	$row = $query->fetch();
 	$arr = json_decode($data['data'], true);
 	switch($row['handler']){
-		case 'VH':
 		case 'KVM':
 			$query = $db->prepare("SELECT * FROM `tariff` WHERE `id` = :id");
 			$query->bindParam(':id', $sid, PDO::PARAM_STR);
@@ -1473,7 +1458,7 @@ function lepus_doTask(){
 	if($data['do'] == 'create'){
 		if(empty($data['tiket']) || empty($data['tariff']) || empty($data['order'])) $err = 'wrong data params';
 	}
-	if($row['handler'] == 'OpenVZ' || $row['handler'] == 'KVM' || $row['handler'] = 'VH'){
+	if($row['handler'] == 'KVM'){
 		if($data['do'] == 'create'){
 			$server = lepus_searchFree($row['handler'], $data['tariff'], $data['order']);
 		}else{
@@ -1485,7 +1470,7 @@ function lepus_doTask(){
 			$update->bindParam(':sid', $server['id'], PDO::PARAM_STR);
 			$update->bindParam(':id', $data['order'], PDO::PARAM_STR);
 			$update->execute();
-			if($row['handler'] == 'KVM' || $row['handler'] == 'VH'){
+			if($row['handler'] == 'KVM'){
 				$update = $db->prepare("UPDATE `ipmanager` SET `service` = :service WHERE `ip` = :ip");
 				$update->bindParam(':service', $data['order'], PDO::PARAM_STR);
 				$update->bindParam(':ip', $server['ipvm'], PDO::PARAM_STR);
@@ -1504,17 +1489,12 @@ function lepus_doTask(){
 	if(empty($err)){
 		switch($row['handler']){
 			default: $info = 'no_handler'; break;
-			case 'VH':
 			case 'KVM':
-			case 'OpenVZ':
-				if($row['handler'] == 'KVM')
-					$commands = ['stop' => 'stopServer', 'start' => 'startServer', 'restart' => 'restartServer', 'hardrestart' => 'hardrestartServer', 'stopandstart' => 'stopANDstart', 'create' => 'createServer', 'change' => 'changeTariff'];
-				else
-					$commands = ['stop' => 'stopServer', 'start' => 'startServer', 'restart' => 'restartServer', 'create' => 'createServer', 'change' => 'changeTariff'];
+				$commands = ['stop' => 'stopServer', 'start' => 'startServer', 'restart' => 'restartServer', 'hardrestart' => 'hardrestartServer', 'stopandstart' => 'stopANDstart', 'create' => 'createServer', 'change' => 'changeTariff'];
 				switch($commands[$data['do']]){
 					default: $info = 'no_action'; break;
 					case 'changeTariff':
-						if($row['handler'] == 'VH' || $row['handler'] == 'KVM'){
+						if($row['handler'] == 'KVM'){
 							$info = send_changeTariff($commands[$data['do']], $server['ip'], $server['access'], $data['order']+100, "memory={$data['memory']}&cpus={$data['cpus']}&diskspace={$data['diskspace']}");
 						}
 					break;
@@ -1523,15 +1503,10 @@ function lepus_doTask(){
 					case 'restartServer':
 					case 'hardrestartServer':
 					case 'stopANDstart':
-						if($row['handler'] == 'OpenVZ'){
-							$info = lepus_sendToPythonAPI($server['ip'], $server['port'], $server['access'], $commands[$data['do']], $data['order']+100, $row['id']);
-						}
-						if($row['handler'] == 'KVM' || $row['handler'] == 'VH'){
-							if($commands[$data['do']] == 'restartServer' || $commands[$data['do']] == 'hardrestartServer' || $commands[$data['do']] == 'stopANDstart'){
-								 $info = send_kvm_restart($commands[$data['do']], $server['ip'], $server['access'], $data['order']+100, $data['boot']);
-							}else{
-								$info = send_kvm($commands[$data['do']], $server['ip'], $server['access'], $data['order']+100);
-							}
+						if($commands[$data['do']] == 'restartServer' || $commands[$data['do']] == 'hardrestartServer' || $commands[$data['do']] == 'stopANDstart'){
+							 $info = send_kvm_restart($commands[$data['do']], $server['ip'], $server['access'], $data['order']+100, $data['boot']);
+						}else{
+							$info = send_kvm($commands[$data['do']], $server['ip'], $server['access'], $data['order']+100);
 						}
 					break;
 					case 'createServer':
@@ -1540,10 +1515,6 @@ function lepus_doTask(){
 							if($row['handler'] == 'KVM'){
 								$s = 'VPS готова';
 								$s1 = 'root';
-							}
-							if($row['handler'] == 'VH'){
-								$s = "виртуальный хостинг готов";
-								$s1 = 'root или lepus [доступ от SFTP/ FTP/ SSH/ MySQL]';
 							}
 							$x = $db->prepare("SELECT * FROM `ipmanager` WHERE `service` = :id");
 							$x->bindParam(':id', $data['order'], PDO::PARAM_STR);
@@ -1626,7 +1597,7 @@ function lepus_searchFree($handler, $tariff, $id){
 				$points += $data[$tmpRow['sid']];
 			}
 			if($points+$need < $row['points']){
-				if($handler == 'KVM' || $handler == 'VH'){
+				if($handler == 'KVM'){
 					$xx = null;
 					$select_ip = $db->prepare("SELECT * FROM `ipmanager` WHERE `sid` = :server AND `service` = 0");
 					$select_ip->bindParam(':server', $row['id'], PDO::PARAM_STR);
@@ -1637,7 +1608,7 @@ function lepus_searchFree($handler, $tariff, $id){
 						$check_mac->bindParam(':server', $row['id'], PDO::PARAM_STR);
 						$check_mac->bindParam(':mac', $x['mac'], PDO::PARAM_STR);
 						$check_mac->execute();
-						if($check_mac->rowCount() == 1 || $handler == 'VH'){
+						if($check_mac->rowCount() == 1){
 							$xx = $x['ip'];
 							break;
 						}
@@ -1646,7 +1617,7 @@ function lepus_searchFree($handler, $tariff, $id){
 				}
 				$j = $points+$need;
 				$server = ['id' => $row['id'], 'ip' => long2ip($row['ip']), 'port' => $row['port'], 'access' => $row['access'], 'points' => $j];
-				if($handler == 'KVM' || $handler == 'VH'){
+				if($handler == 'KVM'){
 					$server['ipvm'] = $xx;
 				}
 				break;
@@ -1672,10 +1643,6 @@ function send_kvm($command, $host, $key, $id){
 	return file_get_contents("http://$host/index.php?id=$id&command=$command&key=$key");
 }
 
-function lepus_sendToPythonAPI($host, $port, $access, $action, $data, $id){
-	return file_get_contents("http://$host:$port/".md5($action.$access)."/$action/$data");
-}
-
 function lepus_getListIP($id){
 	global $db; $data = null; $i = 0;
 	$query = $db->prepare("SELECT * FROM `ipmanager` WHERE `service` = :id");
@@ -1698,9 +1665,7 @@ function lepus_userAddTask($id, $command){
 	$query->execute();
 	$row = $query->fetch();
 	switch($row['handler']){
-		case 'VH':
 		case 'KVM':
-		case 'OpenVZ':
 			if(time() < $info['time1']+60*60) return 'wait_60min'; // time to install vps
 			if($command == 'restart' || $command == 'hardrestart' || $command == 'stopandstart'){
 				if(empty($_POST['boot'])) $_POST['boot'] = 1;

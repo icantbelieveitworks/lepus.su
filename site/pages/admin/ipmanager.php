@@ -47,10 +47,9 @@ if($user['data']['access'] < 2) die('no_access');
 						Просмотр, поиск свободных адресов, редактирование, добавление, удаление.<br/>
 						<hr/>
 						<div class="form-inline">
-							<center><input class="form-control" id="ipAddress" style="width: 18%;" type="text" name="count" value="" required="" placeholder="127.0.0.1">
-							<input class="form-control" id="ipMAC"  style="width: 19%;"  type="text" name="count" value="" required="" placeholder="00:0a:95:9d:68:16">
-							<input class="form-control" id="ipHost"  style="width: 14%;"  type="text" name="count" value="" required="" placeholder="hostname">
-							<select id="ipServer" data-placeholder="Сервер..." class="chosen-select" style="width: 17%;">
+							<center><input class="form-control" id="ipAddress" style="width: 24%;" type="text" name="count" value="" required="" placeholder="127.0.0.1">
+							<input class="form-control" id="ipMAC"  style="width: 24%;"  type="text" name="count" value="" required="" placeholder="00:0a:95:9d:68:16">
+							<select id="ipServer" data-placeholder="Сервер..." class="chosen-select" style="width: 20%;">
 								<option value=""></option>
 									<option value=0>empty</option>
 									<?php echo lepus_getHTMLSelect('servers', 'domain'); ?>
@@ -71,7 +70,6 @@ if($user['data']['access'] < 2) die('no_access');
 									<th>SID</th>
 									<th>Owner</th>
 									<th>MAC</th>
-									<th>Domain</th>
 									<th></th>
 								</tr>
 							</thead>

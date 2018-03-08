@@ -12,8 +12,8 @@ for($i=0; $i < 4; $i++)
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 	<head>
-		<title>Лицензии</title>
-		<meta name="description" content="Купить лицензию ispmanager, billmanager" />
+		<title>SSL сертификаты</title>
+		<meta name="description" content="Купить ssl сертификат" />
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 		<meta name="yandex-verification" content="6940b644b3235f76" />
 		<link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
@@ -37,13 +37,9 @@ for($i=0; $i < 4; $i++)
 			<div class="content-box">
 				<div class="content-info box-shadow--2dp">
 					<div class="content-text">
-						<div class="page-title">Лицензии</div>
-						Статья про лицензии: ispsystem, vestacp, cloudlinux, kernelcare. + ссылки на маркеты где дешево купить.
+						<div class="page-title">SSL сертификаты</div>
 						<hr/>
-						<a href="https://ru-tld.ru/soft-ispsystem/">ru-tld.ru</a><br/>
-						<a href="https://hostsuki.pro/page/ispsystem/">hostsuki.pro</a><br/>
-						<a href="https://www.isplicense.com/">isplicense.com</a>
-						<hr/>
+						Статья про <a href="https://letsencrypt.org/">letsencrypt</a> + линк где можно заказать сертификат с проверкой организации.
 					</div>
 				</div>
 			</div>

@@ -6,7 +6,7 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/init/session.php');
 require_once($_SERVER['DOCUMENT_ROOT'].'/private/func.main.php');
 require_once($_SERVER['DOCUMENT_ROOT'].'/private/auth.php');
 $start_order = null;
-for($i=0; $i < 9; $i++)
+for($i=0; $i < 7; $i++)
 		$start_order .= "<td><a id=\"noclick\" class=\"btn btn-danger btn-xs\" rel=\"nofollow\" href=\"https://my.lepus.su/billmgr?func=showroom.redirect&redirect_to=desktop&startform=service.order.itemtype&newwindow=yes\" target=\"_blank\">заказать</a></td>";
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -28,7 +28,7 @@ for($i=0; $i < 9; $i++)
 		<script src="/js/alertify.js"></script>
 		<script src="/js/lepus.js"></script>
 		<style>
-			td,th { text-align: center; vertical-align: middle; }
+			td,th { text-align: center; vertical-align: middle !important; }
 		</style>
 	</head>
 	<body>
@@ -38,43 +38,7 @@ for($i=0; $i < 9; $i++)
 				<div class="content-info box-shadow--2dp">
 					<div class="content-text">
 						<div class="page-title">Домены</div>
-						<table class="table table-striped table-bordered">
-							<thead>
-								<tr>
-									<th>Зона</th>
-									<th>.RU</th>
-									<th>.РФ</th>
-									<th>.SU</th>
-									<th>.NAME</th>
-									<th>.COM</th>
-									<th>.NET</th>
-									<th>.ORG</th>
-									<th>.BIZ</th>
-									<th>.INFO</th>
-								</tr>
-							</thead>
-							<tbody>
-								<th>Цена</th>
-									<th><?php echo lepus_getBillprice(1, 1); ?></th>
-									<th><?php echo lepus_getBillprice(13, 1); ?></th>
-									<th><?php echo lepus_getBillprice(5, 1); ?></th>
-									<th><?php echo lepus_getBillprice(19, 1); ?></th>
-									<th><?php echo lepus_getBillprice(11, 1); ?></th>
-									<th><?php echo lepus_getBillprice(15, 1); ?></th>
-									<th><?php echo lepus_getBillprice(9, 1); ?></th>
-									<th><?php echo lepus_getBillprice(21, 1); ?></th>
-									<th><?php echo lepus_getBillprice(7, 1); ?></th>
-								</tr>
-								<tfoot>
-									<tr>
-										<td>&nbsp;</td>
-										<?php echo $start_order;?>
-									</tr>
-								</tfoot>
-							</tbody>
-						</table>
-						Хотите перенести к нам домены? Будем рады принять их на обслуживание.<br/>
-						<a href="https://lepus.su/pages/support.php">Создайте тикет</a> [необходимо авторизоваться на сайте] и мы поможем выполнить перенос.
+						Статья про домены + ссылки где купить.
 						<hr/>
 					</div>
 				</div>

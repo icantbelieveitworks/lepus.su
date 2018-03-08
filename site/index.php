@@ -5,15 +5,21 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/init/memcache.php');
 require_once($_SERVER['DOCUMENT_ROOT'].'/private/init/session.php');
 require_once($_SERVER['DOCUMENT_ROOT'].'/private/func.main.php');
 require_once($_SERVER['DOCUMENT_ROOT'].'/private/auth.php');
+$start_order = null;
+for($i=0; $i < 4; $i++){
+	if(!is_login())
+		$start_order .= "<td><a class=\"btn btn-danger btn-xs\" data-register-open rel=\"nofollow\">заказать</a></td>";
+	else
+		$start_order .= "<td><a class=\"btn btn-danger btn-xs\" rel=\"nofollow\" href=\"/pages/order.php\">заказать</a></td>";
+}
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 	<head>
-		<title>Lepus - интернет хостинг</title>
-		<meta name="description" content="Виртуальный хостинг, быстрые VPS, выделенные серверы по привлекательной цене." />
+		<title>Виртуальный хостинг</title>
+		<meta name="description" content="Купить надежный виртуальный хостинг" />
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-		<meta name='yandex-verification' content='450601432a8981ef' />
-		<meta name="unitpay-verification" content="f06067263051b3f5a73ddeebadf6fa" />
+		<meta name="yandex-verification" content="6940b644b3235f76" />
 		<link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
 		<link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css">
 		<link rel="stylesheet" type="text/css" href="/css/font-awesome.min.css">
@@ -25,6 +31,9 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/auth.php');
 		<script src="/js/bootstrap.min.js"></script>
 		<script src="/js/alertify.js"></script>
 		<script src="/js/lepus.js"></script>
+		<style>
+			td,th { text-align: center; vertical-align: middle !important; }
+		</style>
 	</head>
 	<body>
 		<div class="wrapper">
@@ -32,21 +41,93 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/auth.php');
 			<div class="content-box">
 				<div class="content-info box-shadow--2dp">
 					<div class="content-text">
-						<div class="page-title">Lepus хостинг</div>
-						Рады предложить вам услуги интернет хостинга. Готовы сотрудничать как с физическими, так и с юридическими лицами.<br/>
-						Работаем с крупными дата центрами <a href="https://www.ovh.com/us/about-us/" target="_blank" rel="nofollow">OVH</a> и <a href="https://www.hetzner.de/us/hosting/unternehmen/ueber-uns" target="_blank" rel="nofollow">Hetzner</a>. Принимаем к оплате: webmoney, yandex, paypal, qiwi и visa/ mastercard.
-						<br/><br/>
-						<p>
-							— <a href="/pages/domains.php">Регистрация доменов</a>.<br/>
-							— Мощные <a href="/pages/vps.php">KVM VPS</a> на SSD дисках.<br/>
-							— Moneyback по первому требованию.<br/>
-							— <a href="/pages/ovz.php">Виртуальный хостинг</a> для ваших сайтов.<br/>
-							— Быстрые <a href="/pages/servers.php">выделенные серверы</a> по выгодной цене.<br/>
-							— Бесплатный <a href="https://github.com/poiuty/lepus.su/wiki/%D0%9F%D0%B5%D1%80%D0%B5%D0%BD%D0%BE%D1%81-%D1%81%D0%B0%D0%B9%D1%82%D0%BE%D0%B2" target="_blank">перенос ваших сайтов</a> на наш хостинг.<br/><br/>
-						</p>
-						Для нас самое ценное - наши клиенты. Мы болеем за вас, радуемся вашим победам и успехам. Добро пожаловать!
-						<hr/>
-					</div>
+						<div class="page-title">Виртуальный хостинг</div>
+							<table class="table table-striped table-bordered">
+								<thead>
+									<tr>
+										<th>Тарифы</th>
+										<th>Basic</th>
+										<th><font color="IndianRed">Standard</font></th>
+										<th>Pro</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td>Сайтов</td>
+										<td>unlim</td>
+										<td>unlim</td>
+										<td>unlim</td>
+									</tr>
+									<tr>
+										<td>Диск [GB]</td>
+										<td>10</td>
+										<td>20</td>
+										<td>30</td>
+									</tr>
+									<tr>
+										<td>MySQL [GB]</td>
+										<td>2</td>
+										<td>4</td>
+										<td>6</td>
+									</tr>
+									<tr>
+										<td>FTP</td>
+										<td>+</td>
+										<td>+</td>
+										<td>+</td>
+									</tr>
+									<tr>
+										<td>Cron</td>
+										<td>+</td>
+										<td>+</td>
+										<td>+</td>
+									</tr>
+									<tr>
+										<td>PHP</td>
+										<td>+</td>
+										<td>+</td>
+										<td>+</td>
+									</tr>
+									<tr>
+										<td>phpMyAdmin</td>
+										<td>+</td>
+										<td>+</td>
+										<td>+</td>
+									</tr>
+									<tr>
+										<td style="line-height: 35px;">Панель управления</td>
+										<td class="text-center" colspan="3">ISPmanager 5</td>
+									</tr>
+									<tr>
+										<td>Дата-центр</td>
+										<td>OVH</td>
+										<td>OVH</td>
+										<td>OVH</td>
+									</tr>
+									<tr>
+										<td>Страна</td>
+										<td><img src="https://lepus.su/images/flags/france-flag.png" title="France"></td>
+										<td><img src="https://lepus.su/images/flags/france-flag.png" title="France"></td>
+										<td><img src="https://lepus.su/images/flags/france-flag.png" title="France"></td>
+									</tr>
+									<tr>
+										<th>Цена</th>
+										<td><b><?php echo lepus_getBillprice(45, 0); ?></b></td>
+										<td><b><?php echo lepus_getBillprice(49, 0); ?></b></td>
+										<td><b><?php echo lepus_getBillprice(53, 0); ?></b></td>
+									</tr>
+									<tfoot>
+										<tr>
+											<td>&nbsp;</td>
+											<td><a id="noclick" class="btn btn-danger btn-xs" rel="nofollow" href="https://my.lepus.su/billmgr?func=showroom.redirect&amp;redirect_to=desktop&amp;startform=service.order.itemtype&amp;newwindow=yes" target="_blank">заказать</a></td>
+											<td><a id="noclick" class="btn btn-danger btn-xs" rel="nofollow" href="https://my.lepus.su/billmgr?func=showroom.redirect&amp;redirect_to=desktop&amp;startform=service.order.itemtype&amp;newwindow=yes" target="_blank">заказать</a></td>
+											<td><a id="noclick" class="btn btn-danger btn-xs" rel="nofollow" href="https://my.lepus.su/billmgr?func=showroom.redirect&amp;redirect_to=desktop&amp;startform=service.order.itemtype&amp;newwindow=yes" target="_blank">заказать</a></td>
+										</tr>
+									</tfoot>
+								</tbody>
+							</table>
+							<hr/>
+						</div>
 				</div>
 			</div>
 			<?php require_once($_SERVER['DOCUMENT_ROOT'].'/private/pages/navi.php'); ?>

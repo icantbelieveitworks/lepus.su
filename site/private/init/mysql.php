@@ -6,7 +6,7 @@ try {
 }
 catch(PDOException $e) {
 	file_put_contents($_SERVER['DOCUMENT_ROOT'].'/private/logs/PDOErrors.txt', $e->getMessage().PHP_EOL, FILE_APPEND);
-	die('MySQL ERROR');
+	die('MySQL ERROR-1');
 }
 try {
 	$pdns = new PDO("mysql:host={$conf['pdns_host']};dbname={$conf['pdns_base']}", $conf['pdns_user'], $conf['pdns_pass']);
@@ -15,5 +15,5 @@ try {
 }
 catch(PDOException $e) {
 	file_put_contents($_SERVER['DOCUMENT_ROOT'].'/private/logs/PDOErrors.txt', $e->getMessage().PHP_EOL, FILE_APPEND);
-	die('MySQL ERROR');
+	die('MySQL ERROR-2');
 }

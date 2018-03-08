@@ -6,7 +6,7 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/init/session.php');
 require_once($_SERVER['DOCUMENT_ROOT'].'/private/func.main.php');
 require_once($_SERVER['DOCUMENT_ROOT'].'/private/auth.php');
 $start_order = null;
-for($i=0; $i < 5; $i++){
+for($i=0; $i < 3; $i++){
 	if(!is_login())
 		$start_order .= "<td><a class=\"btn btn-danger btn-xs\" data-register-open rel=\"nofollow\">заказать</a></td>";
 	else
@@ -33,7 +33,7 @@ for($i=0; $i < 5; $i++){
 		<script src="/js/alertify.js"></script>
 		<script src="/js/lepus.js"></script>
 		<style>
-			td,th { text-align: center; vertical-align: middle; }
+			td,th { text-align: center; vertical-align: middle !important; }
 		</style>
 	</head>
 	<body>
@@ -50,51 +50,39 @@ for($i=0; $i < 5; $i++){
 									<th>KVM1</th>
 									<th><font color="IndianRed">KVM2</font></th>
 									<th>KVM3</th>
-									<th>KVM4</th>
-									<th>KVM5</th>
 								</tr>
 							</thead>
 							<tbody>
 								<tr>
-									<td>CPU (MHz)</td>
-									<td>2200</td>
-									<td>2200</td>
-									<td>2200</td>
-									<td>2x2200</td>
-									<td>2x2200</td>
+									<td>CPU [MHz]</td>
+									<td>3600</td>
+									<td>3600</td>
+									<td>2x3600</td>
 								</tr>
 								<tr>
-									<td>Диск (Gb)</td>
-									<td>10</td>
+									<td>Диск [GB]</td>
 									<td>20</td>
 									<td>30</td>
 									<td>40</td>
-									<td>50</td>
 								</tr>
 								<tr>
-									<td>RAM (Mb)</td>
-									<td>1024</td>
+									<td>RAM [MB]</td>
 									<td>2048</td>
-									<td>3072</td>
 									<td>4096</td>
-									<td>5120</td>
+									<td>6144</td>
 								</tr>
 								<tr>
 									<td style="line-height: 35px;">ОС</td>
-									<td class="text-center" colspan="5"><img src="https://lepus.su/images/flags/debian.png" title="Debian"> <img src="https://lepus.su/images/flags/ubuntu.png" style="margin-left: 55px;" title="Ubuntu"> <img src="https://lepus.su/images/flags/centos.png" style="margin-left: 55px;" title="CentOS"></td>
+									<td class="text-center" colspan="3"><img src="https://lepus.su/images/flags/debian.png" title="Debian"> <img src="https://lepus.su/images/flags/ubuntu.png" style="margin-left: 55px;" title="Ubuntu"> <img src="https://lepus.su/images/flags/centos.png" style="margin-left: 55px;" title="CentOS"></td>
 								</tr>
 								<tr>
 									<td>Дата-центр</td>
 									<td>OVH</td>
 									<td>OVH</td>
 									<td>OVH</td>
-									<td>OVH</td>
-									<td>OVH</td>
 								</tr>
 								<tr>
 									<td style="line-height: 25px;">Страна</td>
-									<td><img src="https://lepus.su/images/flags/france-flag.png" title="France"></td>
-									<td><img src="https://lepus.su/images/flags/france-flag.png" title="France"></td>
 									<td><img src="https://lepus.su/images/flags/france-flag.png" title="France"></td>
 									<td><img src="https://lepus.su/images/flags/france-flag.png" title="France"></td>
 									<td><img src="https://lepus.su/images/flags/france-flag.png" title="France"></td>
@@ -111,9 +99,6 @@ for($i=0; $i < 5; $i++){
 								</tfoot>
 							</tbody>
 						</table>
-						Предлагаем решение на базе виртуализации KVM. Бесплатно <a href="https://github.com/poiuty/lepus.su/wiki/%D0%9F%D0%B5%D1%80%D0%B5%D0%BD%D0%BE%D1%81-%D1%81%D0%B0%D0%B9%D1%82%D0%BE%D0%B2" target="_blank">перенесем ваши сайты</a>. <u><i>Новым клиентам 50% скидка!</i></u><br/>
-						Подключение к сети 100Mb/s, защита от DDoS (tcp/udp) на уровне дата-центра, SSD диск, низкий пинг (~40ms MSK).<br/>
-						В качестве панели управления, мы предлагаем использовать <a href="https://my.lepus.su/billmgr?func=showroom.redirect&redirect_to=desktop&startform=service.order.itemtype&newwindow=yes" target="_blank">ISPmanager</a> [<?php echo lepus_getBillprice(17, 0); ?> руб/ месяц] или <a href="http://vestacp.com/" target="_blank">VestaCP</a> [бесплатная].
 						<hr/>
 					</div>
 				</div>

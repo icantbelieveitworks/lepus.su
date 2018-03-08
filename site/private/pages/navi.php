@@ -43,8 +43,6 @@ if(empty($user)){ ?>
 				<li><a href="/pages/service.php">Все услуги</a></li>
 				<li><a href="/pages/service.php?q=2">VPS хостинг</a></li>
 				<li><a href="/pages/dns.php">DNS хостинг</a></li>
-				<li><a href="https://my.lepus.su/billmgr?func=showroom.redirect&redirect_to=desktop&startform=service.order.itemtype&newwindow=yes" target="_blank">Домены и лицензии</a></li>
-				<li><a href="/pages/service.php?q=4">Администрирование</a></li>
 				<li><a href="/pages/service.php?q=5">Виртуальный xостинг</a></li>
 				<li><a href="/pages/service.php?q=3">Выделенные серверы</a></li>
 				<hr/>

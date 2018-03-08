@@ -12,7 +12,7 @@ for($i=0; $i < 4; $i++)
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 	<head>
-		<title>Лицензии</title>
+		<title>Аутсорсинг</title>
 		<meta name="description" content="Купить лицензию ispmanager, billmanager" />
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 		<meta name="yandex-verification" content="6940b644b3235f76" />
@@ -37,12 +37,8 @@ for($i=0; $i < 4; $i++)
 			<div class="content-box">
 				<div class="content-info box-shadow--2dp">
 					<div class="content-text">
-						<div class="page-title">Лицензии</div>
-						Статья про лицензии: ispsystem, vestacp, cloudlinux, kernelcare. + ссылки на маркеты где дешево купить.
-						<hr/>
-						<a href="https://ru-tld.ru/soft-ispsystem/">ru-tld.ru</a><br/>
-						<a href="https://hostsuki.pro/page/ispsystem/">hostsuki.pro</a><br/>
-						<a href="https://www.isplicense.com/">isplicense.com</a>
+						<div class="page-title">Аутсорсинг</div>
+						Администрирование: <a href="https://www.isplicense.ru/services/administration/">isplicense.com</a>, <a href="http://admin-linux.net/">admin-linux.net</a>
 						<hr/>
 					</div>
 				</div>

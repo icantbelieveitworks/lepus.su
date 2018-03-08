@@ -11,7 +11,7 @@ foreach($xml->Cube->Cube->Cube as $rate){
 	if($rate['currency'] == 'RUB'){
 		$j = floatval($rate['rate']);
 		if(is_numeric($j)){
-			$update = $db->prepare("UPDATE `currency` SET `val` =:rate WHERE `name` = 'EUR2'");
+			$update = $db->prepare("UPDATE `currency` SET `val` =:rate WHERE `name` = 'EUR'");
 			$update->bindParam(':rate', $j, PDO::PARAM_STR);
 			$update->execute();
 		}

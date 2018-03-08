@@ -39,7 +39,7 @@ require_once($_SERVER['DOCUMENT_ROOT'].'/private/auth.php');
 						<select class="form-control" id="idServiceOrder" name="type">
 							<?php echo lepus_getTariffList(); ?>
 						</select>
-						<input id="promo_code" class="form-control" style="margin-top: 4px;" type="text" value="" required="" placeholder="Промокод (если вы новый клиент, напишите NEW и получите 50% скидку на хостинг и VPS)">
+						<input id="promo_code" class="form-control" style="margin-top: 4px;" type="text" value="" required="" placeholder="Промокод">
 						<input class="btn btn-sm btn-danger btn-block" data-order-service style="margin-top: 4px;" type="submit" value="Заказать">
 						<hr/>
 					</div>

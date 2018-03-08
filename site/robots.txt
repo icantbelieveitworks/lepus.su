@@ -1,6 +1,6 @@
 User-agent: *
 Allow: /$
-Allow: /pages/ovz.php$
+Allow: /pages/hosting.php$
 Allow: /pages/vps.php$
 Allow: /pages/servers.php$
 Allow: /pages/domains.php$
@@ -8,13 +8,13 @@ Allow: /pages/license.php$
 Allow: /pages/doc.php$
 Allow: /pages/contacts.php$
 Allow: /sitemap.xml$
-Allow: /*.js
-Allow: /*.css
-Allow: /*.png
-Allow: /*.gif
-Allow: /*.bmp
-Allow: /*.jpg
-Allow: /*.jpeg
+Allow: /*.js$
+Allow: /*.css$
+Allow: /*.png$
+Allow: /*.gif$
+Allow: /*.bmp$
+Allow: /*.jpg$
+Allow: /*.jpeg$
 Disallow: /
 
 Host: lepus.su

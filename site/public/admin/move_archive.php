@@ -9,5 +9,5 @@ if(!is_login()) die("no_login");
 if($user['data']['access'] < 2)
 	 $tmpData = error('no_access');
 else
-	$tmpData = error(lepus_admin_removeIP(intval($_POST['id'])));
+	$tmpData = error(lepus_moveToArchive(intval($_POST['id'])));
 echo json_encode($tmpData);

@@ -177,7 +177,7 @@ function lepus_crypt($input, $do = 'encode'){
 }
 
 function lepus_new_account($login){
-	global $db; $login = mb_strtolower($login); $allow = ['RU', 'UA', 'BY'];
+	global $db; $login = mb_strtolower($login); $allow = ['RU', 'UA', 'BY', 'MD', 'EE'];
 	if(lepus_checkBan($login) || lepus_checkBan()) return 'no_access';
 	if(!in_array(geoip_country_code_by_name($_SERVER['REMOTE_ADDR']), $allow)) return "no_access";
 	if(empty($login)) return 'empty_post_value';
@@ -223,7 +223,7 @@ function lepus_get_logip($id, $i = 0){
 
 function lepus_addDNSDomain($domain, $type, $master, $id){
 	global $pdns; $arr = array_reverse(explode(".", $domain));
-	$lvl = ['kiev.ua', 'com.ua', 'pp.ua', 'ru.com', 'com.kz', 'org.kz', 'co.am', 'com.am', 'net.am', 'msk.ru', 'org.ru',
+	$lvl = ['kiev.ua', 'com.ua', 'pp.ua', 'ru.com', 'com.kz', 'org.kz', 'co.am', 'com.am', 'net.am', 'msk.ru', 'org.ru', 'com.au',
 			'org.am', 'co.in', 'net.in', 'org.in', 'gen.in', 'firm.in', 'ind.in', 'za.com', 'uy.com', 'br.com', 'msk.su',
 			'spb.su', 'spb.ru', 'com.ru', 'ru.net', 'co.ua', 'od.ua', 'in.ua', 'net.ua', 'kh.ua', 'kharkov.ua', 'co.uk', 'vn.ua', 'org.ua'];
 	if(count($arr) > 2){
@@ -793,7 +793,7 @@ function admin_lepus_getIPlist(){
 			$row['sid'] = 'empty';
 		}
 		$row['ip'] = long2ip($row['ip']);
-		$data .= "<tr><td>{$row['id']}</td><td>{$row['ip']}</td><td>{$row['sid']}</td><td>{$row['service']}</td><td>{$row['owner']}</td><td>{$row['mac']}</td><td>{$row['domain']}</td><td><a href=\"nourl\" data-adminip-delete-id=\"{$row['id']}\"><i class=\"glyphicon glyphicon-remove\"></i></a></td></tr>";
+		$data .= "<tr><td>{$row['id']}</td><td>{$row['ip']}</td><td>{$row['sid']}</td><td>{$row['service']}</td><td>{$row['owner']}</td><td>{$row['mac']}</td><td><a href=\"nourl\" data-adminip-delete-id=\"{$row['id']}\"><i class=\"glyphicon glyphicon-remove\"></i></a></td></tr>";
 	}
 	return $data;
 }
@@ -986,7 +986,7 @@ function lepus_getLogSpend($id, $i = 0){
 
 function lepus_getPageNavi(){
 	$navi = ''; 
-	$pages = ['/' => 'Главная', '/pages/ovz.php' => 'Хостинг', '/pages/vps.php' => 'VPS', '/pages/servers.php' => 'Серверы',  '/pages/ssl.php' => 'SSL', '/pages/domains.php' => 'Домены', '/pages/license.php' => 'Лицензии', '/pages/contacts.php' => 'Контакты'];
+	$pages = ['/' => 'Хостинг', '/pages/vps.php' => 'VPS', '/pages/servers.php' => 'Серверы',  '/pages/ssl.php' => 'SSL', '/pages/domains.php' => 'Домены', '/pages/license.php' => 'Лицензии', '/pages/outsourcing.php' => 'Аутсорсинг', '/pages/contacts.php' => 'Контакты'];
 	foreach($pages as $key => $val){
 		if($_SERVER["REQUEST_URI"] == $key)
 			$navi .= "<li class=\"active\"><a href=\"$key\">$val</a></li>";
@@ -1147,16 +1147,16 @@ function lepus_getService($id){
 						   <input class=\"btn btn-sm btn-danger\" style=\"margin-top: 4px; width: 33%;\" data-vm-restart={$id} type=\"submit\" value=\"Перезагрузить\">
 						   <input class=\"btn btn-sm btn-danger\" style=\"margin-top: 4px; width: 32.9%;\" data-vm-restart-hard={$id} type=\"submit\" value=\"Перезагрузить (hard reboot)\">
 						   <input class=\"btn btn-sm btn-danger btn-block\" style=\"margin-top: 4px;\" data-vm-vnc={$id} type=\"submit\" value=\"Получить VNC доступ\">
-						   <hr/><table id=\"IPList\" class=\"table table-striped table-bordered\" cellspacing=\"0\" width=\"100%\"><thead><tr><th>ID</th><th>IP</th><th>Domain</th><th>MAC</th></tr></thead>".lepus_getListIP($id)."<tbody></tbody></table>";
+						   <hr/><table id=\"IPList\" class=\"table table-striped table-bordered\" cellspacing=\"0\" width=\"100%\"><thead><tr><th>ID</th><th>IP</th><th>MAC</th></tr></thead>".lepus_getListIP($id)."<tbody></tbody></table>";
 				}else{
 				$bottom = "<input class=\"btn btn-sm btn-danger btn-block\" style=\"margin-top: 4px;\" data-vm-restart={$id} type=\"submit\" value=\"Перезагрузить\">
-						   <hr/><table id=\"IPList\" class=\"table table-striped table-bordered\" cellspacing=\"0\" width=\"100%\"><thead><tr><th>ID</th><th>IP</th><th>Domain</th><th>MAC</th></tr></thead>".lepus_getListIP($id)."<tbody></tbody></table>";
+						   <hr/><table id=\"IPList\" class=\"table table-striped table-bordered\" cellspacing=\"0\" width=\"100%\"><thead><tr><th>ID</th><th>IP</th><th>MAC</th></tr></thead>".lepus_getListIP($id)."<tbody></tbody></table>";
 				}
 			}
 		break;
 		case 'OVH-DEDIC':
 		case 'HETZNER-DEDIC':
-			$bottom = "<hr/><table id=\"IPList\" class=\"table table-striped table-bordered\" cellspacing=\"0\" width=\"100%\"><thead><tr><th>ID</th><th>IP</th><th>Domain</th><th>MAC</th></tr></thead>".lepus_getListIP($id)."<tbody></tbody></table>";
+			$bottom = "<hr/><table id=\"IPList\" class=\"table table-striped table-bordered\" cellspacing=\"0\" width=\"100%\"><thead><tr><th>ID</th><th>IP</th><th>MAC</th></tr></thead>".lepus_getListIP($id)."<tbody></tbody></table>";
 		break;
 	}
 	return ['id' => $row['id'], 'gid' => $tmpRow['gid'], 'sid' => $row['sid'], 'name' => $tmpRow['name'], 'time' => date("Y-m-d", $row['time2']), 'price' => $price, 'extra' => $arr['extra_text'], 'top' => $top, 'bottom' => $bottom, 'promised' => date("Y-m-d", $row['time3'])];
@@ -1683,7 +1683,7 @@ function lepus_getListIP($id){
 	$query->execute();
 	while($row = $query->fetch()){
 		$row['ip'] = long2ip($row['ip']);
-		$i++; $data .= "<tr><td>$i</td> <td>{$row['ip']}</td> <td>{$row['domain']}</td> <td>{$row['mac']}</td> </tr>";
+		$i++; $data .= "<tr><td>$i</td> <td>{$row['ip']}</td> <td>{$row['mac']}</td> </tr>";
 	}
 	return $data;
 }
@@ -1763,7 +1763,7 @@ function lepus_closeTikets(){
 
 function lepus_getBillprice($id, $period, $j = 0){
 	global $conf, $cache;
-	$eur = lepus_price(1, 'EUR2');
+	$eur = lepus_price(1, 'EUR');
 	$price = $cache->get("billprice.$id.$period");
 	if($price === FALSE || $price == 0 || $j == 1){
 		$ctx = stream_context_create(['http'=> ['timeout' => 30]]);

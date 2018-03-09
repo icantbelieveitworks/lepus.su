@@ -1495,7 +1495,7 @@ function lepus_doTask(){
 					default: $info = 'no_action'; break;
 					case 'changeTariff':
 						if($row['handler'] == 'KVM'){
-							$info = send_changeTariff($commands[$data['do']], $server['ip'], $server['access'], $data['order']+100, "memory={$data['memory']}&cpus={$data['cpus']}&diskspace={$data['diskspace']}");
+							$info = send_changeTariff($commands[$data['do']], $server['host'], $server['access'], $data['order']+100, "memory={$data['memory']}&cpus={$data['cpus']}&diskspace={$data['diskspace']}");
 						}
 					break;
 					case 'startServer':
@@ -1504,13 +1504,13 @@ function lepus_doTask(){
 					case 'hardrestartServer':
 					case 'stopANDstart':
 						if($commands[$data['do']] == 'restartServer' || $commands[$data['do']] == 'hardrestartServer' || $commands[$data['do']] == 'stopANDstart'){
-							 $info = send_kvm_restart($commands[$data['do']], $server['ip'], $server['access'], $data['order']+100, $data['boot']);
+							 $info = send_kvm_restart($commands[$data['do']], $server['host'], $server['access'], $data['order']+100, $data['boot']);
 						}else{
-							$info = send_kvm($commands[$data['do']], $server['ip'], $server['access'], $data['order']+100);
+							$info = send_kvm($commands[$data['do']], $server['host'], $server['access'], $data['order']+100);
 						}
 					break;
 					case 'createServer':
-						$info = send_kvm('getStatus', $server['ip'], $server['access'], $data['order']+100);
+						$info = send_kvm('getStatus', $server['host'], $server['access'], $data['order']+100);
 						if($info == 'running'){
 							if($row['handler'] == 'KVM'){
 								$s = 'VPS готова';
@@ -1568,14 +1568,11 @@ function lepus_searchFree($handler, $tariff, $id){
 		$query->bindParam(':id', $row['server'], PDO::PARAM_STR);
 		$query->execute();
 		$row = $query->fetch();
-		if($handler == 'KVM'){
-			$query = $db->prepare("SELECT * FROM `ipmanager` WHERE `service` = :id");
-			$query->bindParam(':id', $row['server'], PDO::PARAM_STR);
-			$query->execute();
-			$tmpData = $query->fetch();
-			return ['id' => $row['id'], 'ip' => long2ip($row['ip']), 'port' => $row['port'], 'access' => $row['access'], 'ipvm' => $tmpData['ip']];
-		}
-		return ['id' => $row['id'], 'ip' => long2ip($row['ip']), 'port' => $row['port'], 'access' => $row['access']];
+		$query = $db->prepare("SELECT * FROM `ipmanager` WHERE `service` = :id");
+		$query->bindParam(':id', $row['server'], PDO::PARAM_STR);
+		$query->execute();
+		$tmpData = $query->fetch();
+		return ['id' => $row['id'], 'ip' => long2ip($row['ip']), 'port' => $row['port'], 'host' => $row['domain'], 'access' => $row['access'], 'ipvm' => $tmpData['ip']];
 	}
 	if(!empty($tariff)){
 		$query = $db->prepare("SELECT * FROM `tariff` WHERE `handler` = :handler");
@@ -1628,19 +1625,19 @@ function lepus_searchFree($handler, $tariff, $id){
 }
 
 function send_changeTariff($command, $host, $key, $id, $get){
-	return file_get_contents("http://$host/index.php?id=$id&command=$command&key=$key&$get");
+	return file_get_contents("https://$host/index.php?id=$id&command=$command&key=$key&$get");
 }
 
 function send_kvm_restart($command, $host, $key, $id, $boot){
-	return file_get_contents("http://$host/index.php?id=$id&command=$command&key=$key&boot=$boot");
+	return file_get_contents("https://$host/index.php?id=$id&command=$command&key=$key&boot=$boot");
 }
 
 function send_kvm_vnc($command, $host, $key, $id, $passwd){
-	return file_get_contents("http://$host/index.php?id=$id&command=$command&key=$key&vnc=$passwd");
+	return file_get_contents("https://$host/index.php?id=$id&command=$command&key=$key&vnc=$passwd");
 }
 
 function send_kvm($command, $host, $key, $id){
-	return file_get_contents("http://$host/index.php?id=$id&command=$command&key=$key");
+	return file_get_contents("https://$host/index.php?id=$id&command=$command&key=$key");
 }
 
 function lepus_getListIP($id){
@@ -1794,7 +1791,7 @@ function lepus_kvmVNC($id, $do){
 	$text = str_replace("0.0.0.0", "Настройки подключения: {$server['ip']}", $text);
 	if($do == 'passwd'){
 		$passwd = genRandStr(32);
-		send_kvm_vnc('changeVNC', $server['ip'], $server['access'], $id+100, $passwd);
+		send_kvm_vnc('changeVNC', $server['host'], $server['access'], $id+100, $passwd);
 		$text .= "<br/>Пароль: ".md5($passwd);
 	}
 	return $text;

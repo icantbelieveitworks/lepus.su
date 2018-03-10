@@ -1618,7 +1618,11 @@ function lepus_searchFree($handler, $tariff, $id){
 	return $server;
 }
 
+
+
+
 function lepus_kvmSend($host, $arr){
+	$arr['key'] = hash('sha256', $arr['key'].gethostbyname("lepus.su"));
 	$ch	= curl_init("https://$host/index.php");
 	curl_setopt($ch, CURLOPT_POST, true);
 	curl_setopt($ch, CURLOPT_POSTFIELDS, $arr);

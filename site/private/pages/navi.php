@@ -44,7 +44,6 @@ if(empty($user)){ ?>
 				<li><a href="/pages/service.php?q=2">VPS хостинг</a></li>
 				<li><a href="/pages/dns.php">DNS хостинг</a></li>
 				<li><a href="/pages/service.php?q=5">Виртуальный xостинг</a></li>
-				<li><a href="/pages/service.php?q=3">Выделенные серверы</a></li>
 				<hr/>
 				<li><a href="/pages/support.php">Тех. поддержка</a></li>
 				<li><a href="/pages/spend.php">Логи оплаты услуг</a></li>

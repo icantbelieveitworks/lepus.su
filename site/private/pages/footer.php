@@ -1,7 +1,7 @@
 <div class="footer-box">
 	<div class="footer box-shadow--2dp">
 		<p class="bannes" style="width:250px;">
-			<a href="https://github.com/poiuty/lepus.su" target="_blank" rel="nofollow"><img src="/images/other/github.png"></a>
+			<a href="https://github.com/icantbelieveitworks/lepus.su" target="_blank" rel="nofollow"><img src="/images/other/github.png"></a>
 			<a href="https://wiki.lepus.su/" target="_blank" rel="nofollow"><img src="/images/other/base.png"/></a>
 			<a href="https://www.kernel.org/" target="_blank" rel="nofollow"><img src="/images/other/linux_logo.png"/></a>
 		</p>

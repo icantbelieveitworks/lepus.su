@@ -38,7 +38,7 @@ if(empty($user)){ ?>
 				<li><a href="/pages/cp.php">Пополнить счет</a></li>
 				<li><a href="/pages/cron.php">Планировщик задач</a></li>
 				<li><a href="/pages/2fa.php">2FA аутентификация</a></li>
-				<li><a href="https://github.com/poiuty/lepus.su/issues" target="_blank">Пожелания и ошибки</a></li>
+				<li><a href="https://github.com/icantbelieveitworks/lepus.su/issues" target="_blank">Пожелания и ошибки</a></li>
 				<hr>
 				<li><a href="/pages/service.php">Все услуги</a></li>
 				<li><a href="/pages/service.php?q=2">VPS хостинг</a></li>

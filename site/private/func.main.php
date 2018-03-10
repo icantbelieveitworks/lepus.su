@@ -1488,39 +1488,33 @@ function lepus_doTask(){
 	}
 	if(empty($err)){
 		switch($row['handler']){
-			default: $info = 'no_handler'; break;
+			default:
+				$info = 'no_handler';
+			break;
 			case 'KVM':
 				$commands = ['stop' => 'stopServer', 'start' => 'startServer', 'restart' => 'restartServer', 'hardrestart' => 'hardrestartServer', 'stopandstart' => 'stopANDstart', 'create' => 'createServer', 'change' => 'changeTariff'];
 				switch($commands[$data['do']]){
-					default: $info = 'no_action'; break;
+					default:
+						$info = 'no_action';
+					break;
 					case 'changeTariff':
-						if($row['handler'] == 'KVM'){
-							$info = send_changeTariff($commands[$data['do']], $server['host'], $server['access'], $data['order']+100, "memory={$data['memory']}&cpus={$data['cpus']}&diskspace={$data['diskspace']}");
-						}
+						$info = lepus_kvmSend($server['host'], ['key' => $server['access'], 'command' => $commands[$data['do']], 'id' =>  $data['order']+100, 'memory' => $data['memory'], 'cpus' => $data['cpus'], 'diskspace' => $data['diskspace']]);
 					break;
 					case 'startServer':
 					case 'stopServer':
 					case 'restartServer':
 					case 'hardrestartServer':
 					case 'stopANDstart':
-						if($commands[$data['do']] == 'restartServer' || $commands[$data['do']] == 'hardrestartServer' || $commands[$data['do']] == 'stopANDstart'){
-							 $info = send_kvm_restart($commands[$data['do']], $server['host'], $server['access'], $data['order']+100, $data['boot']);
-						}else{
-							$info = send_kvm($commands[$data['do']], $server['host'], $server['access'], $data['order']+100);
-						}
+						$info = lepus_kvmSend($server['host'], ['key' => $server['access'], 'command' => $commands[$data['do']], 'id' => $data['order']+100, 'boot' => $data['boot']]);
 					break;
 					case 'createServer':
-						$info = send_kvm('getStatus', $server['host'], $server['access'], $data['order']+100);
+						$info = lepus_kvmSend($server['host'], ['key' => $server['access'], 'command' => 'getStatus', 'id' => $data['order']+100]);						
 						if($info == 'running'){
-							if($row['handler'] == 'KVM'){
-								$s = 'VPS готова';
-								$s1 = 'root';
-							}
 							$x = $db->prepare("SELECT * FROM `ipmanager` WHERE `service` = :id");
 							$x->bindParam(':id', $data['order'], PDO::PARAM_STR);
 							$x->execute();
 							$r = $x->fetch();
-							$_POST['msg'] = "Дорогой клиент, $s.\nIP: ".long2ip($r['ip'])."\nLogin: $s1\nPassword: {$data['passwd']}\nПожалуйста, поменяйте пароль.\nВы можете посмотреть более подробную информацию об услуге [url=https://lepus.su/pages/view.php?id={$data['order']}]на этой странице[/url].";
+							$_POST['msg'] = "Дорогой клиент, VPS готова.\nIP: ".long2ip($r['ip'])."\nLogin: root\nPassword: {$data['passwd']}\nПожалуйста, поменяйте пароль.\nВы можете посмотреть более подробную информацию об услуге [url=https://lepus.su/pages/view.php?id={$data['order']}]на этой странице[/url].";
 							support_msg(5, $data['tiket'], 2, 1);
 						}else{
 							$update = $db->prepare("UPDATE `task` SET `status` = 0 WHERE `id` = :id");
@@ -1624,20 +1618,21 @@ function lepus_searchFree($handler, $tariff, $id){
 	return $server;
 }
 
-function send_changeTariff($command, $host, $key, $id, $get){
-	return file_get_contents("https://$host/index.php?id=$id&command=$command&key=$key&$get");
-}
-
-function send_kvm_restart($command, $host, $key, $id, $boot){
-	return file_get_contents("https://$host/index.php?id=$id&command=$command&key=$key&boot=$boot");
-}
-
-function send_kvm_vnc($command, $host, $key, $id, $passwd){
-	return file_get_contents("https://$host/index.php?id=$id&command=$command&key=$key&vnc=$passwd");
-}
-
-function send_kvm($command, $host, $key, $id){
-	return file_get_contents("https://$host/index.php?id=$id&command=$command&key=$key");
+function lepus_kvmSend($host, $arr){
+	$ch	= curl_init("https://$host/index.php");
+	curl_setopt($ch, CURLOPT_POST, true);
+	curl_setopt($ch, CURLOPT_POSTFIELDS, $arr);
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+	curl_setopt($ch, CURLOPT_VERBOSE, 1);
+	curl_setopt($ch, CURLOPT_NOBODY, 0);
+	curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+	curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);	
+	$x = curl_exec($ch);	
+	if(curl_errno($ch)){
+		$x = 'Curl error: '.curl_error($ch);
+	}
+	curl_close($ch);
+	return $x;
 }
 
 function lepus_getListIP($id){

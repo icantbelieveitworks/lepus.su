@@ -1618,12 +1618,9 @@ function lepus_searchFree($handler, $tariff, $id){
 	return $server;
 }
 
-
-
-
 function lepus_kvmSend($host, $arr){
 	$arr['key'] = hash('sha256', $arr['key'].gethostbyname("lepus.su"));
-	$ch	= curl_init("https://$host/index.php");
+	$ch = curl_init("https://$host/index.php");
 	curl_setopt($ch, CURLOPT_POST, true);
 	curl_setopt($ch, CURLOPT_POSTFIELDS, $arr);
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -1700,8 +1697,8 @@ function IsTorExitPoint(){
 }
 
 function ReverseIPOctets($inputip){
-		$ipoc = explode(".",$inputip);
-		return $ipoc[3].".".$ipoc[2].".".$ipoc[1].".".$ipoc[0];
+	$ipoc = explode(".",$inputip);
+	return $ipoc[3].".".$ipoc[2].".".$ipoc[1].".".$ipoc[0];
 }
 
 function lepus_changeAPIkey(){
@@ -1786,11 +1783,11 @@ function lepus_kvmVNC($id, $do){
 	if(!is_array($info)) return 'Нет доступа';
 	if(time() > $info['time2']) return 'Услуга не оплачена';
 	$server = lepus_searchFree('KVM', 0, $id);
-	$text = send_kvm('portVNC', $server['ip'], $server['access'], $id+100);
-	$text = str_replace("0.0.0.0", "Настройки подключения: {$server['ip']}", $text);
+	$port = lepus_kvmSend($server['host'], ['key' => $server['access'], 'command' => 'portVNC', 'id' => $id+100]);	
+	$text = "Настройки подключения: {$server['ip']}:{$port}";
 	if($do == 'passwd'){
 		$passwd = genRandStr(32);
-		send_kvm_vnc('changeVNC', $server['host'], $server['access'], $id+100, $passwd);
+		lepus_kvmSend($server['host'], ['key' => $server['access'], 'command' => 'changeVNC', 'id' => $id+100, 'vnc' => $passwd]);
 		$text .= "<br/>Пароль: ".md5($passwd);
 	}
 	return $text;

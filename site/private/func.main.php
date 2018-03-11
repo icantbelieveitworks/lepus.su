@@ -1137,7 +1137,7 @@ function lepus_getService($id){
 		case 'KVM':
 			if($row['server'] != 0){
 				$bottom = "<hr/><select class=\"form-control\" id=\"idboot\" style=\"margin-top: 4px;\" name=\"type\"><option value=\"1\">Boot => hard drive</option><option value=\"2\">Boot => Debian (cdrom)</option><option value=\"3\">Boot => Ubuntu (cdrom)</option><option value=\"4\">Boot => CentOS (cdrom)</option></select>
-						   <input class=\"btn btn-sm btn-danger\" style=\"margin-top: 4px; width: 33%;\" data-vm-stopandstart={$id} type=\"submit\" value=\"Выключить => включить\">
+						   <input class=\"btn btn-sm btn-danger\" style=\"margin-top: 4px; width: 33%;\" data-vm-stopandstart={$id} type=\"submit\" value=\"Выключить/ включить\">
 						   <input class=\"btn btn-sm btn-danger\" style=\"margin-top: 4px; width: 33%;\" data-vm-restart={$id} type=\"submit\" value=\"Перезагрузить\">
 						   <input class=\"btn btn-sm btn-danger\" style=\"margin-top: 4px; width: 32.9%;\" data-vm-restart-hard={$id} type=\"submit\" value=\"Перезагрузить (hard reboot)\">
 						   <input class=\"btn btn-sm btn-danger btn-block\" style=\"margin-top: 4px;\" data-vm-vnc={$id} type=\"submit\" value=\"Получить VNC доступ\">
@@ -1783,14 +1783,13 @@ function lepus_kvmVNC($id, $do){
 	if(!is_array($info)) return 'Нет доступа';
 	if(time() > $info['time2']) return 'Услуга не оплачена';
 	$server = lepus_searchFree('KVM', 0, $id);
-	$port = lepus_kvmSend($server['host'], ['key' => $server['access'], 'command' => 'portVNC', 'id' => $id+100]);	
-	$text = "Настройки подключения: {$server['ip']}:{$port}";
 	if($do == 'passwd'){
 		$passwd = genRandStr(32);
 		lepus_kvmSend($server['host'], ['key' => $server['access'], 'command' => 'changeVNC', 'id' => $id+100, 'vnc' => $passwd]);
-		$text .= "<br/>Пароль: ".md5($passwd);
 	}
-	return $text;
+	$port = lepus_kvmSend($server['host'], ['key' => $server['access'], 'command' => 'portVNC', 'id' => $id+100]);
+	$vnc = json_decode($port, true);
+	return "Host: {$server['host']}<br/>Port: 443<br/>Path: ws/?port={$vnc['port']}<br/>Password: {$vnc['passwd'][0]}<hr/> Если поменяли VNC пароль - нужно выключить/ включить VPS.";
 }
 
 function lepus_admin_send_emails($title, $text, $server){

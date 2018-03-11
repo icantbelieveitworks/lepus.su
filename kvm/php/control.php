@@ -1,14 +1,17 @@
 <?php
 // https://www.linux.org.ru/forum/admin/12097297 (start non-root)
-// https://poiuty.com/index.php?title=%D0%9A%D0%BE%D0%BC%D0%BF%D0%B8%D0%BB%D0%B8%D1%80%D1%83%D0%B5%D0%BC_libvirt-php (build libvirt-php)
-function kvm_exec($command, $id){
-	shell_exec("virsh -c qemu:///system $command $id");
+// apt-get install php-libvirt-php
+
+function safeExec($command){
+	$exec = escapeshellcmd($command);
+	return shell_exec($exec);
 }
 
-function get_status($name){
-	global $url, $credentials, $res;
-	$id = libvirt_domain_lookup_by_name($res, $name);
-	return libvirt_domain_get_info($id); // 1 => online, 5 => offline
+function get_vncPasswd($name){
+	global $conf_dir;
+	$config = safeExec("sudo cat $conf_dir/$name.xml");
+	$xml = new SimpleXMLElement($config);
+	return $xml->devices->graphics['passwd'];
 }
 
 function lepus_editKVM($key, $val){
@@ -23,85 +26,115 @@ function lepus_editKVM($key, $val){
 	}
 }
 
+function kvmControl($command, $name){
+	global $url, $credentials, $res;
+	$id = libvirt_domain_lookup_by_name($res, $name);
+	switch($command){
+		default:
+			$result = libvirt_domain_get_info($id); // status
+		break;
+		case 'stop':
+			$result = libvirt_domain_shutdown($id); // start
+		break;
+		case 'start':
+			$result = libvirt_domain_create($id);  // stop
+		break;
+		case 'reboot':
+			$result = libvirt_domain_reboot($id);  // reboot
+		break;
+		case 'hardstop':
+			$result = libvirt_domain_destroy($id); // hard reboot
+		break;
+		case 'vncport':
+			$xml = simplexml_load_string(libvirt_domain_get_xml_desc($id, ''));
+			$data = json_decode(json_encode($xml), true);
+			$result = intval($data["devices"]["graphics"]["@attributes"]["port"]);
+		break;
+	}	
+	return $result;
+}
+
 $credentials = [VIR_CRED_AUTHNAME => "", VIR_CRED_PASSPHRASE => ""];
 $res = libvirt_connect("qemu+unix:///system", false, $credentials);
 
-if(empty(intval($_GET['id'])) || empty($_GET['command']) || empty($_GET['key'])) die("error 1");
-if($_GET['key'] != 'xxx') die("error 2");
+if(empty(intval($_POST['id'])) || empty($_POST['command']) || empty($_POST['key'])) die("error 1");
+if($_POST['key'] != hash('sha256', 'secret'.$_SERVER['REMOTE_ADDR'])) die("error 2");
 
-$vm_id = "kvm".intval($_GET['id']);
-$status = get_status($vm_id);
+$vm_id = "kvm".intval($_POST['id']);
 $conf_dir = '/etc/libvirt/qemu';
 
-switch($_GET['command']){
+switch($_POST['command']){
 	case 'stopServer':
-		kvm_exec("destroy", $vm_id);
+		kvmControl('hardstop', $vm_id);
 	break;
 	case 'startServer':
-		kvm_exec("start", $vm_id);
+		kvmControl('start', $vm_id);
 	break;
 	case 'restartServer':
 	case 'hardrestartServer':
 	case 'stopANDstart':
-		if(empty($_GET['boot'])) die("error 2");
-		switch($_GET['boot']){
+		if(empty($_POST['boot'])) die("error 2");
+		switch($_POST['boot']){
 			default: $file = '/home/debian.iso'; $boot = 'hd'; break;
 			case '2': $file = '/home/debian.iso'; $boot = 'cdrom'; break;
 			case '3': $file = '/home/ubuntu.iso'; $boot = 'cdrom'; break;
 			case '4': $file = '/home/centos.iso'; $boot = 'cdrom'; break;
 		}
-		shell_exec("sudo chmod 777 $conf_dir/$vm_id.xml");
+		safeExec("sudo chmod 777 $conf_dir/$vm_id.xml");
 		$xml = file_get_contents("$conf_dir/$vm_id.xml");
 		$config = new SimpleXMLElement($xml);
 		lepus_editKVM('boot', $boot);
 		lepus_editKVM('cdfile', $file);
 		file_put_contents("$conf_dir/$vm_id.xml", $config->saveXML());
-		shell_exec("sudo virsh define $conf_dir/$vm_id.xml");
-		if($_GET['command'] == 'hardrestartServer'){
-			kvm_exec("destroy", $vm_id);
+		safeExec("sudo virsh define $conf_dir/$vm_id.xml");
+		if($_POST['command'] == 'hardrestartServer'){
+			kvmControl('hardstop', $vm_id);
 			sleep(3);
-			kvm_exec("start", $vm_id);
+			kvmControl('start', $vm_id);
 		}
-		if($_GET['command'] == 'restartServer'){
-			kvm_exec("reboot", $vm_id);
+		if($_POST['command'] == 'restartServer'){
+			kvmControl('reboot', $vm_id);
 		}
-		if($_GET['command'] == 'stopANDstart'){
-			kvm_exec("shutdown", $vm_id);
-			sleep(3);
-			kvm_exec("start", $vm_id);
+		if($_POST['command'] == 'stopANDstart'){
+			kvmControl('stop', $vm_id);
+			sleep(8);
+			kvmControl('start', $vm_id);
 		}
 	break;
 	case 'changeTariff':
-		if(empty($_GET['memory']) || empty($_GET['cpus']) || empty($_GET['diskspace'])) die("error 2");
-		if(!is_numeric($_GET['memory']) || !is_numeric($_GET['cpus']) || !is_numeric($_GET['diskspace'])) die("error 3");
-		shell_exec("sudo zfs set volsize=".$_GET['diskspace']."G ssd/$vm_id");
-		shell_exec("sudo chmod 777 $conf_dir/$vm_id.xml");
+		if(empty($_POST['memory']) || empty($_POST['cpus']) || empty($_POST['diskspace'])) die("error 2");
+		if(!is_numeric($_POST['memory']) || !is_numeric($_POST['cpus']) || !is_numeric($_POST['diskspace'])) die("error 3");
+		safeExec("sudo zfs set volsize=".$_POST['diskspace']."G ssd/$vm_id");
+		safeExec("sudo chmod 777 $conf_dir/$vm_id.xml");
 		$xml = file_get_contents("$conf_dir/$vm_id.xml");
 		$config = new SimpleXMLElement($xml);
-		lepus_editKVM('memory', $_GET['memory']);
-		lepus_editKVM('currentMemory', $_GET['memory']);
-		lepus_editKVM('vcpu', $_GET['cpus']);
+		lepus_editKVM('memory', $_POST['memory']);
+		lepus_editKVM('currentMemory', $_POST['memory']);
+		lepus_editKVM('vcpu', $_POST['cpus']);
 		file_put_contents("$conf_dir/$vm_id.xml", $config->saveXML());
-		shell_exec("sudo virsh define $conf_dir/$vm_id.xml");
-		kvm_exec("destroy", $vm_id);
+		safeExec("sudo virsh define $conf_dir/$vm_id.xml");
+		kvmControl('hardstop', $vm_id);
 		sleep(3);
-		kvm_exec("start", $vm_id);
+		kvmControl('start', $vm_id);
 	break;
 	case 'changeVNC':
-		if(empty($_GET['vnc'])) die("error 2");
-		shell_exec("sudo chmod 777 $conf_dir/$vm_id.xml");
+		if(empty($_POST['vnc'])) die("error 2");
+		safeExec("sudo chmod 777 $conf_dir/$vm_id.xml");
 		$xml = file_get_contents("$conf_dir/$vm_id.xml");
 		$config = new SimpleXMLElement($xml);
-		lepus_editKVM('vnc', md5($_GET['vnc']));
+		lepus_editKVM('vnc', md5($_POST['vnc']));
 		file_put_contents("$conf_dir/$vm_id.xml", $config->saveXML());
-		shell_exec("sudo virsh define $conf_dir/$vm_id.xml");
+		safeExec("sudo virsh define $conf_dir/$vm_id.xml");
 	break;
 	case 'portVNC':
-		$pid = intval(trim(shell_exec("sudo ps uax | grep 'qemu-system-x86_64 -enable-kvm -name $vm_id ' | grep -v grep | awk '{print $2}'")));
-		die(shell_exec("sudo netstat -tupan | grep LISTEN | grep $pid | head -n1 | awk '{print $4}'"));
+		echo json_encode(['port' => kvmControl('vncport', $vm_id), 'passwd' => get_vncPasswd($vm_id)]);
+		die;
 	break;
 	
 }
 
-if($status['state'] == 1) echo 'running';
-	else echo 'down';
+if(kvmControl('status', $vm_id) == 1){
+	echo 'running';
+}else{
+	echo 'down';
+}

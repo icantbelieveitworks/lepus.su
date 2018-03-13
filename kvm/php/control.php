@@ -26,6 +26,12 @@ function lepus_editKVM($key, $val){
 	}
 }
 
+function lepus_kvmPermConf($id){
+	global $conf_dir;
+	safeExec("sudo chown lepus:root $conf_dir/$id.xml");
+	safeExec("sudo chmod 660 $conf_dir/$id.xml");
+}
+
 function kvmControl($command, $name){
 	global $url, $credentials, $res;
 	$id = libvirt_domain_lookup_by_name($res, $name);
@@ -86,8 +92,8 @@ switch($_POST['command']){
 			case '2': $file = '/home/debian.iso'; $boot = 'cdrom'; break;
 			case '3': $file = '/home/ubuntu.iso'; $boot = 'cdrom'; break;
 			case '4': $file = '/home/centos.iso'; $boot = 'cdrom'; break;
-		}
-		safeExec("sudo chmod 777 $conf_dir/$vm_id.xml");
+		}		
+		lepus_kvmPermConf($vm_id);
 		$xml = file_get_contents("$conf_dir/$vm_id.xml");
 		$config = new SimpleXMLElement($xml);
 		lepus_editKVM('boot', $boot);
@@ -112,7 +118,7 @@ switch($_POST['command']){
 		if(empty($_POST['memory']) || empty($_POST['cpus']) || empty($_POST['diskspace'])) die("error 2");
 		if(!is_numeric($_POST['memory']) || !is_numeric($_POST['cpus']) || !is_numeric($_POST['diskspace'])) die("error 3");
 		safeExec("sudo zfs set volsize=".$_POST['diskspace']."G ssd/$vm_id");
-		safeExec("sudo chmod 777 $conf_dir/$vm_id.xml");
+		lepus_kvmPermConf($vm_id);
 		$xml = file_get_contents("$conf_dir/$vm_id.xml");
 		$config = new SimpleXMLElement($xml);
 		lepus_editKVM('memory', $_POST['memory']);
@@ -126,7 +132,7 @@ switch($_POST['command']){
 	break;
 	case 'changeVNC':
 		if(empty($_POST['vnc'])) die("error 2");
-		safeExec("sudo chmod 777 $conf_dir/$vm_id.xml");
+		lepus_kvmPermConf($vm_id);
 		$xml = file_get_contents("$conf_dir/$vm_id.xml");
 		$config = new SimpleXMLElement($xml);
 		lepus_editKVM('vnc', md5($_POST['vnc']));
@@ -136,12 +142,7 @@ switch($_POST['command']){
 	case 'portVNC':
 		echo json_encode(['port' => kvmControl('vncport', $vm_id), 'passwd' => get_vncPasswd($vm_id)]);
 		die;
-	break;
-	
-	case 'getStatus':
-	
-	break;
-	
+	break;	
 }
 
 if(kvmControl('status', $vm_id) == 1){

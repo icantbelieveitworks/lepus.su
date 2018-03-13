@@ -31,7 +31,8 @@ function kvmControl($command, $name){
 	$id = libvirt_domain_lookup_by_name($res, $name);
 	switch($command){
 		default:
-			$result = libvirt_domain_get_info($id); // status
+			$status = libvirt_domain_get_info($id); // status
+			$result = $status['state'];
 		break;
 		case 'stop':
 			$result = libvirt_domain_shutdown($id); // start
@@ -44,6 +45,12 @@ function kvmControl($command, $name){
 		break;
 		case 'hardstop':
 			$result = libvirt_domain_destroy($id); // hard reboot
+		break;
+		case 'autostart':
+			$result = libvirt_domain_set_autostart($id, 1);
+		break;
+		case 'disableautostart':
+			$result = libvirt_domain_set_autostart($id, 0);
 		break;
 		case 'vncport':
 			$xml = simplexml_load_string(libvirt_domain_get_xml_desc($id, ''));
@@ -129,6 +136,10 @@ switch($_POST['command']){
 	case 'portVNC':
 		echo json_encode(['port' => kvmControl('vncport', $vm_id), 'passwd' => get_vncPasswd($vm_id)]);
 		die;
+	break;
+	
+	case 'getStatus':
+	
 	break;
 	
 }

@@ -1,4 +1,4 @@
-#!/usr/bin/php5
+#!/usr/bin/php
 <?php
 /*
 <name>debian</name>
@@ -24,10 +24,6 @@
 </devices>
 */
 
-function kvm_exec($command, $id){
-	shell_exec("virsh -c qemu:///system $command $id");
-}
-
 function gen_uuid() {
     return sprintf( '%04x%04x-%04x-%04x-%04x-%04x%04x%04x', mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0x0fff) | 0x4000, mt_rand(0, 0x3fff) | 0x8000, mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff));
 }
@@ -46,6 +42,19 @@ function lepus_editKVM($key, $val){
 		case 'mac': $config->devices->interface->mac['address'] = $val; break;
 		case 'vnc': $config->devices->graphics['passwd'] = $val; break;
 	}
+}
+
+function genRandStr($length = 10, $chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ') { // when upgrade to php 7 => use random_bytes
+	$rnd = openssl_random_pseudo_bytes($length);
+	for ($i = 0; $i < $length; $i++) {
+		$str .= $chars[ord($rnd[$i]) & strlen($chars)-1];
+	}
+    return $str;
+}
+
+function safeExec($command){
+	$exec = escapeshellcmd($command);
+	return shell_exec($exec);
 }
 
 $conf_dir = '/root/lepus/config';
@@ -74,15 +83,17 @@ lepus_editKVM('currentMemory', $json['memory']);
 lepus_editKVM('vcpu', $json['cpus']);
 lepus_editKVM('disk', "/dev/zvol/ssd/$vm_id");
 lepus_editKVM('mac', $json['mac']);
-lepus_editKVM('vnc', md5(rand(0,100000)));
+lepus_editKVM('vnc', md5(genRandStr(16)));
 file_put_contents("/etc/libvirt/qemu/$vm_id.xml", $config->saveXML());
-shell_exec("zfs create -s -V {$json['diskspace']}g ssd/$vm_id");
-shell_exec("zfs set compression=lz4 ssd/$vm_id");
+safeExec("zfs create -s -V {$json['diskspace']}g ssd/$vm_id");
+safeExec("zfs set compression=lz4 ssd/$vm_id");
 sleep(10);
-shell_exec("cp /dev/zvol/ssd/{$json['os']} /dev/zvol/ssd/$vm_id");
-shell_exec("virsh define /etc/libvirt/qemu/$vm_id.xml");
-shell_exec("mkdir /mnt/$vm_id");
-shell_exec("mount /dev/zvol/ssd/$vm_id-part1 /mnt/$vm_id");
+safeExec("cp /dev/zvol/ssd/{$json['os']} /dev/zvol/ssd/$vm_id");
+sleep(5);
+safeExec("partprobe");
+safeExec("virsh define /etc/libvirt/qemu/$vm_id.xml");
+safeExec("mkdir /mnt/$vm_id");
+safeExec("mount /dev/zvol/ssd/$vm_id-part1 /mnt/$vm_id");
 switch($json['os']){
 	case 'debian':
 	case 'ubuntu':
@@ -106,5 +117,6 @@ file_put_contents("/mnt/$vm_id/root/lepus/tmp/passwd", $json['passwd']);
 @unlink("/mnt/$vm_id/root/lepus/tmp/passwd.lock");
 @unlink("/mnt/$vm_id/root/lepus/tmp/resize.lock");
 @unlink("/mnt/$vm_id/root/lepus/tmp/keys.lock");
-shell_exec("umount /mnt/$vm_id");
-shell_exec("virsh start $vm_id");
+safeExec("umount /mnt/$vm_id");
+safeExec("virsh start $vm_id");
+safeExec("virsh autostart $vm_id");

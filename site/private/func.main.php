@@ -944,17 +944,27 @@ function lepus_create_order($sid, $promo = 0, $os){
 	$query->execute();
 	$order_id = $db->lastInsertId();
 	lepus_log_spend($user['id'], $order_id, $time1, $time2, $info['price'], "{$info['name']} [заказ]");
-	if(!ctype_digit($os) && $os != 'no') $os = 'no';
-	if($os > 0 && $os < 4) $os_info = lepus_osType($os, 'full');
-	if($os == 'no'){
-		$_POST['msg'] = "Дорогой клиент, благодарим за оплату.\nКак только ваш заказ будет готов - мы свяжемся с вами в этом тикете.";
-	}else{
-		$_POST['msg'] = "Дорогой клиент, благодарим за оплату.\nКак только ваш заказ будет готов - мы свяжемся с вами в этом тикете.\nДополнение к заказу: операционная система {$os_info['full']}";
+	$_POST['msg'] = "Дорогой клиент, благодарим за оплату.\nКак только ваш заказ будет готов - мы свяжемся с вами в этом тикете.";
+	$arr = ['do' => 'create', 'tariff' => $sid, 'email' => $user['login'], 'order' => $order_id];
+	if($info['handler'] == 'KVM'){
+		if(!ctype_digit($os) && $os != 'no') $os = 'no';
+		if($os > 0 && $os < 4) $os_info = lepus_osType($os, 'full');
+		$_POST['msg'] .= "\nДополнение к заказу: операционная система {$os_info['full']}";
+		$arr['os'] = $os_info['name'];
+	}
+	if($info['handler'] == 'VH'){
+		$query = $db->prepare("SELECT * FROM `tariff` WHERE `id` = :id");
+		$query->bindParam(':id', $sid, PDO::PARAM_STR);
+		$query->execute();
+		$tmp = $query->fetch();
+		$x = json_decode($tmp['data'], true);
+		$arr['present'] = $x['preset'];
 	}
 	$tmpData = support_create($user['id'], $info['name'], 2);
+	$arr['tiket'] = $tmpData;
 	support_msg(5, $tmpData, 2, 1);
 	telegram_send("Заявка №[$tmpData]\nКлиент сделал новый заказ.\nhttps://".$_SERVER['SERVER_NAME']."/pages/tiket.php?id=$tmpData");
-	lepus_addTask($user['id'], $info['handler'], ['do' => 'create', 'tiket' => $tmpData, 'tariff' => $sid, 'email' => $user['login'], 'order' => $order_id, 'os' => $os_info['name']]);
+	lepus_addTask($user['id'], $info['handler'], $arr);
 	return $tmpData;
 }
 
@@ -1232,15 +1242,16 @@ function lepus_changeTariff($id, $sid){
 	$query->execute();
 	$row = $query->fetch();
 	$arr = json_decode($data['data'], true);
-	switch($row['handler']){
-		case 'KVM':
-			$query = $db->prepare("SELECT * FROM `tariff` WHERE `id` = :id");
-			$query->bindParam(':id', $sid, PDO::PARAM_STR);
-			$query->execute();
-			$tmp = $query->fetch();
-			$x = json_decode($tmp['data'], true);
-			$toTask = ['do' => 'change', 'memory' => $x['memory'], 'cpus' => $x['cpus'], 'diskspace' => $x['diskspace'], 'order' => $data['id']];
-		break;
+	$query = $db->prepare("SELECT * FROM `tariff` WHERE `id` = :id");
+	$query->bindParam(':id', $sid, PDO::PARAM_STR);
+	$query->execute();
+	$tmp = $query->fetch();
+	$x = json_decode($tmp['data'], true);
+	if($row['handler'] == 'KVM'){
+		$toTask = ['do' => 'change', 'memory' => $x['memory'], 'cpus' => $x['cpus'], 'diskspace' => $x['diskspace'], 'order' => $data['id']];
+	}
+	if($row['handler'] == 'VH'){
+		$toTask = ['do' => 'change', 'preset' => $x['preset'], 'order' => $data['id']];	
 	}
 	if(!empty($toTask))
 		lepus_addTask($user['id'], $row['handler'], $toTask);
@@ -1458,32 +1469,30 @@ function lepus_doTask(){
 	if($data['do'] == 'create'){
 		if(empty($data['tiket']) || empty($data['tariff']) || empty($data['order'])) $err = 'wrong data params';
 	}
-	if($row['handler'] == 'KVM'){
-		if($data['do'] == 'create'){
-			$server = lepus_searchFree($row['handler'], $data['tariff'], $data['order']);
-		}else{
-			$server = lepus_searchFree($row['handler'], 0, $data['order']);
-		}
-		if(!is_array($server)) $err = 'no_free_server';
-		if(empty($err) && $data['do'] == 'create'){
-			$update = $db->prepare("UPDATE `services` SET `server` = :sid WHERE `id` = :id");
-			$update->bindParam(':sid', $server['id'], PDO::PARAM_STR);
-			$update->bindParam(':id', $data['order'], PDO::PARAM_STR);
+	if($data['do'] == 'create'){
+		$server = lepus_searchFree($row['handler'], $data['tariff'], $data['order']);
+	}else{
+		$server = lepus_searchFree($row['handler'], 0, $data['order']);
+	}
+	if(!is_array($server)) $err = 'no_free_server';
+	if(empty($err) && $data['do'] == 'create'){
+		$update = $db->prepare("UPDATE `services` SET `server` = :sid WHERE `id` = :id");
+		$update->bindParam(':sid', $server['id'], PDO::PARAM_STR);
+		$update->bindParam(':id', $data['order'], PDO::PARAM_STR);
+		$update->execute();
+		if($row['handler'] == 'KVM'){
+			$update = $db->prepare("UPDATE `ipmanager` SET `service` = :service WHERE `ip` = :ip");
+			$update->bindParam(':service', $data['order'], PDO::PARAM_STR);
+			$update->bindParam(':ip', $server['ipvm'], PDO::PARAM_STR);
 			$update->execute();
-			if($row['handler'] == 'KVM'){
-				$update = $db->prepare("UPDATE `ipmanager` SET `service` = :service WHERE `ip` = :ip");
-				$update->bindParam(':service', $data['order'], PDO::PARAM_STR);
-				$update->bindParam(':ip', $server['ipvm'], PDO::PARAM_STR);
-				$update->execute();
-				$tmp = $db->prepare("SELECT * FROM `users` WHERE `login` = :login");
-				$tmp->bindParam(':login', $data['email'], PDO::PARAM_STR);
-				$tmp->execute();
-				$v = $tmp->fetch();
-				$tmp = $db->prepare("UPDATE `ipmanager` SET `owner` = :owner WHERE `ip` = :ip");
-				$tmp->bindParam(':owner', $v['id'], PDO::PARAM_STR);
-				$tmp->bindParam(':ip', $server['ipvm'], PDO::PARAM_STR);
-				$tmp->execute();
-			}
+			$tmp = $db->prepare("SELECT * FROM `users` WHERE `login` = :login");
+			$tmp->bindParam(':login', $data['email'], PDO::PARAM_STR);
+			$tmp->execute();
+			$v = $tmp->fetch();
+			$tmp = $db->prepare("UPDATE `ipmanager` SET `owner` = :owner WHERE `ip` = :ip");
+			$tmp->bindParam(':owner', $v['id'], PDO::PARAM_STR);
+			$tmp->bindParam(':ip', $server['ipvm'], PDO::PARAM_STR);
+			$tmp->execute();
 		}
 	}
 	if(empty($err)){
@@ -1521,6 +1530,34 @@ function lepus_doTask(){
 							$update->bindParam(':id', $row['id'], PDO::PARAM_STR);
 							$update->execute();
 							return;
+						}
+					break;
+				}
+			break;
+			case 'VH':			
+				$commands = ['stop' => 'user.suspend', 'start' => 'user.resume', 'create' => 'user.add.finish', 'change' => 'user.edit'];
+				switch($commands[$data['do']]){
+					default:
+						$info = 'no_action';
+					break;
+					case 'user.suspend':
+					case 'user.resume':
+						$info = lepus_vhSend($server['host'], "authinfo=hosting:{$server['access']}&out=json&func={$commands[$data['do']]}&elid=user{$data['order']}&sok=ok");
+					break;
+					case 'user.edit':
+						$info = lepus_vhSend($server['host'], "authinfo=hosting:{$server['access']}&out=json&func={$commands[$data['do']]}&preset={$data['preset']}&elid=user{$data['order']}&sok=ok");
+					break;
+					case 'user.add.finish':
+						$tmpPasswd = genRandStr(12);
+						$tmpWeb = 'removeit'.md5(genRandStr(12)).'.com';
+						$tmpFullName = urlencode($data['email']);
+						$info = lepus_vhSend($server['host'], "authinfo=hosting:{$server['access']}&out=json&func={$commands[$data['do']]}&preset={$data['present']}&name=user{$data['order']}&passwd=$tmpPasswd&webdomain_name=$tmpWeb&fullname=$tmpFullName&sok=ok");
+						if(strpos($info, 'Curl error') === false){
+							$a = json_decode($info, true);
+							if(empty($a['doc']['ok'])){
+								$_POST['msg'] = "Дорогой клиент, виртуальный хостинг готов.\nПанель управления: [url=https://{$server['host']}:1500]https://{$server['host']}:1500[/url]\nLogin: user{$data['order']}\nPassword: $tmpPasswd\nПожалуйста, поменяйте пароль.\nВы можете посмотреть более подробную информацию об услуге [url=https://lepus.su/pages/view.php?id={$data['order']}]на этой странице[/url].";
+								support_msg(5, $data['tiket'], 2, 1);
+							}
 						}
 					break;
 				}
@@ -1636,6 +1673,23 @@ function lepus_kvmSend($host, $arr){
 	return $x;
 }
 
+function lepus_vhSend($host, $url){
+	$ch = curl_init("https://$host:1500/?$url");
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+	curl_setopt($ch, CURLOPT_VERBOSE, 1);
+	curl_setopt($ch, CURLOPT_NOBODY, 0);
+	curl_setopt($ch, CURLOPT_TIMEOUT, 25);
+	curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+	curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+	$x = curl_exec($ch);	
+	if(curl_errno($ch)){
+		$x = 'Curl error: '.curl_error($ch);
+	}
+	curl_close($ch);
+	return $x;
+}
+
 function lepus_getListIP($id){
 	global $db; $data = null; $i = 0;
 	$query = $db->prepare("SELECT * FROM `ipmanager` WHERE `service` = :id");
@@ -1717,22 +1771,6 @@ function lepus_closeTikets(){
 	$query = $db->prepare("UPDATE `support` SET `status` = '2' WHERE `open` < :time AND `last` < :time");
 	$query->bindParam(':time', $time, PDO::PARAM_STR);
 	$query->execute();
-}
-
-function lepus_getBillprice($id, $period, $j = 0){
-	global $conf, $cache;
-	$eur = lepus_price(1, 'EUR');
-	$price = $cache->get("billprice.$id.$period");
-	if($price === FALSE || $price == 0 || $j == 1){
-		$ctx = stream_context_create(['http'=> ['timeout' => 30]]);
-		$arr = json_decode(file_get_contents("https://my.lepus.su/billmgr?authinfo={$conf['billmgr_user']}:{$conf['billmgr_pass']}&out=json&func=pricelist.export&onlyavailable=on&pricelist=$id", false, $ctx), true);
-		$price = $arr["doc"]["pricelist"][0]["price"]["period"][$period]['$cost'];
-		if($price == NULL){
-			$price = $arr["doc"]["pricelist"][0]["price"]["period"]['$cost'];	
-		}
-		$cache->set("billprice.$id.$period", $price, MEMCACHE_COMPRESSED, 3600);
-	}
-	return intval($price*$eur);
 }
 
 function lepus_getServStat(){

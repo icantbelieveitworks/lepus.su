@@ -97,6 +97,7 @@ iface ens3 inet static
 	pre-down ip route del 37.187.155.254 dev ens3
 	pre-down ip route del default via 37.187.155.254
 
+# Read http://docs.ovh.ca/en/guides-network-ipv6.html#debian-derivatives-ubuntu-crunchbang-steamos
 iface ens3 inet6 static
 	address 2001:41d0:a:5be5::1
 	netmask 64
